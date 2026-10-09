@@ -1,0 +1,27 @@
+# Baut die Desktop-App auf je einem Runner pro Betriebssystem (kein Cross-Build möglich: Sidecar und WebView sind plattformgebunden).
+name: desktop
+on: { workflow_dispatch: {}, push: { tags: ["desktop-v*"] } }
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix: { os: [macos-latest, windows-latest, ubuntu-22.04] }
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Linux-Bibliotheken
+        if: matrix.os == 'ubuntu-22.04'
+        run: sudo apt-get update && sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf rsync
+      - name: Sidecar
+        shell: bash
+        run: desktop/build-sidecar.sh
+      - name: App
+        shell: bash
+        run: cd desktop && npm install --include=dev && npx tauri build
+      - uses: actions/upload-artifact@v4
+        with: { name: "app-${{ matrix.os }}", path: desktop/src-tauri/target/release/bundle/** }

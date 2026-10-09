@@ -1,0 +1,263 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1259",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.35,
+     49.85
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ0992",
+    "kenn": "072320191",
+    "plz": "54669",
+    "name": "Bollendorf",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 220,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.12,
+    "value_cosmic": 0.045,
+    "value_terrestrial": 0.075,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1276",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.64,
+     49.93
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ3507",
+    "kenn": "072321232",
+    "plz": "54552",
+    "name": "Speicher",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 341,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.138,
+    "value_cosmic": 0.047,
+    "value_terrestrial": 0.092,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1260",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.45,
+     50
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ1007",
+    "kenn": "072325011",
+    "plz": "54636",
+    "name": "Wißmannsdorf-Hermesdorf",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 290,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.135,
+    "value_cosmic": 0.046,
+    "value_terrestrial": 0.089,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1279",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.58,
+     49.71
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ3519",
+    "kenn": "072110002",
+    "plz": "54294",
+    "name": "Trier-Zewen",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 133,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.12,
+    "value_cosmic": 0.044,
+    "value_terrestrial": 0.077,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1256",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.66,
+     49.75
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ0985",
+    "kenn": "072110001",
+    "plz": "54296",
+    "name": "Trier",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 273,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.132,
+    "value_cosmic": 0.046,
+    "value_terrestrial": 0.086,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_125c",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.34,
+     50.3
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ1000",
+    "kenn": "072322021",
+    "plz": "54597",
+    "name": "Auw bei Prüm",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 560,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.126,
+    "value_cosmic": 0.05,
+    "value_terrestrial": 0.076,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.fid--7c20ea55_1a0ee6aa7bb_1274",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     7.01,
+     50.13
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "DEZ3351",
+    "kenn": "071350572",
+    "plz": "56826",
+    "name": "Lutzerath",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 410,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.15,
+    "value_cosmic": 0.048,
+    "value_terrestrial": 0.102,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  },
+  {
+   "type": "Feature",
+   "id": "odlinfo_odl_1h_latest.999",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     8.10,
+     48.80
+    ]
+   },
+   "geometry_name": "geom",
+   "properties": {
+    "id": "999999999",
+    "kenn": "999999999",
+    "plz": "56826",
+    "name": "Weitab",
+    "site_status": 1,
+    "site_status_text": "in Betrieb",
+    "kid": 4,
+    "height_above_sea": 410,
+    "start_measure": "2026-09-29T16:00:00Z",
+    "end_measure": "2026-09-29T17:00:00Z",
+    "value": 0.15,
+    "value_cosmic": 0.048,
+    "value_terrestrial": 0.102,
+    "unit": "µSv/h",
+    "validated": 1,
+    "nuclide": "Gamma-ODL-Brutto",
+    "duration": "1h"
+   }
+  }
+ ],
+ "totalFeatures": 7,
+ "numberMatched": 38,
+ "numberReturned": 7,
+ "timeStamp": "2026-09-29T18:26:25.911Z",
+ "crs": {
+  "type": "name",
+  "properties": {
+   "name": "urn:ogc:def:crs:EPSG::4326"
+  }
+ }
+}

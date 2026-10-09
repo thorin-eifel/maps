@@ -1,0 +1,423 @@
+{
+ "type": "FeatureCollection",
+ "features": [
+  {
+   "type": "Feature",
+   "id": "baustelle.LBMGER_721IV55-23/08/019-K020ODIrr3_OVERALL_15827459",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.45601,
+     49.84661
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "G",
+    "von": "2026-07-30T07:00:00Z",
+    "bis": "2027-03-31T18:00:00Z",
+    "art_der_arbeiten": "Vollsperrung",
+    "strasse": "L4",
+    "speedlimit": null,
+    "version": "2026-07-30T14:24:30Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Kanal- und Straßenbauarbeiten im Zuge der L 4 \"Prümzurlayer Straße\" in der Ortslage Irrel unter einer Vollsperrung für den Verkehr.  Eine Umleitungsstrecke erfolgt ab dem Kreisverkehr Niederweiser Straße über „Am Spitulersberg“ – Prümzurlayer Straße - Ewerhartstraße in Richtung Luxemburg, Camping Südeifel und dem Industriegebiet „Auf Zweikreuz“.",
+    "frc": "FRC2",
+    "sperrungstyp": "roadClosed",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.45601,
+    49.84661,
+    6.45601,
+    49.84661
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.KVEIFELB_232-01_PI26/07/013-K035 Speich_OVERALL_59805645",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.61887,
+     49.92636
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "C",
+    "von": "2026-07-31T07:00:00Z",
+    "bis": "2026-10-16T18:00:00Z",
+    "art_der_arbeiten": "Halbseitige Sperrungen",
+    "strasse": "K35",
+    "speedlimit": null,
+    "version": "2026-07-15T08:49:36Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "K35  zwischen Speicher (Bahnhof) und Dahlem bzw. Sülm (Kreuzung K34) Elektrifizierung der Eifelstrecke Halbseitige Sperrung der Fahrbahn durch Lichtzeichenanlage und Reduzierung der Höchstgeschwindigkeit",
+    "frc": "FRC3",
+    "sperrungstyp": "maintenanceWork",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.61887,
+    49.92636,
+    6.61887,
+    49.92636
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.KVEIFELB_232-01_PI24/09/006-K031 Hos_OVERALL_24041345",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.63341,
+     49.89114
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "B",
+    "von": "2024-09-23T07:00:00Z",
+    "bis": "2026-12-31T17:00:00Z",
+    "art_der_arbeiten": "Verkehrsraumeinschränkung",
+    "strasse": "K31",
+    "speedlimit": 50,
+    "version": "2025-11-24T10:31:01Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "K31 zwischen Hosten und Orenhofen; Baustellenausfahrten zur Herstellung einer Hochspannungsleitung",
+    "frc": "FRC3",
+    "sperrungstyp": "maintenanceWork",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.63341,
+    49.89114,
+    6.63341,
+    49.89114
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.LBMGER_721IV55-26/08/003-B257Daun2_OVERALL_26852352",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.83975,
+     50.19467
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "F",
+    "von": "2026-09-14T07:00:00Z",
+    "bis": "2026-10-31T18:00:00Z",
+    "art_der_arbeiten": "Sperrung einer Fahrtrichtung",
+    "strasse": "B257",
+    "speedlimit": null,
+    "version": "2026-09-10T14:10:45Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Kanal- und Straßenbauarbeiten im Zuge der B 257 in der \"Mehrener Straße\" in der Stadt Daun unter einer Einbahnstraßenregelung für den Verkehr.  Eine Umleitungsstrecke erfolgt ab dem Kreisel B 257 / L 46 in Daun über Gemünden und der B 421",
+    "frc": "FRC1",
+    "sperrungstyp": "carriagewayClosures",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.83975,
+    50.19467,
+    6.83975,
+    50.19467
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.LBMGER_721IV56-26/07/016-GERSperrSV_OVERALL_47833972",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.65916,
+     50.22344
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "N",
+    "von": "2026-07-30T07:00:00Z",
+    "bis": "2028-03-31T18:00:00Z",
+    "art_der_arbeiten": "Sperrung für LKW",
+    "strasse": "B410",
+    "speedlimit": null,
+    "version": "2026-09-11T11:05:29Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Sperrung der Hochbrücke Gerolstein für Schwerlastverkehr.    Eine Umleitung wird großräumig über Dohm-Lammersdorf und Rockeskyll eingerichtet.",
+    "frc": "FRC1",
+    "sperrungstyp": "carriagewayClosures",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.65916,
+    50.22344,
+    6.65916,
+    50.22344
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.KVBEWIT_2026B00135_OVERALL_51989808",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.79963,
+     49.87952
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "G_GEPLANT",
+    "von": "2026-10-29T20:00:00Z",
+    "bis": "2026-10-31T08:00:00Z",
+    "art_der_arbeiten": "Vollsperrung",
+    "strasse": "K39",
+    "speedlimit": null,
+    "version": "2026-09-29T12:41:09Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Beseitigung von Gefahrenstellen im Gleisbereich",
+    "frc": "FRC3",
+    "sperrungstyp": "roadClosed",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.79963,
+    49.87952,
+    6.79963,
+    49.87952
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.Straßenbauverwaltung Luxemburg__34246__34246-39941__635186",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.29187,
+     49.69185
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "G",
+    "von": "2020-05-29T00:00:00Z",
+    "bis": "2029-05-29T18:00:00Z",
+    "art_der_arbeiten": "Vollsperrung",
+    "strasse": "CR129",
+    "speedlimit": null,
+    "version": "2026-09-29T15:36:15.806Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": null,
+    "frc": null,
+    "sperrungstyp": "maintenanceWork",
+    "quelle": "Straßenbauverwaltung Luxemburg"
+   },
+   "bbox": [
+    6.29187,
+    49.69185,
+    6.29187,
+    49.69185
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.Straßenbauverwaltung Luxemburg__40786__40786-50959__242129",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.2995,
+     49.78499
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "C",
+    "von": "2021-07-23T00:00:00Z",
+    "bis": "2027-07-31T17:00:00Z",
+    "art_der_arbeiten": "Halbseitige Sperrung",
+    "strasse": "CR121",
+    "speedlimit": null,
+    "version": "2026-09-29T15:36:15.807Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": null,
+    "frc": null,
+    "sperrungstyp": null,
+    "quelle": "Straßenbauverwaltung Luxemburg"
+   },
+   "bbox": [
+    6.2995,
+    49.78499,
+    6.2995,
+    49.78499
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.vi-bs.2024-11-26_00-00-00-000.f_001.de__7871490-7871491-7871494-7871495",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.18546,
+     50.23131
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "B",
+    "von": "2024-12-02T00:00:00Z",
+    "bis": "2027-03-16T00:00:00Z",
+    "art_der_arbeiten": "Verkehrsraumeinschränkung",
+    "strasse": "A60",
+    "speedlimit": 20,
+    "version": "2026-09-03T12:39:13Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "A60 Sperrung Fahrspur in FR Wittlich Höhe Parkplatz Zoll Grenzkontrolle  - Bauphase - Lage-1 Sonstiges",
+    "frc": null,
+    "sperrungstyp": "other",
+    "quelle": "Autobahn GmbH"
+   },
+   "bbox": [
+    6.18546,
+    50.23131,
+    6.18546,
+    50.23131
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.vi-bs.2026-04-28_00-00-00-000_001.de__21496844-21496846-21496849-21496995",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.65684,
+     49.79947
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "B",
+    "von": "2026-04-28T00:00:00Z",
+    "bis": "2029-12-31T23:45:00Z",
+    "art_der_arbeiten": "Verkehrsraumeinschränkung",
+    "strasse": "A64a",
+    "speedlimit": null,
+    "version": "2026-07-27T09:45:36Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "A64a Dauerhafte Sperrung Zufahrt Rastplatz Dicke Buche - Bauphase - Lage-1 Sonstiges",
+    "frc": null,
+    "sperrungstyp": "other",
+    "quelle": "Autobahn GmbH"
+   },
+   "bbox": [
+    6.65684,
+    49.79947,
+    6.65684,
+    49.79947
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.KVBIRKEN_2026B00024_OVERALL_01971238",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     7.1434,
+     49.696
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "G_GEPLANT",
+    "von": "2026-10-05T07:30:00Z",
+    "bis": "2026-10-10T18:00:00Z",
+    "art_der_arbeiten": "Vollsperrung",
+    "strasse": "B269",
+    "speedlimit": null,
+    "version": "2026-09-21T14:46:36Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Sperrung B 269 zwischen Abfahrt Oberhambach und Hattgenstein. Umleitung erfolgt über die L 174, L 175 und K 15 und umgekehrt.",
+    "frc": "FRC1",
+    "sperrungstyp": "roadClosed",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    7.1434,
+    49.696,
+    7.1434,
+    49.696
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.KVVULKAN_233KVVNiBe25/08/001-L95 WPLirs_OVERALL_31891935",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     7.04958,
+     50.24156
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "B",
+    "von": "2025-08-25T07:00:00Z",
+    "bis": "2027-08-21T19:00:00Z",
+    "art_der_arbeiten": "Verkehrsraumeinschränkung",
+    "strasse": "L95",
+    "speedlimit": null,
+    "version": "2026-08-26T11:25:43Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Verkehrsbeschränkung L 95 Neubau Windpark Lirstal",
+    "frc": "FRC2",
+    "sperrungstyp": "maintenanceWork",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    7.04958,
+    50.24156,
+    7.04958,
+    50.24156
+   ]
+  },
+  {
+   "type": "Feature",
+   "id": "baustelle.SYNTHETISCH_KONTAKT_1",
+   "geometry": {
+    "type": "Point",
+    "coordinates": [
+     6.45601,
+     49.84661
+    ]
+   },
+   "geometry_name": "coordinates_flipped",
+   "properties": {
+    "typ": "G",
+    "von": "2026-07-30T07:00:00Z",
+    "bis": "2027-03-31T18:00:00Z",
+    "art_der_arbeiten": "Vollsperrung",
+    "strasse": "B269",
+    "speedlimit": null,
+    "version": "2026-07-30T14:24:30Z",
+    "ansprechpartner": "kontakt@example.invalid",
+    "beschreibung": "Sperrung wegen Kabelarbeiten, Rückfragen: max.muster@example.invalid oder 06525 123456.",
+    "frc": "FRC2",
+    "sperrungstyp": "roadClosed",
+    "quelle": "Verkehrsbehörden in Rheinland-Pfalz"
+   },
+   "bbox": [
+    6.45601,
+    49.84661,
+    6.45601,
+    49.84661
+   ]
+  }
+ ],
+ "numberMatched": 13,
+ "numberReturned": 13
+}

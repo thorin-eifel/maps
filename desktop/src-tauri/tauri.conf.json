@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "Was ist los bei uns",
+  "version": "0.1.0",
+  "identifier": "de.ctw.osint",
+  "build": { "frontendDist": "../dist" },
+  "app": {
+    "windows": [],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": ["icons/icon.png"],
+    "externalBin": ["binaries/osint-core", "binaries/pmtiles"],
+    "category": "Utility"
+  },
+  "plugins": {}
+}

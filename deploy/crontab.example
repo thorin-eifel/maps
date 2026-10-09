@@ -1,0 +1,5 @@
+# Sammelstelle (Linux oder macOS mit cron). Installation: crontab -e und die Zeilen anpassen.
+# Pfad /opt/osint durch den Projektordner ersetzen.
+*/5 * * * *  /opt/osint/deploy/run-cycle.sh >> /var/log/osint-cycle.log 2>&1
+15 3 * * *   cd /opt/osint && .venv/bin/python tools/backup.py --keep 14 >> /var/log/osint-backup.log 2>&1
+# Logrotation für /var/log/osint-*.log nicht vergessen (logrotate), sonst wächst die Datei ohne Ende.

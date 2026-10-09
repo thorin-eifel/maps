@@ -1,0 +1,972 @@
+# Quellenregister — OSINT by CTW
+# Ohne Eintrag hier läuft kein Collector. Diese Datei speist auch die UI-Seite „Quellen und Lizenzen“.
+#
+# Felder: id, name, betreiber, url, lizenz, lizenz_geprueft, lizenz_hinweis, namensnennung,
+#         intervall (s), ratenlimit, auth, geo_bezug, datenschutz_risiko (niedrig|mittel|hoch),
+#         aktiv, zuletzt_geprüft, collector (Modulname), params (Collector-spezifisch)
+#
+# lizenz_geprueft: false = Endpunkt live getestet, Lizenztext aber noch nicht an der Primärquelle
+#                  bestätigt. Vor dem öffentlichen Start jede Zeile auf true bringen (Abschnitt 7 der Anweisung).
+
+sources:
+  - id: nina
+    name: NINA Bevölkerungswarnungen
+    kurzname: NINA / BBK
+    betreiber: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK)
+    url: https://warnung.bund.de/api31
+    lizenz: Nutzungsbedingungen NINA/BBK
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die API ist ohne Schlüssel erreichbar (live getestet). Ein maschinenlesbarer Lizenzvermerk
+      steht in der OpenAPI-Beschreibung (bund.dev) nicht. Nutzungsbedingungen beim BBK bestätigen.
+    namensnennung: "Quelle: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), NINA-Warnungen"
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; wir fragen höchstens einmal je 5 Minuten und Region
+    auth: keine
+    geo_bezug: Dashboard je Kreis-ARS, danach Geometriefilter auf Südeifel + 120 km
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: nina
+    params:
+      # 12-stelliger ARS. Kreise im 120-km-Radius (Rheinland-Pfalz, Saarland, ein Stück NRW); jeder Code ist live gegen die API geprüft (404 bei falschem Code).
+      ars:
+        - {ars: "072320000000", name: "Eifelkreis Bitburg-Prüm"}
+        - {ars: "072350000000", name: "Trier-Saarburg"}
+        - {ars: "072110000000", name: "Stadt Trier"}
+        - {ars: "072330000000", name: "Vulkaneifelkreis"}
+        - {ars: "072310000000", name: "Bernkastel-Wittlich"}
+        - {ars: "100420000000", name: "Merzig-Wadern"}
+        - {ars: "071350000000", name: "Cochem-Zell"}
+        - {ars: "071340000000", name: "Birkenfeld"}
+        - {ars: "071370000000", name: "Mayen-Koblenz"}
+        - {ars: "071310000000", name: "Ahrweiler"}
+        - {ars: "071400000000", name: "Rhein-Hunsrück-Kreis"}
+        - {ars: "071110000000", name: "Stadt Koblenz"}
+        - {ars: "071330000000", name: "Bad Kreuznach"}
+        - {ars: "100410000000", name: "Regionalverband Saarbrücken"}
+        - {ars: "100430000000", name: "Neunkirchen (Saar)"}
+        - {ars: "100440000000", name: "Saarlouis"}
+        - {ars: "100450000000", name: "Saarpfalz-Kreis"}
+        - {ars: "100460000000", name: "St. Wendel"}
+        - {ars: "053660000000", name: "Euskirchen"}
+        - {ars: "053340000000", name: "Städteregion Aachen"}
+
+  - id: dwd_warnungen
+    name: DWD Wetterwarnungen (Landkreise)
+    kurzname: DWD
+    betreiber: Deutscher Wetterdienst (DWD)
+    url: https://maps.dwd.de/geoserver/dwd/ows
+    lizenz: GeoNutzV (DWD Open Data)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Endpunkt (WFS 2.0.0, Layer dwd:Warnungen_Landkreise) live getestet; die BBox-Achsenreihenfolge
+      (lon,lat) wurde an einer Ebene mit festen Daten geprüft. Zum Testzeitpunkt lag bundesweit keine
+      Warnung vor, deshalb folgen die Feldnamen der Dokumentation und nicht einer Live-Probe.
+      Lizenztext und Feldliste bei der ersten echten Warnlage gegenprüfen.
+    namensnennung: "Quelle: Deutscher Wetterdienst"
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; ein Abruf je 5 Minuten
+    auth: keine
+    geo_bezug: WFS mit Bounding Box (lon,lat), danach Geometriefilter auf Südeifel + 120 km
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: dwd_warnungen
+    params:
+      layer: "dwd:Warnungen_Landkreise"
+
+  - id: brightsky
+    name: Wetter (Bright Sky, DWD-Daten)
+    kurzname: DWD via Bright Sky
+    betreiber: Bright Sky (Jakob de Maeyer) auf Basis von DWD Open Data
+    url: https://api.brightsky.dev
+    lizenz: DWD GeoNutzV; Bright Sky Software MIT
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Öffentliche Instanz, live getestet. Für den Dauerbetrieb eine eigene Bright-Sky-Instanz
+      aufsetzen (Docker, Phase 2), statt die öffentliche zu belasten.
+    namensnennung: "Quelle: Deutscher Wetterdienst, via Bright Sky"
+    intervall: 900
+    ratenlimit: öffentliche Instanz, Fair Use; ein Abruf je 15 Minuten
+    auth: keine
+    geo_bezug: Punktabfrage am Zentrum Irrel
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: brightsky
+    params:
+      forecast_hours: 48
+
+  - id: pegelonline
+    name: PEGELONLINE Wasserstände
+    kurzname: WSV Pegelonline
+    betreiber: Wasserstraßen- und Schifffahrtsverwaltung des Bundes (WSV)
+    url: https://www.pegelonline.wsv.de/webservices/rest-api/v2
+    lizenz: Datenlizenz Deutschland – Namensnennung 2.0 (zu bestätigen)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Endpunkt live getestet (16 Stationen im Radius: Mosel, Saar). Lizenz aus Kenntnis, nicht am
+      Portal bestätigt. Prüm, Kyll, Sauer und Our sind keine WSV-Pegel und kommen in Phase 2
+      (Hochwasserportal RLP, Luxemburg).
+    namensnennung: "Quelle: Wasserstraßen- und Schifffahrtsverwaltung des Bundes (WSV), PEGELONLINE"
+    intervall: 600
+    ratenlimit: nicht veröffentlicht; ein Abruf je 10 Minuten (Messwerte alle 15 Minuten)
+    auth: keine
+    geo_bezug: Stationssuche mit Radius um Irrel, danach Feinfilter
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: pegelonline
+    params:
+      parameter: W
+
+  - id: autobahn
+    name: Autobahn-API (Baustellen, Sperrungen, Verkehrsmeldungen, Stau)
+    kurzname: Autobahn GmbH
+    betreiber: Die Autobahn GmbH des Bundes
+    url: https://verkehr.autobahn.de/o/autobahn
+    lizenz: Nutzungsbedingungen Autobahn GmbH (zu bestätigen)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Endpunkt live getestet, ohne Schlüssel. Die OpenAPI-Beschreibung nennt Kontakt und
+      Datenschutzseite, aber keine Datenlizenz. Beim Betreiber nachfragen. Stau, zähfließender
+      Verkehr und Stillstand stammen aus dem Feld abnormalTrafficType der Verkehrsmeldungen; die
+      Kennungen tragen den Vermerk INRIX, die Herkunft dieser Verkehrslage ist also ein Drittanbieter
+      und gehört in die Lizenzanfrage. Abgedeckt sind nur Autobahnen, keine Bundes- und Landesstraßen.
+    namensnennung: "Quelle: Die Autobahn GmbH des Bundes"
+    intervall: 180
+    ratenlimit: nicht veröffentlicht; 12 Abrufe je Lauf, nacheinander mit Pause, ein Lauf alle 3 Minuten (Stau ändert sich schnell)
+    auth: keine
+    geo_bezug: A1, A48, A60, A64 bundesweit geladen, Geometriefilter auf Südeifel + 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: autobahn
+    params:
+      roads: [A1, A48, A60, A64]
+      services: [roadworks, warning, closure]
+
+  - id: adsblol
+    name: Luftverkehr (ADS-B, adsb.lol)
+    kurzname: adsb.lol
+    betreiber: adsb.lol (Community-Netzwerk)
+    url: https://api.adsb.lol
+    lizenz: ODbL 1.0 (laut Betreiber-Dokumentation)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die API-Seite nennt "License: ODbL 1.0" und "available to everyone". Ratenlimit und
+      Regeln zur gewerblichen Nutzung stehen dort nicht. Vor öffentlichem Start beim Betreiber
+      nachfragen. OpenSky wurde nicht gewählt: kommerzielle Nutzung, auch intern, braucht dort eine Lizenz.
+    namensnennung: "Quelle: adsb.lol (ODbL 1.0)"
+    intervall: 15
+    ratenlimit: nicht veröffentlicht; ein Abruf alle 15 Sekunden (Live-Schleife), Mindestabstand 10 Sekunden. Bei Fehlern greift der Circuit Breaker.
+    auth: keine
+    geo_bezug: Abfrage 47 NM um Irrel, danach Feinfilter auf 120 km am Rand; nur Flugzeuge in der Luft
+    datenschutz_risiko: mittel
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: adsblol
+    params:
+      live: true   # holt die Live-Schleife (app/live.py), nicht der Fünf-Minuten-Zyklus
+
+  - id: lbm_baustellen
+    name: Baustellen und Sperrungen Rheinland-Pfalz (Mobilitätsatlas)
+    kurzname: Mobilitätsatlas RLP
+    betreiber: Ministerium für Wirtschaft, Verkehr, Landwirtschaft und Weinbau Rheinland-Pfalz (Mobilitätsatlas), Daten der Verkehrsbehörden RLP und der Straßenbauverwaltung Luxemburg
+    url: https://maps.mobilitaetsatlas.de/geoserver/ows
+    lizenz: nicht angegeben (zu klären)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WFS live getestet, ohne Schlüssel. Weder die Capabilities (keine Fees/AccessConstraints) noch die
+      Erläuterung zum WMS/WFS-Dienst nennen eine Lizenz. Anfrage beim Mobilitätsatlas-Team stellen (Kontakt siehe README).
+      Laut Betreiber unvollständig (nicht alle Kommunen liefern). Die im Dienst enthaltenen Meldungen der
+      Autobahn GmbH werden verworfen, sie kommen über den Autobahn-Collector.
+    namensnennung: "Quelle: Mobilitätsatlas Rheinland-Pfalz (MWVLW), Verkehrsbehörden RLP, Straßenbauverwaltung Luxemburg"
+    intervall: 600
+    ratenlimit: nicht veröffentlicht; 2 Abrufe je 10 Minuten (der Dienst aktualisiert alle 10 Minuten)
+    auth: keine
+    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf 120 km am Rand; Verlauf als Linie, sonst Punkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: lbm_baustellen
+
+  - id: hochwasser_rlp
+    name: Pegel Hochwasservorhersagezentrale Rheinland-Pfalz
+    kurzname: Hochwasser RLP
+    betreiber: Landesamt für Umwelt Rheinland-Pfalz (Hochwasservorhersagezentrale); Messwerte der Pegelbetreiber (SGD Nord, Kommunen, AGE Luxemburg, SPW Belgien)
+    url: https://hochwasser.rlp.de/api/v1
+    lizenz: nicht angegeben (zu klären)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Es ist die JSON-Schnittstelle, die die Webseite hochwasser.rlp.de selbst nutzt (/api/v1/config, /api/v1/index),
+      nicht als offene API dokumentiert. Nutzungsbedingungen und Lizenz nicht gefunden. Die Urheberrechte liegen laut
+      Länderübergreifendem Hochwasserportal bei der jeweiligen Hochwasserzentrale bzw. dem Pegelbetreiber. Vor jeder
+      Weitergabe beim LfU RLP (Hochwassermanagement) anfragen. Für das Demo im Haus vertretbar, die Seite pollt dieselbe
+      Datei alle 5 Minuten. Einzelne Messstellen kommen aus Luxemburg und Belgien (ostbelgische Our); WSV-Stellen werden
+      verworfen (PEGELONLINE).
+    namensnennung: "Quelle: Hochwasservorhersagezentrale Rheinland-Pfalz (LfU RLP), Pegelbetreiber laut Messstelle"
+    intervall: 900
+    ratenlimit: nicht veröffentlicht; ein Abruf (ca. 3 MB) alle 15 Minuten, Stammdaten 12 Stunden zwischengespeichert
+    auth: keine
+    geo_bezug: alle Messstellen im 120-km-Radius (UTM-32-Koordinaten der Stammdaten, Feinfilter am Rand)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: hochwasser_rlp
+
+  - id: bfs_odl
+    name: Ortsdosisleistung (BfS-Messnetz)
+    kurzname: BfS ODL
+    betreiber: Bundesamt für Strahlenschutz (BfS)
+    url: https://www.imis.bfs.de/ogc/opendata/ows
+    lizenz: Datenlizenz Deutschland – Namensnennung – Version 2.0 (nach Kenntnisstand)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WFS live getestet, ohne Schlüssel. Die Lizenz des BfS-Open-Data-Angebots ist nach Kenntnisstand dl-de/by-2.0,
+      die Lizenzseite ließ sich nicht abrufen. Vor dem öffentlichen Start am Primärtext (imis.bfs.de, opendata.bfs.de)
+      bestätigen. Die Schwellen für Hinweis (0,3 µSv/h) und Warnung (1,0 µSv/h) sind eigene Orientierung, kein amtlicher Grenzwert.
+      Luxemburg und Frankreich (Cattenom) sind in diesem Dienst nicht enthalten.
+    namensnennung: "Quelle: Bundesamt für Strahlenschutz (BfS), ODL-Messnetz (Datenlizenz Deutschland Namensnennung 2.0)"
+    intervall: 1800
+    ratenlimit: nicht veröffentlicht; ein Abruf alle 30 Minuten (Stundenwerte)
+    auth: keine
+    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: bfs_odl
+
+  - id: uba_luft
+    name: Luftqualität (UBA, Landesmessnetze)
+    kurzname: UBA Luftdaten
+    betreiber: Umweltbundesamt (UBA), Daten der Landesmessnetze Rheinland-Pfalz und Saarland
+    url: https://luftdaten.umweltbundesamt.de/api/air-data/v3
+    lizenz: Datenlizenz Deutschland – Namensnennung – Version 2.0 (nach Kenntnisstand)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      API live getestet, ohne Schlüssel. Die alte Adresse www.umweltbundesamt.de/api/air_data/v3 leitet dauerhaft auf
+      luftdaten.umweltbundesamt.de um (Bindestrich im Pfad). Lizenz nach Kenntnisstand dl-de/by-2.0, Seite nicht abrufbar:
+      am Primärtext bestätigen. Werte sind vorläufig. Im Radius liegen nur wenige Stationen (Trier, Wascheid, Biringen).
+      Luxemburg fehlt. Der Luftqualitätsindex (0 sehr gut bis 4 sehr schlecht) stammt aus der API.
+    namensnennung: "Quelle: Umweltbundesamt, Luftdaten der Länder (vorläufig, Datenlizenz Deutschland Namensnennung 2.0)"
+    intervall: 1800
+    ratenlimit: nicht veröffentlicht; je Lauf ein Abruf pro Station (4), Stationsliste 24 Stunden zwischengespeichert
+    auth: keine
+    geo_bezug: Stationsliste gefiltert auf 120 km um Irrel, Abruf je Station
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: uba_luft
+
+  - id: emsc
+    name: Erdbeben (EMSC, SeismicPortal)
+    kurzname: EMSC
+    betreiber: Euro-Mediterranean Seismological Centre (EMSC), Meldungen nationaler Erdbebendienste
+    url: https://www.seismicportal.eu/fdsnws/event/1/query
+    lizenz: CC BY 4.0 (laut Dienstseite)
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      FDSN-Dienst live getestet. Die Dienstseite nennt CC BY 4.0. Herdkoordinaten und Magnitude sind vorläufig und
+      werden vom Katalog später korrigiert. Kleinstbeben (Magnitude unter 2) sind häufig und meist nicht spürbar.
+    namensnennung: "Quelle: EMSC / SeismicPortal (CC BY 4.0)"
+    intervall: 900
+    ratenlimit: nicht veröffentlicht; ein Abruf alle 15 Minuten
+    auth: keine
+    geo_bezug: Bounding-Box-Abfrage der letzten 7 Tage, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: emsc
+
+  - id: dwd_radar
+    name: Regenradar (DWD)
+    kurzname: DWD Radar
+    betreiber: Deutscher Wetterdienst (DWD)
+    url: https://maps.dwd.de/geoserver/dwd/wms
+    lizenz: GeoNutzV (Geodatennutzungsverordnung), Quellenvermerk Deutscher Wetterdienst
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WMS live getestet (Layer dwd:Niederschlagsradar, RV-Produkt). Der DWD stellt Geodaten nach GeoNutzV frei bereit;
+      die Nutzungsbedingungen der GeoServer-Seite wurden nicht einzeln geprüft. Das Bild wird serverseitig geholt und vom
+      eigenen Server ausgeliefert. Ab 24.11.2026 wächst die Radarreichweite von 150 auf 180 km (laut Layerbeschreibung).
+    namensnennung: "Quelle: Deutscher Wetterdienst (Niederschlagsradar RV)"
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; ein Bild alle 5 Minuten
+    auth: keine
+    geo_bezug: ein Kartenbild für den Ausschnitt 4,4 bis 8,5 Grad Ost, 48,4 bis 51,3 Grad Nord
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: dwd_radar
+
+  - id: dwd_icon_d2_wind
+    name: Wind 10 m (DWD ICON-D2)
+    kurzname: DWD Wind
+    betreiber: Deutscher Wetterdienst (DWD)
+    url: https://opendata.dwd.de/weather/nwp/icon-d2/grib
+    lizenz: GeoNutzV (Geodatennutzungsverordnung), Quellenvermerk Deutscher Wetterdienst
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Open-Data-Server des DWD, Modell ICON-D2 (2,2 km), Dateien regular-lat-lon im Format GRIB2 (bz2) geprüft. Der DWD stellt
+      diese Daten nach GeoNutzV frei bereit; die Nutzungsbedingungen der Seite wurden nicht einzeln geprüft. Modellwerte sind
+      Vorhersagen für den Rasterpunkt, keine Messung am Ort. Der Browser fragt den DWD nie an.
+    namensnennung: "Quelle: Deutscher Wetterdienst (ICON-D2, Modellwind in 10 m Höhe)"
+    intervall: 3600
+    ratenlimit: nicht veröffentlicht; zwei Dateien (je etwa 1 MB) pro Stunde
+    auth: keine
+    geo_bezug: Gitterausschnitt 4,4 bis 8,5 Grad Ost, 48,4 bis 51,3 Grad Nord (jeder zweite Punkt, etwa 3 km)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: dwd_wind
+
+  - id: eumetsat_li
+    name: Blitze (EUMETSAT MTG Lightning Imager)
+    kurzname: EUMETSAT Blitze
+    betreiber: EUMETSAT
+    url: https://view.eumetsat.int/geoserver/wms
+    lizenz: EUMETSAT-Datenpolitik, Quellenvermerk EUMETSAT (Bedingungen für MTG-LI über EUMETView nicht abschließend geprüft)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WMS live getestet (Layer mtg_fd:li_afa, keine Anmeldung, Zeitraster 5 Minuten, Verzögerung etwa 10 bis 20 Minuten).
+      Bewusst statt Blitzortung/LightningMaps gewählt, weil deren Seite die kommerzielle Nutzung untersagt. Vor dem öffentlichen
+      Start Datenpolitik und Namensnennung bei EUMETSAT prüfen; die Seite eumetsat.int/eumetsat-data-policy ließ sich automatisiert
+      nicht abrufen. Zum Zeitpunkt der Prüfung gab es keinen Blitz im Ausschnitt, die Darstellung ist deshalb nur mit
+      synthetischen Bildern geprüft.
+    namensnennung: "Blitze: © EUMETSAT (MTG Lightning Imager, über EUMETView)"
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; neun kleine Abrufe alle 5 Minuten
+    auth: keine
+    geo_bezug: ein Kartenbild für den Ausschnitt 5,0 bis 7,9 Grad Ost, 48,9 bis 50,8 Grad Nord
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: eumetsat_li
+
+  - id: nasa_firms
+    name: Brandverdacht (NASA FIRMS, VIIRS Satelliten)
+    kurzname: NASA FIRMS
+    betreiber: NASA LANCE / FIRMS (VIIRS auf Suomi NPP, NOAA-20, NOAA-21)
+    url: https://firms.modaps.eosdis.nasa.gov/api/area/csv
+    lizenz: NASA Earthdata-Datennutzungsrichtlinie (frei, auch kommerziell), Quellenangabe NASA FIRMS
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Area-API laut Dokumentation: MAP_KEY im Pfad, 1 bis 5 Tage je Abruf, 5000 Transaktionen je 10 Minuten. Der Wortlaut der
+      Datennutzungsrichtlinie ließ sich automatisiert nicht abrufen (HTTP 403); nach eigenem Kenntnisstand ist die Nutzung frei
+      und ohne Namensnennungspflicht, das vor dem öffentlichen Start bestätigen. Ein Wärmepunkt ist kein bestätigter Brand
+      (Feldbrand, Industrie, Biogas sehen gleich aus); Punkte niedriger Konfidenz werden verworfen.
+    namensnennung: "Brandverdacht: NASA FIRMS (VIIRS), LANCE/EOSDIS"
+    intervall: 1800
+    ratenlimit: 5000 Transaktionen je 10 Minuten laut Dokumentation; drei Abrufe alle 30 Minuten
+    auth: MAP_KEY (kostenlos, in .env als FIRMS_MAP_KEY)
+    geo_bezug: Bounding-Box-Abfrage der letzten 2 Tage, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: nasa_firms
+
+  - id: gtfs_static
+    name: Fahrplan und Haltestellen (GTFS Luxemburg, DELFI Regionalverkehr)
+    kurzname: GTFS Fahrplan
+    betreiber: Ministère de la Mobilité et des Travaux publics (Luxemburg, über data.public.lu); DELFI e. V. (über gtfs.de)
+    url: https://data.public.lu/api/1/datasets/horaires-et-arrets-des-transport-publics-gtfs/
+    lizenz: CC BY 4.0 (Luxemburg laut Datensatz, Deutschland laut gtfs.de "Creative Commons 4.0")
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Luxemburg: Lizenz cc-by laut API des Datensatzes, 16,5 MB, wöchentlich neu. Deutschland: Feed de_rv (Regionalverkehr),
+      11 MB, laut gtfs.de "Creative Commons 4.0" auf Basis des DELFI-Datensatzes; die genaue Variante (BY 4.0) steht nur
+      auf der Unterseite des Feeds, die Namensnennung DELFI e. V. ist dort gefordert. Nahverkehr (Busse, 287 MB) ist
+      bewusst nicht eingebunden. Es wird nur ein Auszug im Radius (Haltestellen, Linie und Ziel) gespeichert, nicht der Fahrplan.
+    namensnennung: "Fahrplandaten: Luxemburg (data.public.lu, CC BY 4.0); DELFI e. V. über gtfs.de (CC BY 4.0)"
+    intervall: 604800
+    ratenlimit: nicht veröffentlicht; zwei Downloads (zusammen etwa 28 MB) je Woche
+    auth: keine
+    geo_bezug: Haltestellen im Radius von 120 km um den Mittelpunkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: gtfs_static
+
+  - id: gtfs_rt_de
+    name: Verspätungen Regionalverkehr (GTFS-Realtime, gtfs.de)
+    kurzname: ÖPNV Echtzeit
+    betreiber: DELFI e. V. / gtfs.de (Daten der Verkehrsverbünde und der DB)
+    url: https://realtime.gtfs.de/realtime-free.pb
+    lizenz: CC BY-SA 4.0 (Namensnennung, Weitergabe unter gleichen Bedingungen), ohne Gewähr
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Feed live getestet (HEAD, 14 MB, Stand wenige Minuten alt). Die Lizenz CC BY-SA 4.0 steht auf gtfs.de/en/realtime.
+      Share-Alike kann für abgeleitete Daten gelten (unsere Verspätungsmeldungen als JSON); vor dem öffentlichen Start
+      rechtlich klären. Luxemburg hat aktuell keinen nutzbaren Echtzeitfeed: der auf data.public.lu verlinkte
+      (openov.lu) wird seit 2017 nicht mehr gepflegt.
+    namensnennung: "Echtzeit: gtfs.de / DELFI e. V. (CC BY-SA 4.0)"
+    intervall: 600
+    ratenlimit: nicht dokumentiert; 14 MB je Abruf, ein Abruf alle 10 Minuten
+    auth: keine
+    geo_bezug: nur Fahrten und Meldungen mit Haltestelle im Radius (Index aus gtfs_static)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-29"
+    collector: gtfs_rt_de
+
+  - id: osm_natur
+    name: "Landmarken (OpenStreetMap: Natur sowie Burgen, Ruinen, Ausgrabungen, Klöster, historische Gebäude)"
+    kurzname: Landmarken
+    betreiber: OpenStreetMap-Mitwirkende; Abfrage über die Overpass API (overpass-api.de)
+    url: https://overpass-api.de/api/interpreter
+    lizenz: ODbL 1.0 (© OpenStreetMap-Mitwirkende)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      ODbL verlangt Namensnennung und Weitergabe abgeleiteter Datenbanken unter gleichen Bedingungen; die Kartenquelle nennt
+      OpenStreetMap bereits. Die Overpass-Instanz hat eine Fair-Use-Richtlinie (wenige Abfragen, ehrlicher User-Agent);
+      eine Abfrage je Woche liegt weit darunter. Gespeichert werden nur Art, Name, Höhe, Koordinate und OSM-Kennung, keine
+      Freitextfelder und keine Bearbeiternamen. Gipfel kommen aus den eigenen Kacheln, nicht von hier.
+      Kultur (historic=castle, fort, manor, ruins, archaeological_site, monastery, building, city_gate, tower): nur benannte Objekte, Gedenkorte
+      (memorial, Stolpersteine, Gedenktafeln) sind ausgeschlossen, weil sie oft Personen nennen.
+    namensnennung: "© OpenStreetMap-Mitwirkende (ODbL)"
+    intervall: 604800
+    ratenlimit: Fair Use; eine Abfrage (etwa 1 bis 3 MB) je Woche
+    auth: keine
+    geo_bezug: Objekte im Radius von 120 km um den Mittelpunkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: osm_natur
+
+  - id: osm_infra
+    name: "Infrastruktur (OpenStreetMap: Windräder, Ladesäulen, Notfallpunkte, Wasserbauwerke, Brücken, Rastplätze, Gemeinwesen, Kulturerbe)"
+    kurzname: Infrastruktur
+    betreiber: OpenStreetMap-Mitwirkende; Abfrage über die Overpass API (overpass-api.de)
+    url: https://overpass-api.de/api/interpreter
+    lizenz: ODbL 1.0 (© OpenStreetMap-Mitwirkende)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      ODbL verlangt Namensnennung und Weitergabe abgeleiteter Datenbanken unter gleichen Bedingungen; die Kartenquelle nennt
+      OpenStreetMap bereits. Fair-Use der Overpass-Instanz: 25 kurze Abfragen je Woche mit Pause und ehrlichem User-Agent.
+      Gespeichert werden nur Art, Koordinate, OSM-Kennung und ein Sachwert (Leistung, Zahl der Ladepunkte, Name der Feuerwache
+      oder des Krankenhauses). Schulen und Rathäuser mit dem Namen der Einrichtung, Friedhöfe nur als Mittelpunkt ohne Namen. Defibrillatoren nur als Standort, ohne Name, Betreiber, Kontakt oder Freitext. Keine Adressen,
+      keine Bearbeiternamen. Friedhöfe, Mühlen, Brunnen, Grenzsteine, Wegkreuze, Rast- und Schutzhütten-Punkte bekommen bewusst keinen Namen (Familiennamen, Stifter). Sirenen, Hydranten, Umspannwerke und Wasserwerke sind mit Absicht nicht enthalten.
+      Die Angaben stammen von Mitwirkenden und sind unvollständig; die Karte ersetzt weder das Defibrillator-Register noch den Notruf 112.
+    namensnennung: "© OpenStreetMap-Mitwirkende (ODbL)"
+    intervall: 604800
+    ratenlimit: Fair Use; fünf kleine Abfragen je Woche
+    auth: keine
+    geo_bezug: Objekte im Radius von 120 km um den Mittelpunkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-08"
+    collector: osm_infra
+
+  - id: osm_anbau
+    name: "Weinberge und Obstanlagen (OpenStreetMap)"
+    kurzname: Anbauflächen
+    betreiber: OpenStreetMap-Mitwirkende; Abfrage über die Overpass API (overpass-api.de)
+    url: https://overpass-api.de/api/interpreter
+    lizenz: ODbL 1.0 (© OpenStreetMap-Mitwirkende)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      ODbL verlangt Namensnennung und Weitergabe abgeleiteter Datenbanken unter gleichen Bedingungen; die Kartenquelle nennt
+      OpenStreetMap bereits. Fair-Use der Overpass-Instanz: vier Abfragen je Woche mit Pause und ehrlichem User-Agent.
+      Gespeichert werden nur Art (Weinberg, Obstanlage), vereinfachter Außenring und OSM-Kennung, keine Namen, Tags oder Bearbeiternamen.
+      Die eigenen Kacheln führen diese Flächenarten nicht; Relationen (Multipolygone) fehlen.
+    namensnennung: "© OpenStreetMap-Mitwirkende (ODbL)"
+    intervall: 604800
+    ratenlimit: Fair Use; vier Abfragen (je etwa 1 bis 5 MB) je Woche
+    auth: keine
+    geo_bezug: Flächen im Radius von 120 km um den Mittelpunkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-09"
+    collector: osm_anbau
+
+  - id: osm_routen
+    name: "Wander- und Radrouten (OpenStreetMap, überregional)"
+    kurzname: Routen
+    betreiber: OpenStreetMap-Mitwirkende; Abfrage über die Overpass API (overpass-api.de)
+    url: https://overpass-api.de/api/interpreter
+    lizenz: ODbL 1.0 (© OpenStreetMap-Mitwirkende)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      ODbL verlangt Namensnennung und Weitergabe abgeleiteter Datenbanken unter gleichen Bedingungen; die Kartenquelle nennt
+      OpenStreetMap bereits. Fair-Use der Overpass-Instanz: zwei Abfragen je Woche (Wandern, Rad) mit Pause und ehrlichem User-Agent.
+      Gespeichert werden nur Name, Kennzeichen, Netzebene und die vereinfachte Linie von Fern-, National- und Regionalrouten.
+      Keine Betreiber, Kontakte, Beschreibungen oder Bearbeiternamen. Die Routen sind Angaben von Mitwirkenden und
+      ersetzen keine Wegweisung vor Ort; Sperrungen und Umleitungen zeigt das Lagebild nicht.
+    namensnennung: "© OpenStreetMap-Mitwirkende (ODbL)"
+    intervall: 604800
+    ratenlimit: Fair Use; zwei Abfragen je Woche
+    auth: keine
+    geo_bezug: Linien im Radius von 120 km um den Mittelpunkt
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-08"
+    collector: osm_routen
+
+  - id: meteolux
+    name: Wetter Luxemburg (MeteoLux, Station Findel)
+    kurzname: MeteoLux Findel
+    betreiber: Administration de la navigation aérienne (ANA) / MeteoLux
+    url: https://metapi.ana.lu/api/v1
+    lizenz: CC0 1.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Lizenz laut API-Beschreibung (metapi.ana.lu/api/v1/docs) und Portal data.public.lu bestätigt.
+      Eine einzige Station (Flughafen Findel, WMO 06590); ANA behält sich Änderungen und Ausfälle vor,
+      Bedingungen unter meteolux.lu/fr/aide/aspects-legaux.
+    namensnennung: "Wetterdaten Luxemburg: MeteoLux (ANA), CC0"
+    intervall: 600
+    ratenlimit: nicht veröffentlicht; zwei Abrufe je 10 Minuten
+    auth: keine
+    geo_bezug: eine Station (Findel), Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: meteolux
+
+  - id: metno
+    name: Wettervorhersage (MET Norway, Locationforecast)
+    kurzname: MET Norway
+    betreiber: Norwegian Meteorological Institute (MET Norway)
+    url: https://api.met.no/weatherapi/locationforecast/2.0/compact
+    lizenz: CC BY 4.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Nutzungsbedingungen (api.met.no/doc/TermsOfService) gelesen: User-Agent mit Kontakt Pflicht, höchstens
+      4 Nachkommastellen, gecachter Abruf statt Dauerabfrage, kein Yr-Branding. Abruf einmal je Stunde ohne
+      If-Modified-Since; bei mehr Quellen dieser Art ergänzen.
+    namensnennung: "Wettervorhersage: MET Norway (CC BY 4.0)"
+    intervall: 3600
+    ratenlimit: Quelle erlaubt bis 20 Anfragen je Sekunde; wir holen eine je Stunde
+    auth: keine
+    geo_bezug: Punktabfrage am Zentrum Irrel
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: metno
+    params:
+      forecast_hours: 48
+
+  - id: sensor_community
+    name: Bürgersensoren Temperatur und Feuchte (Sensor.Community, Raster)
+    kurzname: Sensor.Community
+    betreiber: Sensor.Community (Verein und Mitwirkende)
+    url: https://data.sensor.community
+    lizenz: Datenbank ODbL 1.0, Inhalte DbCL 1.0 (laut Betreiberangabe, zu bestätigen)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Endpunkt live getestet. Lizenztext aus Kenntnis, nicht am Portal bestätigt; die Dokumentation verlangt
+      einen erkennbaren User-Agent und höchstens einen Abruf je 5 Minuten. Vor dem öffentlichen Start die
+      Lizenzseite lesen. Datenschutz: nur Raster-Mediane (0,1°) aus mindestens 3 Außensensoren, keine Sensor-IDs,
+      keine Koordinaten einzelner Sensoren gespeichert.
+    namensnennung: "Bürgersensoren: Sensor.Community, ODbL (Raster-Mediane)"
+    intervall: 600
+    ratenlimit: Quelle bittet um höchstens einen Abruf je 5 Minuten; wir holen einen je 10 Minuten
+    auth: keine
+    geo_bezug: Umkreisabfrage 120 km um Irrel, Feinfilter am Rand, danach Rasterung
+    datenschutz_risiko: mittel
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: sensor_community
+
+  - id: presseportal
+    name: Polizeimeldungen (Presseportal, Blaulicht-Feeds der Polizeipräsidien Trier und Wittlich)
+    kurzname: Presseportal Polizei
+    betreiber: news aktuell GmbH (Presseportal); Inhalte der Polizeidienststellen
+    url: https://www.presseportal.de/rss
+    lizenz: keine offene Lizenz; nur Überschrift, Ort, Zeit und Link
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die Feeds (presseportal.de/rss/dienststelle_ID.rss2) werden vom Portal öffentlich angeboten, robots.txt sperrt sie nicht.
+      Eine ausdrückliche Nutzungsbedingung für Weiterverwendung wurde nicht gelesen; vor dem öffentlichen Start klären.
+      Übernommen wird nur die Überschrift ohne Dienststellenkürzel, der Ort aus der Datumszeile, die Zeit und der Link; der Text
+      wird verworfen. Fahndungen und Vermisstenmeldungen werden bewusst nicht übernommen (Personenbezug).
+    namensnennung: "Polizeimeldungen: Presseportal.de (news aktuell), Dienststellen der Polizei; nur Titel und Link"
+    intervall: 600
+    ratenlimit: Feed meldet ttl 6 Minuten; drei Abrufe je 10 Minuten
+    auth: keine
+    geo_bezug: Ort aus Datumszeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    datenschutz_risiko: mittel
+    aktiv: false   # abgeschaltet: Polizeimeldungen und Themenradar sind aus der Oberfläche genommen
+    zuletzt_geprüft: "2026-09-30"
+    collector: presseportal
+    params:
+      feeds:
+        - {id: 117701, name: Polizeipräsidium Trier, kind: polizei}
+        - {id: 117697, name: Polizeidirektion Wittlich, kind: polizei}
+        - {id: 117698, name: Polizeidirektion Trier, kind: polizei}
+
+  - id: volksfreund
+    name: Regionale Schlagzeilen (Trierischer Volksfreund, RSS)
+    kurzname: Volksfreund
+    betreiber: Trierischer Volksfreund (Medienhaus)
+    url: https://www.volksfreund.de/feed.rss
+    lizenz: keine offene Lizenz; nur Überschrift, Zeit und Link, kein Text, kein Bild
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Vom Verlag öffentlich angebotener RSS-Feed, robots.txt sperrt ihn nicht (gelistete KI-Crawler ausgeschlossen, wir sind keiner und lesen
+      keinen Text). Nutzungsbedingungen des Verlags nicht gelesen; vor dem öffentlichen Start klären oder Quelle streichen.
+      Nur Rubriken Region und Blaulicht, nur mit Ortsnamen im Radius in der Schlagzeile. Wort.lu ist nicht eingebunden: die Seite
+      behält sich Text- und Data-Mining ausdrücklich vor und erlaubt nur persönliche, nicht-kommerzielle Nutzung.
+    namensnennung: "Schlagzeilen: Trierischer Volksfreund (Titel und Link)"
+    intervall: 900
+    ratenlimit: nicht veröffentlicht; ein Abruf je 15 Minuten
+    auth: keine
+    geo_bezug: Ortsname in der Schlagzeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: rss_volksfreund
+
+  - id: lu_pegel
+    name: Pegel Luxemburg (Sauer, Our, Alzette, Mosel; Administration de la gestion de l'eau)
+    kurzname: Pegel Luxemburg
+    betreiber: Administration de la gestion de l'eau (AGE), Luxembourg
+    url: https://inondations.public.lu/dam-assets/ctie/datas/Water-Levels-LocalTime.csv
+    lizenz: CC0 1.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Datensatz "Niveau d'eau" auf data.public.lu, Lizenz cc-zero laut Portal-API (2026-09-30). Stationskoordinaten aus dem zugehörigen
+      Dienst features.geoportail.lu (Sammlung 655). Die Quelle veröffentlicht keine Warnstufen; die Anzeige zeigt Wert und Trend ohne Farbe.
+    namensnennung: "Pegeldaten Luxemburg: AGE, data.public.lu, CC0"
+    intervall: 900
+    ratenlimit: nicht veröffentlicht; zwei Abrufe je 15 Minuten
+    auth: keine
+    geo_bezug: 40 Stationen im Radius, Verbindung von CSV und Koordinaten über den Stationsnamen
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: lu_pegel
+
+  - id: cita_lu
+    name: Verkehrsmeldungen Luxemburg (CITA, DATEX II)
+    kurzname: CITA Luxemburg
+    betreiber: Centre d'information et de transport routier (CITA), Administration des ponts et chaussées
+    url: https://cita.lu/info_trafic/datex/situationrecord36
+    lizenz: CC0 1.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Datensatz auf data.public.lu, Lizenz cc-zero laut Portal-API (2026-09-30). DATEX II v3.6, Autobahnen und Schnellstraßen.
+      Einige Einträge sind alt, aber von der Quelle als aktiv geführt (etwa Tunnelhinweise); wir zeigen sie mit ihrem Beginn.
+    namensnennung: "Verkehrsmeldungen Luxemburg: CITA, data.public.lu, CC0"
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; ein Abruf je 5 Minuten
+    auth: keine
+    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: cita_lu
+
+  - id: dwd_waldbrand
+    name: Waldbrand- und Graslandfeuerindex (DWD, Stationsvorhersage)
+    kurzname: DWD Waldbrandindex
+    betreiber: Deutscher Wetterdienst (DWD)
+    url: https://opendata.dwd.de/climate_environment/CDC/derived_germany/fire_danger_index
+    lizenz: CC BY 4.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Lizenz laut Datensatzbeschreibung des DWD (BESCHREIBUNG_fire_danger_index_woodland_recomputed.pdf, Stand 2026-03). Stationsdateien
+      csv.gz mit 7-Tage-Vorhersage. Stufen 1 bis 5; Ereignisse ab Stufe 3. Keine amtliche Waldbrandwarnung: die kommt von den Ländern.
+    namensnennung: "Waldbrandgefahrenindex, Graslandfeuerindex: Deutscher Wetterdienst (CC BY 4.0)"
+    intervall: 10800
+    ratenlimit: nicht veröffentlicht; höchstens 20 Dateiabrufe alle 3 Stunden mit Pause
+    auth: keine
+    geo_bezug: nächste Stationen im Radius (Standard 10), Feinfilter auf 120 km
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: dwd_waldbrand
+    params:
+      max_stations: 10
+
+  - id: dwd_gesundheit
+    name: Pollenflug und UV-Index (DWD Medizin-Meteorologie)
+    kurzname: DWD Pollen/UV
+    betreiber: Deutscher Wetterdienst (DWD)
+    url: https://opendata.dwd.de/climate_environment/health/alerts
+    lizenz: GeoNutzV (Namensnennung DWD), Bedingungen laut Open-Data-Hinweisen des DWD
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die Dateien s31fg.json und uvi.json tragen keine Lizenzzeile; der DWD stellt seine Open Data nach GeoNutzV bereit. Wortlaut der
+      Bedingungen für diesen Ordner vor dem öffentlichen Start bestätigen. Pollen: Teilregionen 101 und 102; UV: Station Hahn.
+    namensnennung: "Pollenflug- und UV-Gefahrenindex: Deutscher Wetterdienst"
+    intervall: 3600
+    ratenlimit: nicht veröffentlicht; zwei Abrufe je Stunde
+    auth: keine
+    geo_bezug: Teilregionen Rhein/Mosel und Mittelgebirge RLP; UV-Station Hahn (Hunsrück)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: dwd_gesundheit
+    params:
+      pollen_regions: [101, 102]
+      uv_station: Hahn
+
+  - id: tankerkoenig
+    name: Spritpreise (Tankerkönig, MTS-K)
+    kurzname: Tankerkönig
+    betreiber: Tankerkönig; Daten der Markttransparenzstelle für Kraftstoffe (Bundeskartellamt)
+    url: https://creativecommons.tankerkoenig.de/json/list.php
+    lizenz: CC BY 4.0
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Lizenz CC BY 4.0 laut Angabe des Dienstes (creativecommons.tankerkoenig.de); Nutzungsbedingungen mit API-Schlüssel, der Schlüssel
+      ist persönlich und kostenlos. Aktiv seit 2026-10-07 (Schlüssel liegt in .env, nie im Code oder in Logs). Nur Deutschland: für Luxemburg gibt es keine
+      offenen Preise je Tankstelle (Suche auf data.public.lu am 2026-09-30 ohne Treffer), der Grenzpreisvergleich zeigt deshalb nur die
+      deutsche Seite. Straße und Hausnummer werden nicht gespeichert.
+    namensnennung: "Spritpreise: Tankerkönig (creativecommons.tankerkoenig.de), Daten MTS-K, CC BY 4.0"
+    intervall: 900
+    ratenlimit: Dienst verlangt angemessene Abrufzahl; zwei Abrufe je 15 Minuten
+    auth: API-Schlüssel (kostenlos, in .env als TANKERKOENIG_API_KEY)
+    geo_bezug: zwei Umkreise von 25 km (Irrel, Trier), Feinfilter auf 120 km
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: tankerkoenig
+
+  - id: mastodon_themen
+    name: Themenradar (Mastodon, öffentliche Hashtag-Zeitleisten, nur Zählungen)
+    kurzname: Themenradar Mastodon
+    betreiber: Mastodon gGmbH (Instanz mastodon.social); Beiträge gehören ihren Verfassern
+    url: https://mastodon.social
+    lizenz: keine; es werden keine Beiträge gespeichert, nur Zählungen je Hashtag
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Öffentliche API ohne Anmeldung, robots.txt lässt /api/v1/timelines zu, die Nutzungsbedingungen (gelesen 2026-09-30) verbieten
+      den Abruf der öffentlichen API nicht. Nur eine Instanz; andere Instanzen haben eigene Regeln. Datenschutz: nicht gespeichert werden
+      Text, Konten, Namen, Bilder; Konten-Kennungen nur im Arbeitsspeicher für die Schwelle (mindestens 3 verschiedene Konten je Thema).
+      Bluesky ist nicht eingebunden: die öffentliche Suche verlangt Anmeldung (HTTP 403), der Firehose lässt sich nicht nach Region filtern.
+    namensnennung: "Themenradar: Zählung öffentlicher Mastodon-Beiträge (mastodon.social), keine Inhalte gespeichert"
+    intervall: 3600
+    ratenlimit: Instanzgrenze 300 Anfragen je 5 Minuten; zehn Abrufe je Stunde mit Pause
+    auth: keine
+    geo_bezug: Regions-Hashtags (Trier, Eifel, Bitburg …), kein Standort einzelner Beiträge
+    datenschutz_risiko: mittel
+    aktiv: false   # abgeschaltet: Polizeimeldungen und Themenradar sind aus der Oberfläche genommen
+    zuletzt_geprüft: "2026-09-30"
+    collector: mastodon_themen
+    params:
+      hashtags: [trier, eifel, bitburg, irrel, echternach, luxemburg, luxembourg, wittlich, saarburg, mosel]
+
+  - id: hubeau_pegel
+    name: Pegel Lothringen und Grand Est (Hub'eau Hydrométrie, Echtzeit)
+    kurzname: Hub'eau Pegel
+    betreiber: Office français de la biodiversité (OFB) und Schapi, Dienst Hub'eau (eaufrance.fr)
+    url: https://hubeau.eaufrance.fr/api/v2/hydrometrie/observations_tr
+    lizenz: Licence Ouverte 2.0 (Etalab), nach Kenntnis
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die Hydrométrie-Seite von Hub'eau nennt die Lizenz nicht im Text, die Nutzungsbedingungen (CGU) waren nicht abrufbar (2026-09-30).
+      Die Daten der französischen Wasserdienste stehen üblicherweise unter Licence Ouverte 2.0; bitte gegen data.gouv.fr gegenlesen,
+      bevor die Demo öffentlich geht. Quellenangabe "Hub'eau / Schapi". Die Quelle liefert Messwerte ohne Warnstufen (Vigicrues ist
+      ein eigener Dienst und nicht eingebunden). Bergbau-Überläufe werden nicht als Pegel geführt.
+    namensnennung: "Pegeldaten Frankreich: Hub'eau (eaufrance.fr), Schapi, Licence Ouverte 2.0"
+    intervall: 900
+    ratenlimit: Betreiber nennt rund 10 Aufrufe je Sekunde im Mittel; wir machen 2 bis 7 Aufrufe je 15 Minuten
+    auth: keine
+    geo_bezug: Stationen der Bounding Box, Feinfilter auf 120 km am Rand (Mosel, Nied, Orne, Seille im Norden Lothringens)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: hubeau_pegel
+
+  - id: wallonie_pegel
+    name: Pegel Wallonien (SPW Hydrométrie, KiWIS-Webdienst)
+    kurzname: SPW Pegel
+    betreiber: Service public de Wallonie (SPW), Mobilité et Infrastructures, Direction des Voies hydrauliques, Hydrométrie
+    url: https://hydrometrie.wallonie.be/services/KiWIS/KiWIS
+    lizenz: keine ausdrückliche Lizenzangabe am Dienst gefunden
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Der Webdienst ist anonym abrufbar, nennt aber an der Schnittstelle keine Lizenz (2026-10-07). Die Wallonie veröffentlicht viele Datensätze
+      offen (opendata.wallonie.be), für die Echtzeit-Pegel liegt uns kein Lizenztext vor. Vor dem öffentlichen Start beim SPW nachfragen
+      oder den Datensatz im Open-Data-Portal gegenprüfen. Wasserstände sind auf den Nullpunkt der jeweiligen Station bezogen (nicht NN) und
+      deshalb nur im Verlauf je Station lesbar. Warnstufen liefert der Dienst nicht. Der Dienst antwortet auf Reihenlisten gelegentlich sehr
+      langsam; die Liste wird deshalb zwischengespeichert.
+    namensnennung: "Pegeldaten Wallonien: Service public de Wallonie (SPW), Hydrométrie"
+    intervall: 900
+    ratenlimit: nicht genannt; wir machen alle 15 Minuten etwa 4 Abrufe, die Stationsliste (rund 40 Abrufe) nur alle 12 Stunden
+    auth: keine
+    geo_bezug: Stationen der Bounding Box, Feinfilter auf 120 km am Rand (Maas, Ourthe, Semois, Lesse, Vesdre, Sûre-Zuflüsse, Our)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: wallonie_pegel
+
+  - id: brf
+    name: Schlagzeilen Ostbelgien (BRF, RSS)
+    kurzname: BRF
+    betreiber: BRF, Belgischer Rundfunk der Deutschsprachigen Gemeinschaft, Eupen
+    url: https://brf.be/feed/
+    lizenz: keine offene Lizenz; nur Überschrift, Zeit und Link, kein Text, kein Bild
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Vom Sender öffentlich angebotener RSS-Feed, robots.txt sperrt ihn nicht (nur zwei Profilseiten). Nutzungsbedingungen nicht gelesen;
+      vor dem öffentlichen Start klären oder Quelle streichen. Nur Rubrik Regional, nur mit Ort im Radius (aus Schlagzeile oder Schlagwort).
+      Eupen und Raeren liegen außerhalb der 120 km, deren Meldungen fallen am Rand weg.
+    namensnennung: "Schlagzeilen: BRF (Titel und Link)"
+    intervall: 900
+    ratenlimit: nicht veröffentlicht; ein Abruf je 15 Minuten
+    auth: keine
+    geo_bezug: Ortsname in Schlagzeile oder Schlagwort per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: rss_brf
+
+  - id: meteoalarm
+    name: Wetterwarnungen Belgien, Frankreich, Luxemburg (MeteoAlarm)
+    kurzname: MeteoAlarm
+    betreiber: EUMETNET (MeteoAlarm); Herausgeber KMI/IRM Belgien, Météo-France, MeteoLux
+    url: https://feeds.meteoalarm.org/api/v1/warnings/feeds-belgium
+    lizenz: laut Anbieter gleichwertig CC BY 4.0 mit zusätzlichen Auflagen für die Weiterverbreitung
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Die Auflagen stehen in den Terms and Conditions von meteoalarm.org, die Seite ist nur mit JavaScript lesbar und war für uns nicht
+      abrufbar (2026-09-30). Bis zur Klärung zeigen wir nur Stufe, Art, Gebiet, Zeitraum, Herausgeber und Link, keinen Beschreibungstext.
+      Gebietsgrenzen aus Eurostat GISCO (NUTS 2013, "© EuroGeographics bezüglich der Verwaltungsgrenzen"). Das Lagebild ersetzt keine
+      amtliche Warnung: Belgien KMI/IRM, Frankreich Vigilance (Météo-France), Luxemburg MeteoLux. Länderfeeds: belgium, france, luxembourg.
+    namensnennung: "Warnungen: MeteoAlarm und nationale Wetterdienste (KMI/IRM, Météo-France, MeteoLux); Grenzen © EuroGeographics"
+    intervall: 600
+    ratenlimit: nicht veröffentlicht; 3 Abrufe je 10 Minuten
+    auth: keine
+    geo_bezug: NUTS-Gebiet (BE33, BE34, FR411 bis FR413, LU00) als Fläche, nur Gebiete im Radius
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: meteoalarm
+
+  - id: bison_fute
+    name: Verkehrsmeldungen Frankreich (Bison Futé, nicht konzessionierte Nationalstraßen)
+    kurzname: Bison Futé
+    betreiber: DGITM und Directions interdépartementales des routes (DIR), über tipi.bison-fute.gouv.fr
+    url: https://tipi.bison-fute.gouv.fr/bison-fute-ouvert/publicationsDIR/Evenementiel-DIR/grt/RRN/content.xml
+    lizenz: Licence Ouverte 2.0 (Etalab)
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Datensatz "Événements routiers sur le réseau routier national non concédé" auf transport.data.gouv.fr, Licence Ouverte 2.0
+      laut Portal (2026-09-30). Abruf live getestet (DATEX II v2, ganz Frankreich, rund 4 MB, wir filtern am Rand). Lücke: Der Feed
+      enthält nur das nicht konzessionierte Netz; konzessionierte Autobahnen (SANEF, APRR) stehen in eigenen Datensätzen, die hier
+      noch nicht eingebunden sind. Im Radius liegen deshalb oft nur wenige Meldungen.
+    namensnennung: "Verkehrsmeldungen Frankreich: Bison Futé / DGITM, transport.data.gouv.fr, Licence Ouverte 2.0"
+    intervall: 600
+    ratenlimit: nicht veröffentlicht; ein Abruf je 10 Minuten
+    auth: keine
+    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf 120 km am Rand (Lothringen, Ardennen, Luxemburger Grenze)
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-09-30"
+    collector: bison_fute
+
+  - id: statec_sprit
+    name: Amtliche Höchstpreise Kraftstoffe Luxemburg (STATEC, LUSTAT)
+    kurzname: Höchstpreise Luxemburg
+    betreiber: STATEC Luxembourg (Preise setzt das Wirtschaftsministerium fest), Abruf über lustat.statec.lu (SDMX-REST)
+    url: https://lustat.statec.lu/rest/data/LU1,DSD_PRIX_ESSENCE%40DF_E5302,/all
+    lizenz: CC0 1.0
+    lizenz_geprueft: true
+    lizenz_hinweis: >-
+      Datensatz "Économie totale et prix - Prix - Prix de l'énergie" auf data.public.lu (Ressourcen "Prix maxima de l'essence" und
+      "Prix maxima du diesel"), Lizenz CC0 laut Portal (2026-10-07). Abruf live getestet; die Werte stimmen mit den Preisen auf petrol.lu überein.
+      Es sind Höchstpreise je Liter inklusive Steuern für ganz Luxemburg, keine Preise einzelner Tankstellen; Stationen dürfen darunter liegen.
+      Die Anzeige sagt das an jeder Stelle.
+    namensnennung: "Höchstpreise Luxemburg: STATEC / LUSTAT, CC0"
+    intervall: 3600
+    ratenlimit: nicht veröffentlicht; zwei Abrufe je Stunde
+    auth: keine
+    geo_bezug: ein Wert je Sorte für das ganze Großherzogtum
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: statec_sprit
+
+  - id: osm_tankstellen_lu
+    name: Tankstellen Luxemburg (OpenStreetMap, nur Standort und Marke)
+    kurzname: Tankstellen Luxemburg
+    betreiber: OpenStreetMap-Mitwirkende; Abfrage über die Overpass API (overpass-api.de)
+    url: https://overpass-api.de/api/interpreter
+    lizenz: ODbL 1.0 (© OpenStreetMap-Mitwirkende)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      ODbL verlangt Namensnennung; die Kartenquelle nennt OpenStreetMap bereits. Eine Abfrage je Woche liegt weit unter der Fair-Use-Grenze der
+      Overpass-Instanz. Gespeichert werden nur Marke oder Name, Koordinate und OSM-Kennung; keine Adressen, Telefonnummern, Öffnungszeiten oder
+      Betreiberfelder. Die Standorte tragen keine Preise, die Karte verbindet sie mit dem amtlichen Höchstpreis (statec_sprit).
+    namensnennung: "© OpenStreetMap-Mitwirkende (ODbL)"
+    intervall: 604800
+    ratenlimit: Fair Use; eine kleine Abfrage je Woche
+    auth: keine
+    geo_bezug: Tankstellen im Staatsgebiet Luxemburg, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: osm_tankstellen_lu
+
+  - id: dwd_stationen
+    name: Wetterstationen im Radius (DWD, über Bright Sky)
+    kurzname: DWD-Stationen
+    betreiber: Deutscher Wetterdienst (Messdaten), Bright Sky (Jakob de Maeyer) als Aufbereitung
+    url: https://api.brightsky.dev
+    lizenz: DWD GeoNutzV; Bright Sky Software MIT
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Gleiche Lizenzlage wie die Quelle brightsky (DWD GeoNutzV, Namensnennung). Live getestet (2026-10-07): /sources liefert rund 58 SYNOP-Stationen im
+      Radius, /current_weather?dwd_station_id=… die Stundenwerte. Je Lauf bis zu 60 kleine Abfragen mit 0,25 s Pause alle 30 Minuten; für den Dauerbetrieb
+      gehört eine eigene Bright-Sky-Instanz her (Docker), damit die öffentliche nicht belastet wird.
+    namensnennung: "Quelle: Deutscher Wetterdienst, via Bright Sky"
+    intervall: 1800
+    ratenlimit: öffentliche Instanz, Fair Use; bis zu 60 Abrufe je 30 Minuten, Stationsliste einmal am Tag
+    auth: keine
+    geo_bezug: DWD-Stationen mit SYNOP-Meldung im Radius von 120 km
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: dwd_stationen
+    params:
+      max_stations: 60
+
+  - id: irceline
+    name: Luftqualität Belgien (IRCEL-CELINE)
+    kurzname: IRCEL-CELINE
+    betreiber: IRCEL - CELINE (Belgian Interregional Environment Agency), Messnetze Flandern, Wallonien, Brüssel
+    url: https://geo.irceline.be/wfs
+    lizenz: CC BY 4.0 (nach Kenntnisstand)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WFS-Dienst live getestet (2026-10-07), ohne Schlüssel; Ebenen realtime:pm10_hmean_station, pm25, no2, o3 liefern Stundenwerte je Station
+      als GeoJSON. Die Lizenz CC BY 4.0 ist aus der Dokumentation der Client-Bibliothek open-irceline übernommen, nicht am Primärtext der
+      IRCEL-CELINE bestätigt. Werte sind vorläufig; -9999 bedeutet kein Wert. Im Radius liegen nur Stationen der Wallonie (Ardennen, Lüttich, Namur);
+      einen amtlichen Index liefert dieser Dienst nicht, deshalb zeigt die Karte nur die Messwerte.
+    namensnennung: "Quelle: IRCEL - CELINE (vorläufige Stundenwerte, CC BY 4.0)"
+    intervall: 1800
+    ratenlimit: nicht veröffentlicht; vier Abfragen je Lauf alle 30 Minuten
+    auth: keine
+    geo_bezug: Stationen in der Bounding-Box, Zeitfilter in der Abfrage, Feinfilter auf 120 km am Rand
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: irceline
+
+  - id: kmi_stationen
+    name: Wetterstationen Belgien (KMI/IRM)
+    kurzname: KMI-Stationen
+    betreiber: Königliches Meteorologisches Institut von Belgien (KMI/IRM)
+    url: https://opendata.meteo.be/geoserver/ows
+    lizenz: CC BY 4.0 (nach Kenntnisstand)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      WFS-Dienst live getestet (2026-10-07), ohne Schlüssel, Daten rund 12 Minuten alt. Ebenen synop:synop_station und synop:synop_data
+      liefern stündliche SYNOP-Werte als GeoJSON. Das Datenportal des belgischen Klimazentrums nennt für die automatischen Stationen CC BY 4.0;
+      für diese SYNOP-Ebene ist das nicht gesondert bestätigt, am Primärtext prüfen. Im Radius liegen sieben Stationen (Elsenborn, Mont Rigi,
+      Spa, Saint-Hubert, Humain, Buzenol, Bierset); Elsenborn hat laut Dienst seit 13.08.2026 keine Werte mehr und fehlt deshalb auf der Karte. Windgeschwindigkeit wird von m/s in km/h umgerechnet, damit sie zu den DWD-Stationen passt.
+    namensnennung: "Quelle: KMI/IRM, Königliches Meteorologisches Institut von Belgien (CC BY 4.0)"
+    intervall: 1800
+    ratenlimit: nicht veröffentlicht; zwei Abfragen je Lauf, die Stationsliste nur einmal am Tag
+    auth: keine
+    geo_bezug: Stationsliste gefiltert auf 120 km um Irrel, eine Abfrage mit Zeitfilter für alle Stationen
+    datenschutz_risiko: niedrig
+    aktiv: true
+    zuletzt_geprüft: "2026-10-07"
+    collector: kmi_stationen
+

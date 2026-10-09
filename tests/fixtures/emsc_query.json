@@ -1,0 +1,157 @@
+{"type":"FeatureCollection","metadata":{"count":6},"features":[{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      6.8778,
+      49.4809,
+      0.0
+    ]
+  },
+  "id": "20260828_0000112",
+  "properties": {
+    "source_id": "2052346",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-08-28T09:56:20.501533Z",
+    "time": "2026-08-28T09:10:11.091733Z",
+    "flynn_region": "FRANCE-GERMANY BORDER REGION",
+    "lat": 49.4809,
+    "lon": 6.8778,
+    "depth": 0.0,
+    "evtype": "ke",
+    "auth": "ReNaSS",
+    "mag": 2.1,
+    "magtype": "ml",
+    "unid": "20260828_0000112"
+  }
+},{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      7.0860,
+      50.1850,
+      -2.0
+    ]
+  },
+  "id": "20260810_0000377",
+  "properties": {
+    "source_id": "2041056",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-08-11T07:29:56.953039Z",
+    "time": "2026-08-10T21:46:42.9Z",
+    "flynn_region": "GERMANY",
+    "lat": 50.1850,
+    "lon": 7.0860,
+    "depth": 2.0,
+    "evtype": "ke",
+    "auth": "LED",
+    "mag": 0.5,
+    "magtype": "ml",
+    "unid": "20260810_0000377"
+  }
+},{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      6.6309,
+      49.7308,
+      0.0
+    ]
+  },
+  "id": "20260708_0000165",
+  "properties": {
+    "source_id": "2023057",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-07-08T11:35:21.959593Z",
+    "time": "2026-07-08T10:44:27.495293Z",
+    "flynn_region": "FRANCE-GERMANY BORDER REGION",
+    "lat": 49.7308,
+    "lon": 6.6309,
+    "depth": 0.0,
+    "evtype": "ke",
+    "auth": "ReNaSS",
+    "mag": 2.1,
+    "magtype": "ml",
+    "unid": "20260708_0000165"
+  }
+},{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      6.0415,
+      49.7956,
+      0.0
+    ]
+  },
+  "id": "20260610_0000186",
+  "properties": {
+    "source_id": "2008497",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-06-10T12:21:14.209172Z",
+    "time": "2026-06-10T10:22:35.810415Z",
+    "flynn_region": "FRANCE-GERMANY BORDER REGION",
+    "lat": 49.7956,
+    "lon": 6.0415,
+    "depth": 0.0,
+    "evtype": "ke",
+    "auth": "ReNaSS",
+    "mag": 2.0,
+    "magtype": "ml",
+    "unid": "20260610_0000186"
+  }
+},{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      6.8021,
+      49.4487,
+      0.0
+    ]
+  },
+  "id": "20260529_0000138",
+  "properties": {
+    "source_id": "2002269",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-05-29T09:21:07.76014Z",
+    "time": "2026-05-29T08:42:03.869842Z",
+    "flynn_region": "FRANCE-GERMANY BORDER REGION",
+    "lat": 49.4487,
+    "lon": 6.8021,
+    "depth": 0.0,
+    "evtype": "ke",
+    "auth": "ReNaSS",
+    "mag": 2.0,
+    "magtype": "ml",
+    "unid": "20260529_0000138"
+  }
+},{
+  "type": "Feature",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      6.8851,
+      49.8079,
+      0.0
+    ]
+  },
+  "id": "20260522_0000149",
+  "properties": {
+    "source_id": "1998681",
+    "source_catalog": "EMSC-RTS",
+    "lastupdate": "2026-05-22T09:14:55.003461Z",
+    "time": "2026-05-22T08:45:31.146781Z",
+    "flynn_region": "FRANCE-GERMANY BORDER REGION",
+    "lat": 49.8079,
+    "lon": 6.8851,
+    "depth": 0.0,
+    "evtype": "ke",
+    "auth": "ReNaSS",
+    "mag": 2.0,
+    "magtype": "ml",
+    "unid": "20260522_0000149"
+  }
+}]}

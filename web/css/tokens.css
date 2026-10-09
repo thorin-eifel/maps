@@ -1,0 +1,192 @@
+/* Auszug aus CTW Design System v5.1 (Projektdokument ctw-design-system-v5.1.html): nur Tokens.
+   Hell ist Grundeinstellung; Dunkel nur über html[data-ansicht="dunkel"] (bewusst kein prefers-color-scheme). */
+:root {
+  color-scheme: light;
+
+  /* Markenfarben */
+  --brand-teal-900: oklch(32% .04 210);
+  --brand-teal-700: oklch(48% .05 210);
+  --brand-teal-500: oklch(78% .06 210);
+  --brand-teal-200: oklch(93% .02 210);
+  --brand-sand-50: oklch(96% .01 80);
+  --brand-stone-50: oklch(97% .005 240);
+  --brand-red-600: oklch(55% .18 25);
+  --brand-red-100: oklch(94% .04 25);
+  --brand-grey-500: oklch(58% .02 220);
+
+  /* Systemfarben – nur für Status */
+  --sys-red: oklch(63% .22 25);
+  --sys-yellow: oklch(83% .16 85);
+  --sys-green: oklch(72% .17 145);
+  --sys-blue: oklch(62% .18 250);
+  --status-success: oklch(62% .14 155);
+  --status-success-bg: oklch(96% .04 155);
+  --status-warning: oklch(70% .14 75);
+  --status-warning-bg: oklch(97% .05 80);
+  --status-info: oklch(62% .1 230);
+  --status-info-bg: oklch(96% .03 230);
+
+  /* Semantische Rollen (hell, Design System) */
+  --bg: var(--brand-sand-50);
+  --bg-elevated: #fff;
+  --surface: var(--brand-stone-50);
+  --surface-strong: var(--brand-teal-900);
+  --fg: var(--brand-teal-900);
+  --fg-muted: oklch(42% .025 215); /* DS v5.0 --muted: 7,4:1 auf Sand; brand-grey-500 bleibt für Flächen */
+  --warn-text: oklch(48% .10 70); /* Bernstein als Text, AA auf allen Flächen */
+  --fg-on-strong: var(--brand-stone-50);
+  --accent: var(--brand-teal-500);
+  --accent-fg: var(--brand-teal-900);
+  --danger: var(--brand-red-600);
+  --danger-fg: #fff;
+  --border: color-mix(in oklab, var(--brand-teal-900) 10%, transparent);
+  --border-strong: color-mix(in oklab, var(--brand-teal-900) 18%, transparent);
+  --ring: color-mix(in oklab, var(--sys-blue) 45%, transparent);
+
+  /* Materialien */
+  --material-thin: color-mix(in oklab, var(--bg-elevated) 55%, transparent);
+  --material-regular: color-mix(in oklab, var(--bg-elevated) 72%, transparent);
+  --material-thick: color-mix(in oklab, var(--bg-elevated) 86%, transparent);
+  --material-chrome: color-mix(in oklab, var(--brand-stone-50) 78%, transparent);
+  --blur-material: saturate(180%) blur(20px);
+
+  /* Typografie */
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display",
+               "Inter", "Helvetica Neue", Helvetica, Arial, system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display",
+                  "Inter", "Helvetica Neue", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  --fs-2xs: .6875rem;
+  --fs-xs: .75rem;
+  --fs-sm: .8125rem;
+  --fs-base: .9375rem;
+  --fs-md: 1rem;
+  --fs-lg: clamp(1.125rem, 1.05rem + .4vw, 1.25rem);
+  --fs-xl: clamp(1.375rem, 1.2rem + .8vw, 1.625rem);
+  --fs-2xl: clamp(1.75rem, 1.4rem + 1.6vw, 2.25rem);
+  --fs-3xl: clamp(2.25rem, 1.8rem + 2.2vw, 3rem);
+  --lh-tight: 1.12;
+  --lh-snug: 1.35;
+  --lh-base: 1.55;
+  --tracking-tight: -.022em;
+  --tracking-snug: -.01em;
+  --tracking-wide: .06em;
+
+  /* Radien */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 28px;
+  --radius-full: 9999px;
+
+  /* Abstände */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* Schatten */
+  --shadow-xs: 0 0 0 .5px var(--brand-teal-900),
+               0 1px 2px var(--brand-teal-900);
+  --shadow-xs: 0 0 0 .5px color-mix(in oklab, var(--brand-teal-900) 10%, transparent),
+               0 1px 2px color-mix(in oklab, var(--brand-teal-900) 6%, transparent);
+  --shadow-sm: 0 0 0 .5px var(--brand-teal-900),
+               0 2px 6px var(--brand-teal-900);
+  --shadow-sm: 0 0 0 .5px color-mix(in oklab, var(--brand-teal-900) 8%, transparent),
+               0 2px 6px color-mix(in oklab, var(--brand-teal-900) 6%, transparent);
+  --shadow-md: 0 0 0 .5px var(--brand-teal-900),
+               0 8px 24px var(--brand-teal-900);
+  --shadow-md: 0 0 0 .5px color-mix(in oklab, var(--brand-teal-900) 8%, transparent),
+               0 8px 24px color-mix(in oklab, var(--brand-teal-900) 10%, transparent);
+  --shadow-lg: 0 0 0 .5px var(--brand-teal-900),
+               0 24px 60px var(--brand-teal-900);
+  --shadow-lg: 0 0 0 .5px color-mix(in oklab, var(--brand-teal-900) 10%, transparent),
+               0 24px 60px color-mix(in oklab, var(--brand-teal-900) 18%, transparent);
+  --shadow-inset: inset 0 .5px 0 oklab(100% 0 0 / .6);
+
+  /* Bewegung */
+  --ease-out: cubic-bezier(.22, 1, .36, 1);
+  --ease-in-out: cubic-bezier(.65, 0, .35, 1);
+  --dur-fast: 140ms;
+  --dur-base: 220ms;
+  --dur-slow: .28s;
+
+  /* Layout */
+  --container: 1080px;
+
+  /* v5.0 Liquid Glass (aus dem Design System): Glas, Kanten, Knopf-Physik */
+  --brand-red-700: oklch(48% .18 25);
+  --brand-red-800: oklch(42% .18 25);
+  --surface-soft: var(--brand-stone-50);
+  --muted: var(--fg-muted);
+  --line-soft: oklch(88% .015 210);
+  --line: oklch(80% .018 210);
+  --link: var(--brand-teal-700);
+  --focus: oklch(42% .19 250);
+  --glass-fill: oklch(99% .005 210 / .70);
+  --glass-fill-strong: oklch(100% 0 0 / .82);
+  --glass-btn-fill: oklch(99% .005 210 / .76);
+  --glass-btn-hover: oklch(100% 0 0 / .86);
+  --glass-edge: oklch(100% 0 0 / .72);
+  --glass-blur: blur(18px) saturate(140%);
+  --glass-shadow: 0 20px 45px -20px oklch(20% .035 210 / .34), 0 2px 8px oklch(20% .035 210 / .13);
+  --glass-shadow-lift: 0 26px 50px -20px oklch(20% .035 210 / .40), 0 4px 12px oklch(20% .035 210 / .16);
+  --glass-inset: inset 0 1px 0 oklch(100% 0 0 / .88), inset 0 -1px 0 oklch(42% .04 210 / .12);
+  --chamfer-well: inset 0 1.5px 3px oklch(18% .04 210 / .16), 0 1px 0 0 oklab(100% 0 0 / .85);
+  --shadow-ambient: oklch(20% .035 210 / .14);
+  --radius-pill: 9999px;
+  --fs-button: .875rem;
+  --weight-light: 300;
+  --tracking-display: -.035em;
+  --gutter: clamp(16px, 2.2vw, 32px);
+}
+
+:root[data-ansicht="dunkel"] {
+  color-scheme: dark;
+  --bg: oklch(18% .015 230);
+  --bg-elevated: oklch(23% .02 225);
+  --surface: oklch(27% .025 225);
+  --surface-strong: oklch(14% .015 225);
+  --fg: oklch(97% .005 230);
+  --fg-muted: oklch(78% .015 225);
+  --warn-text: var(--status-warning);
+  --fg-on-strong: oklch(97% .005 230);
+  --accent: oklch(78% .07 210);
+  --accent-fg: oklch(16% .02 210);
+  --danger: oklch(68% .18 25);
+  --border: oklab(100% 0 0 / .1);
+  --border-strong: oklab(100% 0 0 / .2);
+  --ring: color-mix(in oklab, var(--sys-blue) 55%, transparent);
+  --material-thin: color-mix(in oklab, var(--bg-elevated) 45%, transparent);
+  --material-regular: color-mix(in oklab, var(--bg-elevated) 65%, transparent);
+  --material-thick: color-mix(in oklab, var(--bg-elevated) 82%, transparent);
+  --material-chrome: color-mix(in oklab, var(--surface) 70%, transparent);
+  --shadow-xs: 0 0 0 .5px oklab(100% 0 0 / .08);
+  --shadow-sm: 0 0 0 .5px oklab(100% 0 0 / .08), 0 2px 6px #00000059;
+  --shadow-md: 0 0 0 .5px oklab(100% 0 0 / .08), 0 10px 30px #00000073;
+  --shadow-lg: 0 0 0 .5px oklab(100% 0 0 / .1), 0 28px 70px #0000008c;
+
+  --surface-soft: oklch(27% .025 225);
+  --line-soft: oklch(36% .02 225);
+  --line: oklch(47% .02 225);
+  --link: oklch(78% .07 210);
+  --focus: oklch(79% .13 240);
+  --glass-fill: oklch(22% .02 225 / .72);
+  --glass-fill-strong: oklch(22% .02 225 / .82);
+  --glass-btn-fill: oklch(24% .02 225 / .78);
+  --glass-btn-hover: oklch(30% .025 225 / .88);
+  --glass-edge: oklch(95% .01 220 / .20);
+  --glass-shadow: 0 20px 45px -20px oklch(0% 0 0 / .65), 0 2px 8px oklch(0% 0 0 / .30);
+  --glass-shadow-lift: 0 26px 50px -20px oklch(0% 0 0 / .75), 0 4px 12px oklch(0% 0 0 / .35);
+  --glass-inset: inset 0 1px 0 oklch(100% 0 0 / .18), inset 0 -1px 0 oklch(0% 0 0 / .25);
+  --chamfer-well: inset 0 1.5px 3px oklch(0% 0 0 / .45), 0 1px 0 0 oklab(100% 0 0 / .08);
+  --shadow-ambient: oklch(0% 0 0 / .35);
+}

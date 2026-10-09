@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Lokale Ansicht auf http://127.0.0.1:8080 (nur localhost), mit Teilabrufen (Range) für die Kartendatei.
+     Kein Ersatz für den IONOS-Webspace. -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>de.ctw.osint-web</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/Users/thorin/Claude/OSINT/.venv/bin/python</string>
+    <string>/Users/thorin/Claude/OSINT/deploy/serve-local.py</string>
+    <string>--dir</string><string>/Users/thorin/Claude/OSINT/web</string>
+    <string>--port</string><string>8080</string>
+    <string>--bind</string><string>127.0.0.1</string>
+  </array>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+  <key>StandardOutPath</key><string>/Users/thorin/Library/Logs/osint-web.log</string>
+  <key>StandardErrorPath</key><string>/Users/thorin/Library/Logs/osint-web.log</string>
+</dict>
+</plist>

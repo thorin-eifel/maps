@@ -1,0 +1,19 @@
+[package]
+name = "osint-desktop"
+version = "0.1.0"
+description = "Was ist los bei uns? Lagebild als lokale Desktop-App"
+edition = "2021"
+rust-version = "1.77"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = true

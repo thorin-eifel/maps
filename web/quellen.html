@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quellen und Lizenzen – Was ist los bei uns?</title>
+<meta name="description" content="Was ist los bei uns? Die aktuelle Lage rund um unsere Heimat: Open Source Information Dashboard von CTW Computer, gebaut aus offenen Daten für die Südeifel und ihre Nachbarregionen (120 km Umkreis). Kein amtliches Warnsystem.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%275%27 fill=%27none%27 stroke=%27%23227a8a%27 stroke-width=%272%27/%3E%3Ccircle cx=%278%27 cy=%278%27 r=%271.6%27 fill=%27%23227a8a%27/%3E%3C/svg%3E">
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+<a class="skip" href="#inhalt">Zum Inhalt springen</a>
+<header class="top"><div class="top-in">
+  <a class="brand" href="./"><img class="brand-logo logo-hell" src="img/ctw-logo-hell.png" alt="CTW Computer-Irrel" width="113" height="34"><img class="brand-logo logo-dunkel" src="img/ctw-logo-dunkel.png" alt="" width="113" height="34"><span class="brand-text"><b>Was ist los bei uns?</b><span>Die aktuelle Lage rund um unsere Heimat</span></span></a>
+  <nav class="nav" aria-label="Hauptnavigation">
+    <a href="./">Lage</a><a href="status.html">Status</a><a href="quellen.html" aria-current="page">Quellen und Lizenzen</a>
+    <button class="btn" id="theme" type="button" aria-pressed="false">Dunkel</button>
+  </nav>
+</div></header>
+<main id="inhalt"><section class="card"><div class="card-h"><h1>Quellen und Lizenzen</h1></div>
+  <div class="card-b prose muted">Jede Quelle steht im Quellenregister (<span class="mono">sources.yaml</span>). Ohne Eintrag läuft kein Collector. Wo die Lizenz noch nicht an der Primärquelle bestätigt ist, steht das hier offen.</div>
+  <div class="card-b prose" id="hinweise">
+    <h2>Über dieses Dashboard</h2>
+    <p>Open Source Information Dashboard von CTW Computer. <strong>Kein Amtsersatz:</strong> Kein amtliches Warnsystem, keine Gewähr. Im Notfall 112 wählen und offizielle Warn-Apps (NINA, KATWARN) nutzen. Dieses Dashboard ersetzt weder NINA noch die Leitstelle. Keine Cookies, kein Tracking, keine Drittanbieter-Skripte; Details unter <a href="datenschutz.html">Datenschutz</a> und <a href="impressum.html">Impressum</a>.</p>
+  </div>
+  <div id="quellen-body"><div class="empty">Lade …</div></div>
+  <div class="card-b prose" id="karte-lizenz">
+    <h2>Kartengrundlage</h2>
+    <p>Straßen, Gebäude, Hausnummern, Gewässer, Flächen: © <a href="https://www.openstreetmap.org/copyright" rel="noopener noreferrer" target="_blank">OpenStreetMap-Mitwirkende</a>, Lizenz ODbL 1.0. Die Kacheln stammen aus dem Protomaps-Basiskartenbau (Ausschnitt Irrel plus Umgebung, Zoomstufen 0 bis 15, Stand siehe <span class="mono">web/tiles/README.txt</span>) und liegen auf diesem Server; beim Betrachten der Karte wird kein Drittanbieter angefragt. Die Basiskarte enthält außerdem Daten von Natural Earth (gemeinfrei). Kartenbibliothek MapLibre GL JS und PMTiles-Leser: BSD-3-Clause.</p>
+    <h2>Hinweise zu einzelnen Quellen</h2>
+    <p>Regenradar: Der Deutsche Wetterdienst liefert das Bild, die Sammelstelle holt es und lädt es mit hoch; Ihr Browser fragt den DWD nicht an. Ohne Farbe heißt: kein Niederschlag oder außerhalb der Radarreichweite (Südwesten der Karte). Pegel: Neben PEGELONLINE zeigen wir Messstellen der Hochwasservorhersagezentrale Rheinland-Pfalz; die Klassen entsprechen der Legende dieser Quelle. Strahlung und Luft: Es gibt Messstellen in Deutschland, für Luxemburg und Frankreich liegen hier keine Werte vor. Erdbeben: Herdkoordinaten laut Katalog, die meisten Beben in der Eifel sind unter Magnitude 2 und nicht spürbar. Schwellen für Hinweise bei Strahlung sind eigene Orientierungswerte, keine amtlichen Grenzwerte. Gewässerbaum im Pegelreiter: Zuordnung der Pegel zu Flussläufen und Mündungspunkte aus Wikidata (CC0), mit einem Werkzeug im Projekt erzeugt und von Hand geprüfbar; unklare Namen bleiben unzugeordnet. Pegel Wallonien: Wasserstände beziehen sich auf den Nullpunkt der jeweiligen Station, nicht auf NN.</p>
+
+    <h2>Höhenrelief</h2>
+    <p>Schummerung, Höhenfärbung und Höhenlinien werden im Browser aus Höhenkacheln (Terrarium-Kodierung) berechnet, die auf diesem Server liegen. Die Kacheln stammen aus den <a href="https://registry.opendata.aws/terrain-tiles/" rel="noopener noreferrer" target="_blank">Mapzen Terrain Tiles</a> auf AWS Open Data; für unsere Region beruhen sie auf EU-DEM und SRTM. Namensnennung nach den Vorgaben der Tile-Quellen: „Produced using Copernicus data and information funded by the European Union - EU-DEM layers.“ SRTM (NASA) ist gemeinfrei. Die Höhenlinien rechnet das Plugin maplibre-contour (BSD-3-Clause) in einem Web Worker; die Ziffern der Beschriftung nutzen die Schrift Noto Sans (SIL Open Font License). Die Höhenangabe unter dem Zeiger ist ein Rasterwert mit rund 30 Metern Auflösung, keine Vermessung.</p>
+    <h2>Schrift der historischen Karte</h2>
+    <p>Die Beschriftung der Karte im Stil des 15. Jahrhunderts setzt die gebrochene Schrift Grenze Gotisch (SIL Open Font License 1.1, Omnibus-Type); die Glyphen liegen auf diesem Server. Der Stil ist eine Darstellung heutiger OpenStreetMap-Daten in Pergamentfarben, keine historische Quelle: Straßenverlauf, Orte und Gewässer sind die heutigen. Windrose, Flächenmuster (Wald, Wiese, Acker, Wasser), Hügel-, Wellen- und Ortszeichen sowie die Bildzeichen für Burgen, Ruinen, Klöster, Fundstellen und Häuser sind eigene Zeichnungen für dieses Projekt.</p>
+    <h2>Symbole</h2>
+    <p>Die Symbole auf der Karte und in den Listen stammen von <a href="https://uxwing.com/" rel="noopener noreferrer" target="_blank">UXWing</a> (freie Nutzung nach der <a href="https://uxwing.com/license/" rel="noopener noreferrer" target="_blank">UXWing-Lizenz</a>, Namensnennung nicht verlangt) und liegen auf diesem Server. Stau, zähfließender Verkehr und Stillstand stammen aus den Verkehrsmeldungen der Autobahn GmbH; die Flugpositionen aus dem Community-Netz adsb.lol werden alle 15 Sekunden aktualisiert und zwischen den Abrufen nur auf der Karte fortgeschrieben.</p>
+  </div></section></main>
+<footer><div class="foot-in">
+  <div>Open Source Information Dashboard von CTW Computer.</div>
+  <div><strong>Kein Amtsersatz.</strong> <span id="disclaimer">Kein amtliches Warnsystem, keine Gewähr. Im Notfall 112 wählen und offizielle Warn-Apps (NINA, KATWARN) nutzen. Dieses Dashboard ersetzt weder NINA noch die Leitstelle.</span></div>
+  <div>Datenquellen: BBK (NINA), Deutscher Wetterdienst, WSV (PEGELONLINE), Die Autobahn GmbH des Bundes, Mobilitätsatlas Rheinland-Pfalz, adsb.lol. Kartendaten: © OpenStreetMap-Mitwirkende (ODbL), Protomaps. Lizenzen und Namensnennung: <a href="quellen.html">Quellen und Lizenzen</a>.</div>
+  <div>Keine Cookies, kein Tracking, keine Drittanbieter-Skripte. <a href="datenschutz.html">Datenschutz</a> · <a href="impressum.html">Impressum</a></div>
+</div></footer>
+<script type="module" src="js/status.js"></script>
+</body>
+</html>
