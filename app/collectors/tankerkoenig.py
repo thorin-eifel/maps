@@ -5,7 +5,9 @@ Betreiber:  Tankerkönig (Dienst), Daten: Markttransparenzstelle für Kraftstoff
 Lizenz:     CC BY 4.0, Namensnennung "Tankerkönig", Hinweis: nur Deutschland; Luxemburg ist nicht enthalten
 Schlüssel:  TANKERKOENIG_API_KEY in .env (kostenlos, Registrierung auf creativecommons.tankerkoenig.de). Ohne Schlüssel meldet der Collector
             einen klaren Fehler und die Quelle steht im Register auf aktiv: false, bis der Schlüssel eingetragen ist.
-Intervall:  900 s; Abfragepunkte aus params.points (Standard: Irrel, Trier, Wittlich, Prüm, Saarburg, je 25 km), also fünf Abrufe je Lauf
+Intervall:  900 s (Region Irrel) bzw. 1800 s (Rheinland-Pfalz plus 80 km). Abfragepunkte: params.points, sonst bei Polygon-Region das Gitter
+            app/data/region/tank_grid.json (59 Kreise zu 25 km über die deutsche Fläche, tools/build_tank_grid.py), sonst Irrel, Trier, Wittlich,
+            Prüm, Saarburg. Zwischen zwei Abrufen liegt eine Pause (pause_s, 1 s).
 Beispiel:   python -m app.collect --once --only tankerkoenig
 
 Gespeichert werden Tankstelle (Marke, Ortsname, Koordinate), Preise für E5, E10 und Diesel als Messwerte. Straße und Hausnummer
@@ -14,10 +16,14 @@ Fehlertexten maskiert. Preise sind Meldungen der Betreiber an die MTS-K, nicht d
 """
 from __future__ import annotations
 
+import asyncio
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 from .. import config, geo
+from ..region import REGION
 from ..models import Measurement, Station, utcnow
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
@@ -31,6 +37,18 @@ DEFAULT_POINTS = [{"lat": config.CENTER_LAT, "lon": config.CENTER_LON, "rad": 25
                   {"lat": 49.9853, "lon": 6.8974, "rad": 25},   # Wittlich
                   {"lat": 50.2098, "lon": 6.4194, "rad": 25},   # Prüm
                   {"lat": 49.4400, "lon": 6.6100, "rad": 25}]   # Saarburg / Merzig
+
+
+GRID_FILE = Path(__file__).resolve().parent.parent / "data" / "region" / "tank_grid.json"
+
+
+def query_points(params: dict[str, Any]) -> list[dict[str, Any]]:
+    """Abfragepunkte: params.points, bei Polygon-Region das Gitter, sonst die fünf Standardpunkte."""
+    if params.get("points"):
+        return params["points"]
+    if REGION.mode == "polygon" and GRID_FILE.exists():
+        return json.loads(GRID_FILE.read_text(encoding="utf-8"))["points"]
+    return DEFAULT_POINTS
 
 
 def parse_list(data: Any, now) -> tuple[list[Station], list[Measurement]]:
@@ -60,6 +78,8 @@ def parse_list(data: Any, now) -> tuple[list[Station], list[Measurement]]:
 
 
 class TankerkoenigCollector(Collector):
+    pause_s = 1.0
+
     async def collect(self) -> CollectResult:
         key = os.environ.get(KEY_ENV, "").strip()
         if not key:
@@ -67,18 +87,29 @@ class TankerkoenigCollector(Collector):
         now = utcnow()
         stations: dict[str, Station] = {}
         meas: dict[tuple[str, str], Measurement] = {}
-        for p in self.entry.params.get("points") or DEFAULT_POINTS:
-            resp = await self._request(self.entry.url, {"lat": p["lat"], "lng": p["lon"], "rad": min(int(p.get("rad", 25)), 25),
-                                                        "sort": "dist", "type": "all", "apikey": key}, "application/json", False, (key,))
-            assert resp is not None
+        points = query_points(self.entry.params)
+        failed = 0
+        for n, p in enumerate(points):
+            if n and self.pause_s:
+                await asyncio.sleep(self.pause_s)
             try:
+                resp = await self._request(self.entry.url, {"lat": p["lat"], "lng": p["lon"], "rad": min(int(p.get("rad", 25)), 25),
+                                                            "sort": "dist", "type": "all", "apikey": key}, "application/json", False, (key,))
+                assert resp is not None
                 st, ms = parse_list(resp.json(), now)
-            except ValueError as exc:
-                raise SourceError("Tankerkönig: kein gültiges JSON") from exc
+            except (SourceError, ValueError) as exc:
+                failed += 1
+                self.log.warning("Punkt %d/%d (%.2f, %.2f): %s", n + 1, len(points), p["lat"], p["lon"], clean_text(str(exc), 160))
+                continue
             stations.update({s.station_id: s for s in st})
             meas.update({(m.station_id, m.parameter): m for m in ms})
+        if failed == len(points):
+            raise SourceError("Tankerkönig: kein Abfragepunkt erreichbar")
+        note = f"{len(stations)} Tankstellen, {len(meas)} Preise, {len(points)} Punkte"
+        if failed:
+            note += f" ({failed} Punkte fehlgeschlagen)"
         return CollectResult(stations=list(stations.values()), measurements=list(meas.values()), writes_events=False,
-                             note=f"{len(stations)} Tankstellen, {len(meas)} Preise")
+                             complete=not failed, note=note)
 
 
 COLLECTOR = TankerkoenigCollector
