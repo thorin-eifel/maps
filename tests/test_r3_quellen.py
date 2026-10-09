@@ -65,10 +65,34 @@ async def test_tank_partial_failure_keeps_rest_and_flags_incomplete(registry, st
     client, router = make_client(h)
     c = load_collector_class(entry.collector)(entry, storage, client, settings, backoff_base_s=0.0)
     c.pause_s = 0
+    entry.params["points_per_run"] = 0   # alle Punkte in einem Lauf
     res = await c.collect()
     await client.aclose()
     assert res.complete is False and "fehlgeschlagen" in res.note
     assert 0 < len(res.stations) < 59 and "Punkte fehlgeschlagen" in res.note
+
+
+def test_tank_rotation_one_point_per_slot_covers_all():
+    pts = [{"lat": i, "lon": 0} for i in range(59)]
+    seen = []
+    for slot in range(59):
+        sl = tankerkoenig.select_slice(pts, 1, 120, slot * 120 + 17)
+        assert len(sl) == 1
+        seen.append(sl[0]["lat"])
+    assert sorted(seen) == list(range(59))
+    assert tankerkoenig.select_slice(pts, 0, 120, 5) == pts
+    assert [p["lat"] for p in tankerkoenig.select_slice(pts, 3, 120, 58 * 120)] == [58 * 3 % 59, (58 * 3 + 1) % 59, (58 * 3 + 2) % 59]
+
+
+async def test_tank_default_run_sends_single_request(registry, storage, settings, monkeypatch):
+    monkeypatch.setenv("TANKERKOENIG_API_KEY", "k-test")
+    monkeypatch.setattr(tankerkoenig, "REGION", SimpleNamespace(mode="polygon"))
+    entry = registry.get("tankerkoenig")
+    client, router = make_client(lambda req: httpx.Response(200, json=_tank_reply(1)))
+    c = load_collector_class(entry.collector)(entry, storage, client, settings, backoff_base_s=0.0)
+    res = await c.collect()
+    await client.aclose()
+    assert len(router.calls) == 1 and res.complete is False and "von 59 Punkten" in res.note
 
 
 # ------------------------------------------------------------------ Bildausschnitt

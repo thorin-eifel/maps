@@ -5,9 +5,11 @@ Betreiber:  Tankerkönig (Dienst), Daten: Markttransparenzstelle für Kraftstoff
 Lizenz:     CC BY 4.0, Namensnennung "Tankerkönig", Hinweis: nur Deutschland; Luxemburg ist nicht enthalten
 Schlüssel:  TANKERKOENIG_API_KEY in .env (kostenlos, Registrierung auf creativecommons.tankerkoenig.de). Ohne Schlüssel meldet der Collector
             einen klaren Fehler und die Quelle steht im Register auf aktiv: false, bis der Schlüssel eingetragen ist.
-Intervall:  900 s (Region Irrel) bzw. 1800 s (Rheinland-Pfalz plus 80 km). Abfragepunkte: params.points, sonst bei Polygon-Region das Gitter
-            app/data/region/tank_grid.json (59 Kreise zu 25 km über die deutsche Fläche, tools/build_tank_grid.py), sonst Irrel, Trier, Wittlich,
-            Prüm, Saarburg. Zwischen zwei Abrufen liegt eine Pause (pause_s, 1 s).
+Intervall:  120 s, je Lauf EIN Abfragepunkt (params.points_per_run, Standard 1). Der Betreiber begrenzt die Abfragefrequenz auf einen Request
+            je Minute (creativecommons.tankerkoenig.de, gelesen 2026-10-09). Die Punkte werden reihum abgefragt; welcher dran ist, folgt aus der
+            Uhrzeit (Epoche // Intervall, ohne Zustand, übersteht Neustarts). Abfragepunkte: params.points, sonst bei Polygon-Region das Gitter
+            app/data/region/tank_grid.json (59 Kreise zu 25 km, tools/build_tank_grid.py; ein Umlauf dauert 59 x 2 min = knapp 2 h), sonst
+            Irrel, Trier, Wittlich, Prüm, Saarburg (Umlauf 10 min). Jeder Preis trägt den Zeitstempel seines Abrufs.
 Beispiel:   python -m app.collect --once --only tankerkoenig
 
 Gespeichert werden Tankstelle (Marke, Ortsname, Koordinate), Preise für E5, E10 und Diesel als Messwerte. Straße und Hausnummer
@@ -19,6 +21,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import time
 from pathlib import Path
 from typing import Any
 
@@ -77,8 +80,16 @@ def parse_list(data: Any, now) -> tuple[list[Station], list[Measurement]]:
     return list(sts.values()), meas
 
 
+def select_slice(points: list[dict[str, Any]], per_run: int, slot_s: int, epoch: float) -> list[dict[str, Any]]:
+    """Die Punkte, die in diesem Zeitfenster dran sind (reihum, zustandslos). per_run <= 0 = alle."""
+    if per_run <= 0 or per_run >= len(points):
+        return points
+    start = (int(epoch // max(slot_s, 1)) * per_run) % len(points)
+    return [points[(start + i) % len(points)] for i in range(per_run)]
+
+
 class TankerkoenigCollector(Collector):
-    pause_s = 1.0
+    pause_s = 60.0   # nur relevant, wenn params.points_per_run > 1 (Betreiber: ein Request je Minute)
 
     async def collect(self) -> CollectResult:
         key = os.environ.get(KEY_ENV, "").strip()
@@ -87,7 +98,8 @@ class TankerkoenigCollector(Collector):
         now = utcnow()
         stations: dict[str, Station] = {}
         meas: dict[tuple[str, str], Measurement] = {}
-        points = query_points(self.entry.params)
+        allp = query_points(self.entry.params)
+        points = select_slice(allp, int(self.entry.params.get("points_per_run", 1)), self.entry.intervall, time.time())
         failed = 0
         for n, p in enumerate(points):
             if n and self.pause_s:
@@ -105,11 +117,11 @@ class TankerkoenigCollector(Collector):
             meas.update({(m.station_id, m.parameter): m for m in ms})
         if failed == len(points):
             raise SourceError("Tankerkönig: kein Abfragepunkt erreichbar")
-        note = f"{len(stations)} Tankstellen, {len(meas)} Preise, {len(points)} Punkte"
+        note = f"{len(stations)} Tankstellen, {len(meas)} Preise, {len(points)} von {len(allp)} Punkten"
         if failed:
             note += f" ({failed} Punkte fehlgeschlagen)"
         return CollectResult(stations=list(stations.values()), measurements=list(meas.values()), writes_events=False,
-                             complete=not failed, note=note)
+                             complete=False if len(points) < len(allp) else not failed, note=note)
 
 
 COLLECTOR = TankerkoenigCollector

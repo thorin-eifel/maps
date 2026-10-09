@@ -677,18 +677,18 @@ sources:
     lizenz_geprueft: false
     lizenz_hinweis: >-
       Die Dateien s31fg.json und uvi.json tragen keine Lizenzzeile; der DWD stellt seine Open Data nach GeoNutzV bereit. Wortlaut der
-      Bedingungen für diesen Ordner vor dem öffentlichen Start bestätigen. Pollen: Teilregionen 101 und 102; UV: Station Hahn.
+      Bedingungen für diesen Ordner vor dem öffentlichen Start bestätigen. Pollen: zehn Teilregionen der Fläche (siehe params); UV: nur Station Hahn, weitere Stationen (Bonn, Frankfurt/Main, Weinbiet) folgen mit der Oberfläche in R5.
     namensnennung: "Pollenflug- und UV-Gefahrenindex: Deutscher Wetterdienst"
     intervall: 3600
     ratenlimit: nicht veröffentlicht; zwei Abrufe je Stunde
     auth: keine
-    geo_bezug: Teilregionen Rhein/Mosel und Mittelgebirge RLP; UV-Station Hahn (Hunsrück)
+    geo_bezug: zehn Pollen-Teilregionen der Fläche; UV-Station Hahn (Hunsrück)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
     collector: dwd_gesundheit
     params:
-      pollen_regions: [101, 102]
+      pollen_regions: [101, 102, 103, 41, 43, 91, 92, 111, 113, 124]   # RLP, Saarland, Rhein-Westfäl. Tiefland, Mittelgebirge NRW, Hessen (2), Baden-Württemberg (2), Mainfranken
       uv_station: Hahn
 
   - id: tankerkoenig
@@ -703,14 +703,14 @@ sources:
       ist persönlich und kostenlos. Aktiv seit 2026-10-07 (Schlüssel liegt in .env, nie im Code oder in Logs). Nur Deutschland: für Luxemburg gibt es keine
       offenen Preise je Tankstelle (Suche auf data.public.lu am 2026-09-30 ohne Treffer), der Grenzpreisvergleich zeigt deshalb nur die
       deutsche Seite. Straße und Hausnummer werden nicht gespeichert.
-    namensnennung: "Spritpreise: Tankerkönig (creativecommons.tankerkoenig.de), Daten MTS-K, CC BY 4.0"
-    intervall: 900
-    ratenlimit: Dienst verlangt angemessene Abrufzahl; zwei Abrufe je 15 Minuten
+    namensnennung: "Spritpreise: Tankerkönig (www.tankerkoenig.de), Daten MTS-K, CC BY 4.0"
+    intervall: 120
+    ratenlimit: Betreiber begrenzt auf einen Request je Minute (Stand 2026-10-09); der Collector fragt je Lauf einen Punkt, alle 2 Minuten, reihum
     auth: API-Schlüssel (kostenlos, in .env als TANKERKOENIG_API_KEY)
-    geo_bezug: zwei Umkreise von 25 km (Irrel, Trier), Feinfilter auf die Region
+    geo_bezug: Umkreise von 25 km (Gitter über die deutsche Fläche, bei Irrel-Region fünf Punkte), Feinfilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
-    zuletzt_geprüft: "2026-10-07"
+    zuletzt_geprüft: "2026-10-09"
     collector: tankerkoenig
 
   - id: mastodon_themen
