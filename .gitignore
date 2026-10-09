@@ -2,11 +2,11 @@
 .venv/
 __pycache__/
 *.pyc
-data/
+/data/
 *.sqlite*
 .pytest_cache/
 node_modules/
-web/data/
+/web/data/
 web/tiles/*.pmtiles
 tools/bin/
 build/
