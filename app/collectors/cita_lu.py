@@ -89,7 +89,7 @@ def parse_situations(data: bytes, now: datetime, source_id: str = "cita_lu") -> 
         if geom is None:
             stats["no_geometry"] += 1
             continue
-        if not geo.geometry_within_radius(geom):
+        if not geo.geometry_in_region(geom):
             stats["outside"] += 1
             continue
         kind, label, sev = KINDS[rtype]

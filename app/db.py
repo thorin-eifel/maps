@@ -239,7 +239,7 @@ class Storage:
     def upsert_stations(self, stations: Sequence[Station]) -> None:
         with self._tx() as c:
             for s in stations:
-                dist = geo.haversine_km(geo.config.CENTER_LAT, geo.config.CENTER_LON, s.lat, s.lon)
+                dist = geo.distance_to_ref_km(s.lat, s.lon)
                 c.execute(
                     """INSERT INTO stations (source_id, station_id, name, water, km, lat, lon, distance_km, meta)
                        VALUES (?,?,?,?,?,?,?,?,?)

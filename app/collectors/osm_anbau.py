@@ -78,7 +78,7 @@ def parse_elements(data: Any) -> list[dict[str, Any]]:
             continue
         clat = sum(p[1] for p in ring) / len(ring)
         clon = sum(p[0] for p in ring) / len(ring)
-        if not geo.in_bbox(clat, clon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, clat, clon) > config.RADIUS_KM:
+        if not geo.in_region(clat, clon):
             continue
         simp = simplify(ring, TOLERANCE_DEG)
         if len(simp) < 4 or simp[0] != simp[-1]:

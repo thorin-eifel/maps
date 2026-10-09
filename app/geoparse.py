@@ -18,7 +18,7 @@ from functools import lru_cache
 from pathlib import Path
 from typing import Iterable
 
-from . import config, geo
+from . import geo
 
 DATA = Path(__file__).resolve().parent / "data" / "orte.json"
 # Ortsnamen, die zugleich gewöhnliche Wörter oder Eigennamen anderer Art sind; in Fließtext nicht auswerten.
@@ -60,11 +60,11 @@ def _load(path: str = str(DATA)) -> tuple[dict[str, list[dict]], "re.Pattern[str
 
 
 def _dist(o: dict) -> float:
-    return geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, o["lat"], o["lon"])
+    return geo.distance_to_ref_km(o["lat"], o["lon"])
 
 
 def _inside(o: dict) -> bool:
-    return geo.in_bbox(o["lat"], o["lon"]) and _dist(o) <= config.RADIUS_KM
+    return geo.in_region(o["lat"], o["lon"])
 
 
 def _pick(cands: list[dict], hints: Iterable[dict] = ()) -> tuple[dict, float]:

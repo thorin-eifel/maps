@@ -6,7 +6,7 @@ Intervall:  300 s
 Beispiel:   python -m app.collect --once --only nina
 
 Ablauf: Dashboard je Kreis-ARS → eindeutige Meldungs-IDs → Detail + GeoJSON →
-Geometriefilter (Südeifel + 120 km). Hat eine Meldung keine Geometrie, wird sie am Kreissitz
+Geometriefilter (Region). Hat eine Meldung keine Geometrie, wird sie am Kreissitz
 verortet und mit confidence 0.5 gekennzeichnet — lieber unscharf als verschwiegen.
 Meldungen vom Typ „Cancel“ und Testmeldungen werden verworfen.
 """

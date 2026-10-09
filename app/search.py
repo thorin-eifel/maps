@@ -20,7 +20,7 @@ from collections import defaultdict
 from pathlib import Path
 from typing import Any, Iterable
 
-from . import config, geo
+from . import geo
 
 DATA = Path(__file__).resolve().parent / "data" / "orte.json"
 # Typen in Anzeigereihenfolge; der Index ist Teil des Dateiformats (nur anhängen, nie umsortieren)
@@ -125,9 +125,7 @@ class Builder:
 
     def add(self, name: str, typ: str, lat: float, lon: float, ort: str | None = None) -> bool:
         name = clean_name(name)
-        if len(name) < 2 or not re.search(r"[^\W\d_]{2}", name) or typ not in T or not geo.in_bbox(lat, lon):
-            return False
-        if geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if len(name) < 2 or not re.search(r"[^\W\d_]{2}", name) or typ not in T or not geo.in_region(lat, lon):
             return False
         if ort is None and self.places is not None and typ not in ("Stadt", "Ort", "Ortsteil", "Weiler"):
             ort = self.places.nearest(lat, lon)

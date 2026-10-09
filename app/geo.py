@@ -1,21 +1,22 @@
 """Geo-Hilfen: Haversine, Bounding-Box-Vorfilter, Distanz zu Geometrien.
 
-Zweck:    Alles, was außerhalb von Südeifel + 120 km liegt, wird am Rand verworfen
+Zweck:    Alles, was außerhalb der Region (region.yaml) liegt, wird am Rand verworfen
           (Collector-Regel), nicht erst im UI.
-Beispiel: from app.geo import geometry_within_radius
-          geometry_within_radius({"type": "Point", "coordinates": [6.45, 49.85]})
+Beispiel: from app.geo import in_region, geometry_in_region
+          in_region(49.85, 6.45)
+          geometry_in_region({"type": "Point", "coordinates": [6.45, 49.85]})
 
 Hinweis:  Distanz zu Linien/Flächen wird in einer lokalen ebenen Projektion
-          (Äquirektangular um das Zentrum) berechnet. Auf 120 km Skala liegt der
-          Fehler im Bereich weniger Meter — für einen Radiusfilter mehr als genug.
-          Ab Phase 2 (PostGIS) übernimmt ST_DWithin auf Geography.
+          (Äquirektangular um den Bezugspunkt) berechnet. Auf 120 km Skala liegt der
+          Fehler im Bereich weniger Meter. Für Polygon-Regionen prüft geometry_in_region
+          Stützpunkte und alle 2 km einen Punkt auf den Strecken.
 """
 from __future__ import annotations
 
 import math
 from typing import Any, Iterable, Iterator
 
-from . import config
+from . import region as _region
 
 EARTH_RADIUS_KM = 6371.0088
 
@@ -30,7 +31,18 @@ def haversine_km(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
     return 2 * EARTH_RADIUS_KM * math.asin(min(1.0, math.sqrt(a)))
 
 
-def in_bbox(lat: float, lon: float, bbox: tuple[float, float, float, float] = config.BBOX) -> bool:
+def in_region(lat: float, lon: float, margin_km: float = 0.0) -> bool:
+    """Liegt der Punkt in der Region? (Kasten als Vorfilter, dann Kreis oder Polygon; siehe app/region.py)"""
+    return _region.REGION.contains(lat, lon, margin_km)
+
+
+def distance_to_ref_km(lat: float, lon: float) -> float:
+    """Entfernung zum Bezugspunkt der Region (Irrel), nur zur Anzeige."""
+    return _region.REGION.distance_to_ref_km(lat, lon)
+
+
+def in_bbox(lat: float, lon: float, bbox: tuple[float, float, float, float] | None = None) -> bool:
+    bbox = bbox or _region.REGION.bbox
     lat_min, lon_min, lat_max, lon_max = bbox
     return lat_min <= lat <= lat_max and lon_min <= lon <= lon_max
 
@@ -92,9 +104,11 @@ def _iter_parts(geom: dict[str, Any]) -> Iterator[tuple[str, Any]]:
 
 
 def geometry_distance_km(
-    geom: dict[str, Any], lat0: float = config.CENTER_LAT, lon0: float = config.CENTER_LON
+    geom: dict[str, Any], lat0: float | None = None, lon0: float | None = None
 ) -> float:
-    """Kleinster Abstand der Geometrie zum Zentrum in km (0 bei Zentrum innerhalb einer Fläche)."""
+    """Kleinster Abstand der Geometrie zum Bezugspunkt in km (0 bei Bezugspunkt innerhalb einer Fläche)."""
+    lat0 = _region.REGION.ref_lat if lat0 is None else lat0
+    lon0 = _region.REGION.ref_lon if lon0 is None else lon0
     best = math.inf
     for kind, part in _iter_parts(geom):
         if kind == "point":
@@ -146,11 +160,37 @@ def bbox_intersects(a: tuple[float, float, float, float], b: tuple[float, float,
     return not (a[2] < b[0] or a[0] > b[2] or a[3] < b[1] or a[1] > b[3])
 
 
-def geometry_within_radius(geom: dict[str, Any], radius_km: float = config.RADIUS_KM) -> bool:
-    """Vorfilter (Bounding Box) plus Feinfilter (echter Abstand)."""
-    if not bbox_intersects(geometry_bbox(geom), config.BBOX):
+def _densified(coords: list[Coord], step_km: float = 2.0) -> Iterator[Coord]:
+    """Stützpunkte plus Zwischenpunkte im Abstand von höchstens step_km auf jeder Strecke."""
+    for i, (lon, lat) in enumerate(coords):
+        yield lon, lat
+        if i + 1 < len(coords):
+            lon2, lat2 = coords[i + 1]
+            n = int(haversine_km(lat, lon, lat2, lon2) // step_km)
+            for k in range(1, n + 1):
+                t = k / (n + 1)
+                yield lon + (lon2 - lon) * t, lat + (lat2 - lat) * t
+
+
+def geometry_in_region(geom: dict[str, Any]) -> bool:
+    """Berührt die Geometrie die Region? Vorfilter über den Kasten, dann Feinfilter.
+    Kreis: Abstand der Geometrie zum Mittelpunkt höchstens Radius. Polygon: ein Stützpunkt oder ein Punkt auf einer
+    Strecke liegt in der Region, oder die Region liegt innerhalb einer Fläche (Bezugspunkt in der Fläche)."""
+    reg = _region.REGION
+    if not bbox_intersects(geometry_bbox(geom), reg.bbox):
         return False
-    return geometry_distance_km(geom) <= radius_km
+    if reg.mode == "radius":
+        return geometry_distance_km(geom, reg.ref_lat, reg.ref_lon) <= (reg.radius_km or 0.0)
+    for kind, part in _iter_parts(geom):
+        if kind == "point":
+            if reg.contains(part[1], part[0]):
+                return True
+        else:
+            rings = [part] if kind == "line" else part
+            for ring in rings:
+                if any(reg.contains(la, lo) for lo, la in _densified([(c[0], c[1]) for c in ring])):
+                    return True
+    return geometry_distance_km(geom, reg.ref_lat, reg.ref_lon) == 0.0  # Bezugspunkt liegt in einer Fläche
 
 
 def representative_point(geom: dict[str, Any]) -> tuple[float, float]:

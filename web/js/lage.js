@@ -25,8 +25,8 @@ import { createFlow, registerArrow } from './fluss.js';
 import { buildRainLegend, updateLegend } from './legend.js';
 import { INFRA_MEDIEVAL, SACRAL_KINDS, registerInfra, infraFeatures, infraText } from './infra.js';
 
-// Standort CTW Computer-Irrel (Firmensitz, Hauptstraße 10, Irrel): Kartenmitte und Logo. Koordinate vom Betreiber angegeben.
-const CTW_SITE = { lat: 49.84615562322509, lon: 6.456057281843173 };
+// Startansicht und Bezugspunkt für Entfernungen: Irrel (Ortsmitte, Koordinate vom Betreiber angegeben).
+const START_VIEW = { lat: 49.84615562322509, lon: 6.456057281843173 };
 const TOWNS = [
   ['Irrel', 49.850, 6.450, true], ['Bitburg', 49.975, 6.526], ['Trier', 49.750, 6.637], ['Echternach', 49.812, 6.418],
   ['Wasserbillig', 49.714, 6.503], ['Luxemburg', 49.611, 6.130], ['Prüm', 50.208, 6.423], ['Wittlich', 49.985, 6.894],
@@ -224,7 +224,7 @@ async function initMap() {
   map = new MlMap({
     container: 'map',
     style: { version: 8, sources: {}, glyphs: glyphsUrl(), layers: [{ id: 'bg', type: 'background', paint: { 'background-color': c.bg } }] },
-    center: [m.center?.lon ?? CTW_SITE.lon, m.center?.lat ?? CTW_SITE.lat], zoom: 8.0, attributionControl: false, dragRotate: false, pitchWithRotate: false,
+    center: [m.center?.lon ?? START_VIEW.lon, m.center?.lat ?? START_VIEW.lat], zoom: 8.0, attributionControl: false, dragRotate: false, pitchWithRotate: false,
     locale: { 'FullscreenControl.Enter': 'Vollbild', 'FullscreenControl.Exit': 'Vollbild beenden', 'NavigationControl.ZoomIn': 'Vergrößern', 'NavigationControl.ZoomOut': 'Verkleinern' },
     maxBounds: [[m.bbox.lon_min - 0.45, m.bbox.lat_min - 0.28], [m.bbox.lon_max + 0.45, m.bbox.lat_max + 0.28]],
   });
@@ -1597,7 +1597,7 @@ function buildEventTools(panel) {
   // Typ, Umkreis und Sortierung liegen eingeklappt hinter „Filter“; Stufe und Suche bleiben sichtbar
   const more = h('div', { class: 'ev-more', id: 'ev-more', hidden: '' },
     h('label', {}, h('span', {}, 'Typ'), sel('ev-type', 'Nach Typ filtern', typeOpts, 'type')),
-    h('label', {}, h('span', {}, 'Umkreis um CTW'), sel('ev-km', 'Nach Entfernung filtern', [[0, 'gesamt'], [10, 'bis 10 km'], [25, 'bis 25 km'], [50, 'bis 50 km']], 'maxKm', true)),
+    h('label', {}, h('span', {}, 'Umkreis um Irrel'), sel('ev-km', 'Nach Entfernung filtern', [[0, 'gesamt'], [10, 'bis 10 km'], [25, 'bis 25 km'], [50, 'bis 50 km']], 'maxKm', true)),
     h('label', { class: 'ev-wide' }, h('span', {}, 'Sortierung'),
       h('span', { class: 'ev-sortbox' }, sel('ev-sort', 'Sortierung', Object.entries(SORTS).map(([k, v]) => [k, v.label]), 'sort'),
         h('button', { type: 'button', id: 'ev-rev', class: 'ev-btn ev-icon', title: 'Reihenfolge umkehren', 'aria-label': 'Reihenfolge umkehren', 'aria-pressed': 'false', onclick: () => { evView.reverse = !evView.reverse; upd(); } }, '↓'))));

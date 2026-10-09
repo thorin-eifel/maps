@@ -15,7 +15,7 @@ from __future__ import annotations
 import hashlib
 from datetime import timedelta
 
-from .. import config, geo
+from .. import geo
 from ..geoparse import locate_text
 from ..models import Event, Severity, utcnow
 from ..sanitize import clean_text
@@ -29,8 +29,7 @@ GENERIC_TAGS = {"regional", "top news", "national", "international", "sport", "k
 
 
 def _in_radius(place) -> bool:
-    return place is not None and geo.in_bbox(place.lat, place.lon) and \
-        geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, place.lat, place.lon) <= config.RADIUS_KM
+    return place is not None and geo.in_region(place.lat, place.lon)
 
 
 def parse_feed(data: bytes, now, source_id: str = "brf") -> tuple[list[Event], dict[str, int]]:

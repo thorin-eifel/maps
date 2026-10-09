@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# OSINT by CTW — Upload auf den IONOS-Webspace per SFTP
+# Was ist los bei uns? — Upload auf den IONOS-Webspace per SFTP
 #
 # Zweck:     Lädt entweder nur die Datendateien (alle paar Minuten) oder die ganze Seite (bei Änderungen).
 # Aufruf:    deploy/publish.sh --data          nur web/data/*.json und radar.png

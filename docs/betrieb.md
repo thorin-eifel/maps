@@ -1,8 +1,10 @@
 # Was ist los bei uns?
 
-Die aktuelle Lage rund um unsere Heimat. Open Source Information Dashboard von CTW Computer (Arbeitstitel im Code und in den Ordnern: OSINT by CTW).
+> **Hinweis:** Diese Betriebsanleitung beschreibt den Stand vor dem Umbau auf Rheinland-Pfalz plus 80 km. Die Fläche kommt jetzt aus `region.yaml` (`app/region.py`); Angaben zu "120 km", Kartengrößen und Kacheln werden in R2 bis R5 angepasst. Der aktuelle Stand steht in der `README.md`. Launchd-Labels und Bundle-Kennung heißen noch `de.ctw.osint`: Umbenennen würde das Datenverzeichnis der Desktop-App verschieben und ist deshalb nicht erfolgt.
 
-Regionales Lagebild aus offenen Daten für die Südeifel und ihre Nachbarregionen (120 km um Irrel, mehr wird es nicht): Warnungen, Verkehr, Pegel, Wetter. Kein Tracking, keine US-Cloud, kein Überwachungswerkzeug: gespeichert werden Orte, Zeiten und Zahlen, keine Personen.
+Die aktuelle Lage rund um unsere Heimat. Privates Open-Source-Projekt (bis Oktober 2026 ein Schaufenster der CTW Computer-Irrel GmbH).
+
+Regionales Lagebild aus offenen Daten für die Südeifel und ihre Nachbarregionen (zurzeit 120 km um Irrel; Ziel ist Rheinland-Pfalz plus 80 km, siehe `docs/rlp/plan.md`): Warnungen, Verkehr, Pegel, Wetter. Kein Tracking, keine US-Cloud, kein Überwachungswerkzeug: gespeichert werden Orte, Zeiten und Zahlen, keine Personen.
 
 Stand: **Phase 1 (MVP)**. Kein amtliches Warnsystem, kein Ersatz für NINA oder die Leitstelle.
 
@@ -11,7 +13,7 @@ Stand: **Phase 1 (MVP)**. Kein amtliches Warnsystem, kein Ersatz für NINA oder 
 Der Webspace führt nur HTML, CSS und JavaScript aus, kein Python. Deshalb zwei Teile:
 
 ```
-Sammelstelle (ein Rechner von CTW, Python, Cron alle 5 Min.)          IONOS-Webspace (statisch)
+Sammelstelle (ein Rechner des Betreibers, Python, Cron alle 5 Min.)          IONOS-Webspace (statisch)
   Quellen → Collector → Geo-Filter → SQLite → Export → JSON-Dateien ──SFTP──▶ web/data/*.json
                                                                             web/ (HTML, CSS, JS, MapLibre)
                                                                                   ▲
@@ -19,7 +21,7 @@ Sammelstelle (ein Rechner von CTW, Python, Cron alle 5 Min.)          IONOS-Webs
                                                                      Zeitfenster und Alter selbst
 ```
 
-Die Sammelstelle braucht Python 3.11+, Internet und `lftp`. Sie kann jeder Rechner sein, der dauerhaft läuft: ein Server im CTW-Rack, ein Mini-PC, ein Raspberry Pi. Fällt sie aus, bleibt die Seite stehen und sagt es: Das Frontend rechnet Alter und Zustand gegen die Uhr des Besuchers und zeigt „Datenstand veraltet“, sobald der Export älter als 20 Minuten ist.
+Die Sammelstelle braucht Python 3.11+, Internet und `lftp`. Sie kann jeder Rechner sein, der dauerhaft läuft: ein Server, ein Mini-PC, ein Raspberry Pi. Fällt sie aus, bleibt die Seite stehen und sagt es: Das Frontend rechnet Alter und Zustand gegen die Uhr des Besuchers und zeigt „Datenstand veraltet“, sobald der Export älter als 20 Minuten ist.
 
 ## Schnellstart
 
@@ -130,7 +132,7 @@ Abhängigkeiten sind gepinnt (`requirements.txt`), vor Updates `pip-audit -r req
 
 ## Sammelstelle auf dem Mac (launchd)
 
-Stand: läuft auf dem Rechner von CTW, Python 3.11 in `.venv`, Zyklus alle 5 Minuten.
+Stand: läuft auf dem Mac des Betreibers, Python 3.11 in `.venv`, Zyklus alle 5 Minuten.
 
 ```
 launchctl print gui/$(id -u)/de.ctw.osint-cycle | grep -E 'state|last exit'

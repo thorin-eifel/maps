@@ -39,9 +39,9 @@ def pick_stations(sources: list[dict[str, Any]], now: datetime, limit: int) -> l
             continue
         if now - last > RECENT:
             continue
-        d = geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, float(lat), float(lon))
-        if d > config.RADIUS_KM:
+        if not geo.in_region(float(lat), float(lon)):
             continue
+        d = geo.distance_to_ref_km(float(lat), float(lon))
         cur = best.get(str(sid))
         if cur is None or d < cur["distance_km"]:
             best[str(sid)] = {"id": str(sid), "name": str(s.get("station_name") or sid), "lat": float(lat), "lon": float(lon),
@@ -59,8 +59,8 @@ class DwdStationenCollector(Collector):
                     return row["payload"]["stations"]
             except ValueError:
                 pass
-        data = await self.fetch_json(f"{base}/sources", params={"lat": config.CENTER_LAT, "lon": config.CENTER_LON,
-                                                               "max_dist": int(config.RADIUS_KM * 1000)})
+        data = await self.fetch_json(f"{base}/sources", params={"lat": config.QUERY_LAT, "lon": config.QUERY_LON,
+                                                               "max_dist": int(config.QUERY_RADIUS_KM * 1000)})
         if not isinstance(data, dict) or not isinstance(data.get("sources"), list):
             raise SourceError("Bright Sky /sources: unerwartete Antwort")
         stations = pick_stations(data["sources"], now, limit)

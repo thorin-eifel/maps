@@ -565,7 +565,7 @@ def test_bison_fute_parse_real_sample_filters_to_radius():
     assert all(e.type == "traffic" and e.region_tag == "FR" and e.attrs["land"] == "FR" and e.source_id == "bison_fute" for e in evs)
     assert {e.attrs["kind"] for e in evs} == {"baustelle", "sperrung"}
     assert any("Vollsperrung" in e.title and e.severity == "warning" for e in evs)
-    assert all(geo.geometry_within_radius(e.geometry) for e in evs)
+    assert all(geo.geometry_in_region(e.geometry) for e in evs)
 
 
 def test_bison_fute_rejects_doctype_and_garbage():

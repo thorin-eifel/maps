@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from typing import Any
 
 from . import __version__, config, geo
+from .region import REGION
 from .db import Storage
 from .models import SEVERITY_ORDER, iso, utcnow
 from .registry import Registry, SourceEntry
@@ -74,8 +75,9 @@ def statuses(storage: Storage, registry: Registry) -> dict[str, dict[str, Any]]:
 def meta_payload(storage: Storage) -> dict[str, Any]:
     return {
         "name": "Was ist los bei uns?", "version": __version__,
-        "center": {"lat": config.CENTER_LAT, "lon": config.CENTER_LON, "name": "Irrel"},
-        "radius_km": config.RADIUS_KM,
+        "center": {"lat": config.CENTER_LAT, "lon": config.CENTER_LON, "name": REGION.ref_name},
+        "radius_km": REGION.radius_km if REGION.radius_km is not None else REGION.query_radius_km,  # Polygon: umschließender Kreis
+        "region": REGION.meta(),
         "bbox": {"lat_min": config.BBOX[0], "lon_min": config.BBOX[1], "lat_max": config.BBOX[2], "lon_max": config.BBOX[3]},
         "disclaimer": DISCLAIMER, "data_version": storage.data_version(), "generated_at": iso(utcnow()),
     }
@@ -420,7 +422,7 @@ def luxembourg_fuel(storage: Storage, registry: Registry) -> dict[str, Any]:
     mx = _cache_block(storage, "lu_fuel_max") or {}
     stations = []
     for it in (_cache_block(storage, "lu_stations") or {}).get("items", []):
-        d = geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, it["lat"], it["lon"])
+        d = geo.distance_to_ref_km(it["lat"], it["lon"])
         stations.append({"name": it["name"], "lat": it["lat"], "lon": it["lon"], "distance_km": round(d, 1)})
     return {"max_prices": mx.get("fuels", {}), "max_source": sts.get("statec_sprit"), "stations": stations,
             "stations_source": sts.get("osm_tankstellen_lu"), "kind": "max_price"}

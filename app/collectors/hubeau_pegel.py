@@ -55,7 +55,7 @@ def parse_stations(data: Any) -> dict[str, Station]:
             continue
         if r.get("en_service") is False:
             continue
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         ab = ABROAD.match(name)
         if ab:

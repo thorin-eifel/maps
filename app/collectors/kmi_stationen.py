@@ -16,7 +16,7 @@ import json
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from .. import config, geo
+from .. import geo
 from ..models import Measurement, Station, utcnow
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
@@ -44,7 +44,7 @@ def pick_stations(data: Any) -> list[dict[str, Any]]:
             continue
         if p.get("date_end") is not None:
             continue
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         out[code] = {"code": code, "name": str(p.get("name", code)), "lat": lat, "lon": lon, "height": p.get("altitude")}
     return sorted(out.values(), key=lambda s: s["code"])

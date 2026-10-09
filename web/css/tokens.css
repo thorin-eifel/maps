@@ -1,4 +1,4 @@
-/* Auszug aus CTW Design System v5.1 (Projektdokument ctw-design-system-v5.1.html): nur Tokens.
+/* Design-Tokens des Projekts (Herkunft: Design System v5.1, Projektdokument ctw-design-system-v5.1.html): nur Tokens.
    Hell ist Grundeinstellung; Dunkel nur über html[data-ansicht="dunkel"] (bewusst kein prefers-color-scheme). */
 :root {
   color-scheme: light;

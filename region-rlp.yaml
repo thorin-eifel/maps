@@ -1,0 +1,7 @@
+# Zielregion: Rheinland-Pfalz plus 80 km (ADR 0001). Das Polygon baut tools/build_region.py aus BKG VG250.
+# Noch nicht aktiv: OSINT_REGION=region-rlp.yaml setzt sie für einen Lauf.
+name: Rheinland-Pfalz plus 80 km
+mode: polygon
+reference: { name: Irrel, lat: 49.84615562322509, lon: 6.456057281843173 }
+polygon_file: app/data/region/rlp_plus80.json
+attribution: "Verwaltungsgrenzen: © BKG (2026) dl-de/by-2-0, Datenquellen: https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf"

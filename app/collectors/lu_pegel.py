@@ -22,7 +22,7 @@ from datetime import datetime
 from typing import Any
 from zoneinfo import ZoneInfo
 
-from .. import config, geo
+from .. import geo
 from ..models import Measurement, Station
 from .base import Collector, CollectResult, SourceError
 
@@ -89,7 +89,7 @@ def parse(csv_text: str, stations_geo: Any) -> tuple[list[Station], list[Measure
             stats["no_coords"] += 1
             continue
         name, lat, lon = hit
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             stats["outside"] += 1
             continue
         values = []

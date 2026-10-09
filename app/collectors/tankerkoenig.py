@@ -43,7 +43,7 @@ def parse_list(data: Any, now) -> tuple[list[Station], list[Measurement]]:
             sid, lat, lon = str(s["id"]), float(s["lat"]), float(s["lng"])
         except (KeyError, TypeError, ValueError):
             continue
-        if not s.get("isOpen") or not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not s.get("isOpen") or not geo.in_region(lat, lon):
             continue
         got = []
         for f in FUELS:

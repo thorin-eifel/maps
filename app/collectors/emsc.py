@@ -6,7 +6,7 @@ Lizenz:     CC BY 4.0 (laut Angabe auf der Dienstseite), Namensnennung EMSC
 Intervall:  900 s
 Beispiel:   python -m app.collect --once --only emsc
 
-Abfrage der letzten 7 Tage im Bounding Box, Feinfilter auf 120 km am Rand. Die Eifel und der Hunsrück haben viele
+Abfrage der letzten 7 Tage im Bounding Box, Feinfilter auf die Region am Rand. Die Eifel und der Hunsrück haben viele
 Kleinstbeben (Magnitude unter 2), die niemand spürt: Sie stehen als Info, ab Magnitude 3,0 als Hinweis, ab 4,0 als Warnung.
 Die Orte sind Herdkoordinaten laut Katalog, keine Schadensmeldungen. Ein Beben bleibt 24 Stunden im Fenster „jetzt“.
 """
@@ -53,7 +53,7 @@ class EmscCollector(Collector):
             except (KeyError, TypeError, ValueError):
                 continue
             t = _dt(p.get("time"))
-            if t is None or not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if t is None or not geo.in_region(lat, lon):
                 continue
             if p.get("evtype") not in (None, "ke", "se"):  # ke = bekanntes Erdbeben; Sprengungen und Sonstiges nicht
                 continue

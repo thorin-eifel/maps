@@ -72,9 +72,9 @@ class MeteoLuxCollector(Collector):
         obs = await self.fetch_json(f"{base}/hvd/observations")
         stations = await self.fetch_json(f"{base}/hvd/stations")
         station, measurements = parse_observations(obs, stations)
-        if not geo.in_bbox(station.lat, station.lon) or not geo.geometry_within_radius(
+        if not geo.in_bbox(station.lat, station.lon) or not geo.geometry_in_region(
                 {"type": "Point", "coordinates": [station.lon, station.lat]}):
-            return CollectResult(note="Station liegt außerhalb des Radius", writes_events=False)
+            return CollectResult(note="Station liegt außerhalb der Region", writes_events=False)
         return CollectResult(stations=[station], measurements=measurements, writes_events=False)
 
 

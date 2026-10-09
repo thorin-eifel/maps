@@ -16,7 +16,7 @@ import hashlib
 import re
 from datetime import timedelta
 
-from .. import config, geo
+from .. import geo
 from ..geoparse import locate_dateline
 from ..models import Event, Severity, utcnow
 from ..sanitize import clean_text
@@ -50,7 +50,7 @@ def parse_feed(data: bytes, now, kind: str, feed_name: str) -> tuple[list[Event]
         if place is None:
             stats["no_place"] += 1
             continue
-        if not geo.in_bbox(place.lat, place.lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, place.lat, place.lon) > config.RADIUS_KM:
+        if not geo.in_region(place.lat, place.lon):
             stats["outside"] += 1
             continue
         _, sev = classify(title)

@@ -6,7 +6,7 @@ Lizenz:     siehe sources.yaml (nach Kenntnisstand Datenlizenz Deutschland Namen
 Intervall:  1800 s (Stundenmittelwerte, der Dienst aktualisiert stündlich)
 Beispiel:   python -m app.collect --once --only bfs_odl
 
-Ein Abruf mit Bounding Box (Achsenfolge lat,lon), Feinfilter auf 120 km am Rand. Jede Sonde ist eine Station, der
+Ein Abruf mit Bounding Box (Achsenfolge lat,lon), Feinfilter auf die Region am Rand. Jede Sonde ist eine Station, der
 Stundenwert (µSv/h, Brutto) eine Messreihe `odl`. Die BfS-Sonden decken Deutschland ab; Luxemburg und Frankreich
 (Cattenom) fehlen in diesem Dienst. Ereignisse entstehen nur über eigene Orientierungsschwellen, siehe unten.
 Schwellen (eigene Orientierung, KEIN amtlicher Grenzwert): ab 0,3 µSv/h Hinweis, ab 1,0 µSv/h Warnung. Die natürliche
@@ -60,7 +60,7 @@ class BfsOdlCollector(Collector):
             end = _dt(p.get("end_measure"))
             if end is None or now - end > MAX_AGE or p.get("site_status") != 1:
                 continue
-            if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if not geo.in_region(lat, lon):
                 continue
             sid = str(p.get("id") or p.get("kenn"))
             name = clean_text(str(p.get("name") or sid), 80)

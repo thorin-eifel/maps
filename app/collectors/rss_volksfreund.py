@@ -16,7 +16,7 @@ from __future__ import annotations
 import hashlib
 from datetime import timedelta
 
-from .. import config, geo
+from .. import geo
 from ..geoparse import locate_text
 from ..models import Event, Severity, utcnow
 from ..sanitize import clean_text
@@ -41,8 +41,7 @@ def parse_feed(data: bytes, now, source_id: str = "volksfreund") -> tuple[list[E
             stats["person"] += 1
             continue
         place = locate_text(item.title)
-        if place is None or not geo.in_bbox(place.lat, place.lon) or \
-                geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, place.lat, place.lon) > config.RADIUS_KM:
+        if place is None or not geo.in_region(place.lat, place.lon):
             stats["no_place"] += 1
             continue
         sev: Severity = "notice" if NOTICE.search(item.title) else "info"

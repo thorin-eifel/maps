@@ -5,7 +5,7 @@ Betreiber:  EUMETSAT (europäische Wetter-Satellitenorganisation, von den Mitgli
 Lizenz:     siehe sources.yaml; Nutzungsbedingungen von EUMETView/MTG-Daten sind NICHT abschließend geprüft
 Intervall:  300 s
 Beispiel:   python -m app.collect --once --only eumetsat_li
-Warum nicht Blitzortung/LightningMaps: deren Seite untersagt die kommerzielle Nutzung der Blitzdaten (CTW ist eine GmbH).
+Warum nicht Blitzortung/LightningMaps: deren Seite untersagt die kommerzielle Nutzung der Blitzdaten (ursprünglich Firmenprojekt der CTW GmbH; seit Oktober 2026 privat, die Bewertung ist nicht neu geprüft).
 
 Vorgehen:   Die letzten 9 Zeitschritte (45 Minuten) werden als transparente Bilder geholt. Jeder Bildpunkt mit Blitzen wird nach
             Alter eingefärbt (wie bei LightningMaps: gelb = neu, orange, rot, dunkelrot = älter), zu einem Bild zusammengesetzt und

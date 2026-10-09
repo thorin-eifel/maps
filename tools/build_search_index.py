@@ -147,7 +147,7 @@ def assemble(raw: list[dict]) -> dict:
     waters: dict[tuple[str, str], list[tuple[float, float]]] = defaultdict(list)
     for o in raw:
         lat, lon = o["lat"], o["lon"]
-        if geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         if o["l"] == "roads":
             if o["k"] not in ROAD_KINDS:

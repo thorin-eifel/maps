@@ -1,4 +1,4 @@
-/* OSINT by CTW — Oberfläche. Nüchtern, ruhig, Admin-Tool-Charakter. Tokens: css/tokens.css */
+/* Was ist los bei uns? — Oberfläche. Nüchtern, ruhig, Admin-Tool-Charakter. Tokens: css/tokens.css */
 *, *::before, *::after { box-sizing: border-box; }
 html { color-scheme: light; }
 /* Große Bildschirme: Schrift, Rahmenbreite und Kartenhöhe wachsen mit (alles in rem), sonst bleibt eine schmale Spalte in der Mitte */
@@ -352,7 +352,7 @@ th[aria-sort="descending"] .th-sort::after { content: " ▼"; font-size: .8em; }
 #panel-events thead th { padding-top: 4px; padding-bottom: 4px; }
 
 /* ==========================================================================
-   Angleichung an das CTW Design System v5.1 (Liquid Glass)
+   Oberflächenstil (Liquid Glass), Tokens aus css/tokens.css
    Steht am Ende und gewinnt bei gleicher Spezifität. Regeln: Glas aus Tokens, Kante oben hell, Schatten unten, Pillen statt Kästen,
    leichte Überschriften, Haarlinien, ein fester Abstand (--gutter am Rand, --float-gap über der Karte). Die Kartenseite bleibt randlos
    (Grundsatzentscheidung oben); nur was darüber schwebt, folgt dem Glas.
@@ -493,7 +493,7 @@ footer { background: var(--surface-soft); border-top: 1px solid var(--glass-edge
 /* Regentropfen-Animation: Canvas über der Karte, unter den Bedienelementen, nie klickbar */
 .ripples { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 
-/* CTW-Logo links im Kopf: Bild plus zweizeiliger Titel, hell/dunkel wie die Marke auf der Karte */
+/* Kopf links: zweizeiliger Titel (Name und Unterzeile) */
 .brand { flex-direction: row; align-items: center; gap: var(--space-3); }
 .brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .brand-logo { height: 34px; width: auto; flex: none; display: block; }

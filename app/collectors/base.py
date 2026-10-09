@@ -149,7 +149,7 @@ class Collector(ABC):
     @staticmethod
     def keep(geometry: dict[str, Any]) -> bool:
         try:
-            return geo.geometry_within_radius(geometry)
+            return geo.geometry_in_region(geometry)
         except (ValueError, KeyError, TypeError, IndexError):
             return False
 

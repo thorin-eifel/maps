@@ -1,6 +1,6 @@
 """Statischer Export: schreibt die JSON-Dateien, die das Frontend auf dem Webspace liest.
 
-Zweck:      Der Webspace (IONOS) führt kein Python aus. Der Collector läuft auf einem Rechner von CTW,
+Zweck:      Der Webspace (IONOS) führt kein Python aus. Der Collector läuft auf einem Rechner des Betreibers,
             dieser Export macht aus der Datenbank kleine JSON-Dateien, ein Upload (deploy/publish.sh)
             bringt sie auf den Webspace.
 Parameter:  --out PFAD   Zielordner (Standard web/data)

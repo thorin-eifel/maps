@@ -6,7 +6,7 @@ Intervall:  15 s (Live-Schleife, siehe app/live.py; ein Abruf je Durchlauf, nie 
 Beispiel:   python -m app.collect --once --only adsblol
 
 Warum nicht OpenSky: Die OpenSky-Bedingungen verlangen für kommerzielle Stellen, auch bei
-interner Nutzung, eine Lizenz. CTW ist eine GmbH, das Lagebild ein Schaufenster. Ohne Lizenz kein Collector.
+interner Nutzung, eine Lizenz. Das Lagebild war ursprünglich ein Firmen-Schaufenster (CTW GmbH), seit Oktober 2026 ist es ein privates Projekt; die Prüfung wird bei Gelegenheit neu bewertet. Ohne Lizenz kein Collector.
 
 Datenschutz (Projektanweisung 2 und 7): Ereignisse statt Personen. Flugzeugkennungen lassen sich
 Haltern zuordnen. Deshalb werden Hex-Code, Rufzeichen, Kennzeichen und Flugzeugtyp nie gespeichert.

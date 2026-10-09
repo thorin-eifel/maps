@@ -6,32 +6,11 @@ Beispiel:   OSINT_DB_PATH=./data/osint.sqlite python -m app.collect --once
 """
 from __future__ import annotations
 
-import math
 import os
 from dataclasses import dataclass
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-# Räumlicher Zuschnitt (Projektanweisung Abschnitt 1)
-# Mittelpunkt des Radius: Firmensitz CTW in Irrel (Wert vom Betreiber vorgegeben), vorher Ortsmitte 49.850 / 6.450.
-# Das Lagebild gilt der Region, nicht dem Ort: 120 km, mehr wird es nicht (Entscheidung des Betreibers).
-# Die Desktop-App setzt den Mittelpunkt bei der Ersteinrichtung über OSINT_CENTER_LAT/-LON (Radius bleibt 120 km).
-CENTER_LAT = float(os.environ.get("OSINT_CENTER_LAT", 49.84615562322509))
-CENTER_LON = float(os.environ.get("OSINT_CENTER_LON", 6.456057281843173))
-RADIUS_KM = 120.0
-
-
-def _bbox(lat: float, lon: float, km: float) -> tuple[float, float, float, float]:
-    """Umschließender Kasten (lat_min, lon_min, lat_max, lon_max) um den Kreis, nach außen auf 0,01° gerundet."""
-    dlat = km / 111.195
-    dlon = km / (111.195 * math.cos(math.radians(lat)))
-    return (math.floor((lat - dlat) * 100) / 100, math.floor((lon - dlon) * 100) / 100,
-            math.ceil((lat + dlat) * 100) / 100, math.ceil((lon + dlon) * 100) / 100)
-
-
-# Grober Vorfilter; der Feinfilter ist die Distanzberechnung in app.geo
-BBOX = _bbox(CENTER_LAT, CENTER_LON, RADIUS_KM)  # (lat_min, lon_min, lat_max, lon_max)
 
 def load_dotenv(path: Path | None = None) -> int:
     """Liest KEY=VALUE-Zeilen aus .env in die Umgebung. Bereits gesetzte Variablen gewinnen (Shell schlägt Datei).
@@ -59,6 +38,18 @@ def load_dotenv(path: Path | None = None) -> int:
 if not os.environ.get("OSINT_NO_DOTENV"):
     load_dotenv()
 
+# Räumlicher Zuschnitt kommt aus region.yaml (app/region.py), nicht mehr aus Konstanten. Erst nach .env laden,
+# damit OSINT_REGION und OSINT_CENTER_* aus der Datei wirken.
+# CENTER_* ist der Bezugspunkt für Entfernungsangaben (Irrel), BBOX der Kasten der Region (grober Vorfilter,
+# Reihenfolge lat_min, lon_min, lat_max, lon_max). QUERY_* ist ein Kreis, der die Region umschließt, für Quellen,
+# die nur "Mittelpunkt plus Radius" können. Ob ein Punkt wirklich in der Region liegt, entscheidet geo.in_region().
+from .region import REGION  # noqa: E402
+
+CENTER_LAT = REGION.ref_lat
+CENTER_LON = REGION.ref_lon
+BBOX = REGION.bbox
+QUERY_LAT, QUERY_LON, QUERY_RADIUS_KM = REGION.query_lat, REGION.query_lon, REGION.query_radius_km
+
 CONTACT = os.environ.get("OSINT_CONTACT", "kontakt@example.invalid")
 
 
@@ -81,7 +72,7 @@ class Settings:
             db_path=Path(os.environ.get("OSINT_DB_PATH", BASE_DIR / "data" / "osint.sqlite")),
             sources_path=Path(os.environ.get("OSINT_SOURCES", BASE_DIR / "sources.yaml")),
             web_dir=Path(os.environ.get("OSINT_WEB_DIR", BASE_DIR / "web")),
-            user_agent=f"OSINT-by-CTW/1.0 (+{contact})",
+            user_agent=f"WasIstLosBeiUns/1.0 (+{contact})",
             http_timeout_s=float(os.environ.get("OSINT_HTTP_TIMEOUT", "20")),
             http_max_attempts=int(os.environ.get("OSINT_HTTP_ATTEMPTS", "3")),
             breaker_threshold=int(os.environ.get("OSINT_BREAKER_THRESHOLD", "5")),

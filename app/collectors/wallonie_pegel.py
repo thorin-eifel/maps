@@ -65,7 +65,7 @@ def pick_stations(data: Any) -> dict[str, Station]:
             lat, lon = float(row[i_lat]), float(row[i_lon])
         except (TypeError, ValueError, IndexError):
             continue
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         river = clean_text(str(row[i_river]), 80) if i_river is not None and row[i_river] else None
         out[no] = Station(source_id="wallonie_pegel", station_id=no, name=_title(clean_text(str(row[i_name]), 100) or no),

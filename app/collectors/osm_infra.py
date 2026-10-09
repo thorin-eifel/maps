@@ -119,7 +119,7 @@ def parse_elements(data: Any) -> list[dict[str, Any]]:
             lat, lon = float(c["lat"]), float(c["lon"])
         except (KeyError, TypeError, ValueError):
             continue
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         oid = f"{el.get('type', 'node')}/{el.get('id')}"
         item: dict[str, Any] = {"id": oid, "kind": kind, "name": name, "lat": round(lat, 5), "lon": round(lon, 5)}

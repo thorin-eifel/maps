@@ -65,7 +65,7 @@ class IrcelineCollector(Collector):
                     continue
                 if value <= MISSING or value < 0:
                     continue
-                if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+                if not geo.in_region(lat, lon):
                     continue
                 city, num = _city(str(p.get("ab_name", code)))
                 stations.setdefault(code, {"name": city, "num": num, "lat": lat, "lon": lon, "network": p.get("network")})
