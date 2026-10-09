@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Höhenmodell-Kacheln für das Relief holen (Terrarium-Kodierung) und lokal ablegen.
 
-Zweck:      Lädt die Terrarium-Höhenkacheln (Mapzen Terrain Tiles auf AWS Open Data) für Irrel + Umgebung
+Zweck:      Lädt die Terrarium-Höhenkacheln (Mapzen Terrain Tiles auf AWS Open Data) für die Region (region.yaml, bei OSINT_REGION=region-rlp.yaml Rheinland-Pfalz plus 80 km)
             einmalig nach web/tiles/dem/{z}/{x}/{y}.png. Die Karte zeigt daraus Schummerung, Höhenfärbung
             und Höhenlinien; beim Betrachten wird kein Drittserver angefragt.
 Quelle:     https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png
@@ -18,14 +18,20 @@ from __future__ import annotations
 import argparse
 import math
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import httpx
 
-BBOX = {"lat_min": 48.50, "lat_max": 51.20, "lon_min": 4.40, "lon_max": 8.50}  # 120-km-Radius plus Rand, deckt maxBounds der Karte ab
-# Grobe Zoomstufen bis 10 großzügiger, damit am Kartenrand bei kleinem Maßstab keine Lücken entstehen
-BBOX_WIDE = {"lat_min": 47.6, "lat_max": 52.0, "lon_min": 3.0, "lon_max": 10.0}
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from app import config  # noqa: E402  (Gebiet aus region.yaml bzw. OSINT_REGION)
+
+_S, _W, _N, _E = config.BBOX
+# Gebiet der Region plus Rand, deckt maxBounds der Karte ab
+BBOX = {"lat_min": _S - 0.3, "lat_max": _N + 0.3, "lon_min": _W - 0.4, "lon_max": _E + 0.4}
+# Grobe Zoomstufen bis 9 großzügiger, damit am Kartenrand bei kleinem Maßstab keine Lücken entstehen
+BBOX_WIDE = {"lat_min": _S - 1.0, "lat_max": _N + 1.0, "lon_min": _W - 1.5, "lon_max": _E + 1.5}
 WIDE_MAX_ZOOM = 9
 URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
 UA = "WasIstLosBeiUns/1.0 (DEM tiles, one-off fetch)"
@@ -49,8 +55,8 @@ def tiles(min_zoom: int, max_zoom: int):
                 yield z, x, y
 
 
-def fetch(client: httpx.Client, z: int, x: int, y: int) -> bool:
-    target = DEST / str(z) / str(x) / f"{y}.png"
+def fetch(client: httpx.Client, z: int, x: int, y: int, dest: Path = DEST) -> bool:
+    target = dest / str(z) / str(x) / f"{y}.png"
     if target.exists() and target.stat().st_size > 100:
         return True
     for attempt in range(3):
@@ -72,23 +78,32 @@ def main() -> int:
     ap.add_argument("--min-zoom", type=int, default=6)
     ap.add_argument("--max-zoom", type=int, default=12)
     ap.add_argument("--check", action="store_true")
+    ap.add_argument("--dest", type=Path, default=DEST, help="Zielordner (Standard web/tiles/dem)")
+    ap.add_argument("--budget-s", type=float, default=0, help="nach dieser Zeit aufhören (Exit 2 = Befehl wiederholen), 0 = unbegrenzt")
     args = ap.parse_args()
-    todo = list(tiles(args.min_zoom, args.max_zoom))
+    dest = args.dest
+    todo = [t for t in tiles(args.min_zoom, args.max_zoom) if not (dest / str(t[0]) / str(t[1]) / f"{t[2]}.png").exists()] if args.budget_s else list(tiles(args.min_zoom, args.max_zoom))
     print(f"{len(todo)} Kacheln (Zoom {args.min_zoom} bis {args.max_zoom})")
     if args.check:
         return 0
     missing = 0
+    start = time.monotonic()
+    if args.budget_s:
+        todo = todo[: int(args.budget_s * 25)]   # grob 25 Kacheln/s; der Rest folgt im nächsten Lauf
     with httpx.Client(headers={"User-Agent": UA}, timeout=30, follow_redirects=False) as client, ThreadPoolExecutor(4) as pool:
-        for i, ok in enumerate(pool.map(lambda t: fetch(client, *t), todo), 1):
+        for i, ok in enumerate(pool.map(lambda t: fetch(client, *t, dest=dest), todo), 1):
             missing += not ok
             if i % 100 == 0:
                 print(f"  {i}/{len(todo)}", flush=True)
-    size = sum(p.stat().st_size for p in DEST.rglob("*.png")) / 1e6
-    (DEST / "README.txt").write_text(
+    size = sum(p.stat().st_size for p in dest.rglob("*.png")) / 1e6
+    dest.mkdir(parents=True, exist_ok=True)
+    (dest / "README.txt").write_text(
         "Höhenkacheln (Terrarium-Kodierung), Quelle: Mapzen Terrain Tiles auf AWS Open Data\n"
         "https://registry.opendata.aws/terrain-tiles/  ·  Datenbasis u. a. SRTM, EU-DEM\n"
         f"Erzeugt mit tools/build_dem.py, Zoom {args.min_zoom} bis {args.max_zoom}, {size:.0f} MB.\n", encoding="utf-8")
     print(f"fertig: {size:.0f} MB, fehlend: {missing}")
+    if args.budget_s and any(not (dest / str(z) / str(x) / f"{y}.png").exists() for z, x, y in tiles(args.min_zoom, args.max_zoom)):
+        return 2
     return 1 if missing else 0
 
 
