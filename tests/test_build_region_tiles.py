@@ -81,3 +81,12 @@ def test_merge_dedupes_and_keeps_order(tmp_path):
 def test_merge_without_chunks_fails(tmp_path):
     with pytest.raises(ValueError):
         b.merge([], tmp_path / "x.pmtiles")
+
+
+def test_merge_header_center_zoom_within_range(tmp_path):
+    from pmtiles.reader import MmapSource, Reader
+    _write(tmp_path / "a.pmtiles", {0: b"A"})
+    b.merge([tmp_path / "a.pmtiles"], tmp_path / "m.pmtiles")
+    with open(tmp_path / "m.pmtiles", "rb") as fh:
+        h = Reader(MmapSource(fh)).header()
+    assert h["min_zoom"] <= h["center_zoom"] <= h["max_zoom"]

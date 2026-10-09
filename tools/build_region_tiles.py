@@ -185,12 +185,15 @@ def merge(chunk_files: list[Path], out: Path) -> dict[str, Any]:
         header, meta = rd.header(), rd.metadata()
     lon0 = lat0 = 1e9
     lon1 = lat1 = -1e9
+    zmin, zmax = 99, -1
     for f in chunk_files:
         with open(f, "rb") as fh:
             h = Reader(MmapSource(fh)).header()
         lon0, lat0 = min(lon0, h["min_lon_e7"]), min(lat0, h["min_lat_e7"])
         lon1, lat1 = max(lon1, h["max_lon_e7"]), max(lat1, h["max_lat_e7"])
-    header.update(min_lon_e7=int(lon0), min_lat_e7=int(lat0), max_lon_e7=int(lon1), max_lat_e7=int(lat1),
+        zmin, zmax = min(zmin, h["min_zoom"]), max(zmax, h["max_zoom"])
+    header.update(min_zoom=zmin, max_zoom=zmax, center_zoom=min(max(header.get("center_zoom", zmin), zmin), zmax),
+                  min_lon_e7=int(lon0), min_lat_e7=int(lat0), max_lon_e7=int(lon1), max_lat_e7=int(lat1),
                   center_lon_e7=int((lon0 + lon1) / 2), center_lat_e7=int((lat0 + lat1) / 2))
     n_in = n_out = 0
     last = -1
