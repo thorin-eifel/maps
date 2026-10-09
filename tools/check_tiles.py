@@ -39,9 +39,38 @@ def layers(data: bytes) -> set[str]:
     return set(mvt.decode(raw))
 
 
+VIEWS = [("Heimat (Irrel)", 49.85, 6.45, 10), ("Land (Rheinland-Pfalz)", 49.9, 7.6, 7), ("Stadt (Mainz)", 49.9929, 8.2473, 13)]
+
+
+def view_tiles(lat: float, lon: float, z: int, w: int = 1920, h: int = 1080) -> list[tuple[int, int, int]]:
+    """Kacheln (512 px, wie MapLibre bei tileSize 512) für ein Fenster w x h, eine Kachel Rand dazu."""
+    n = 2 ** z
+    cx = (lon + 180) / 360 * n
+    cy = (1 - math.asinh(math.tan(math.radians(lat))) / math.pi) / 2 * n
+    hw, hh = w / 1024, h / 1024
+    return [(z, x, y) for x in range(int(cx - hw) - 1, int(cx + hw) + 2) for y in range(int(cy - hh) - 1, int(cy + hh) + 2) if 0 <= x < n and 0 <= y < n]
+
+
+def volume(rd) -> None:
+    """Übertragungsmenge der Startansicht: Kacheln der Ansicht plus Elternkacheln bis Zoom 0, komprimiert, wie sie über das Netz gingen."""
+    print("\nStartansichten, 1920x1080, Vektorkacheln komprimiert:")
+    for name, lat, lon, z in VIEWS:
+        seen: set[tuple[int, int, int]] = set()
+        for t in view_tiles(lat, lon, z):
+            seen.add(t)
+        total = n = 0
+        for (tz, x, y) in seen:
+            arch = "core" if tz >= 14 else "region"
+            data = rd[arch].get(tz, x, y)
+            total += len(data or b"")
+            n += bool(data)
+        print(f"  {name:24} z{z:<2} {len(seen):3} Kacheln ({n} vorhanden), {total / 1e6:6.2f} MB")
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dir", type=Path, default=Path("build/tiles/final"))
+    ap.add_argument("--volume", action="store_true", help="zusätzlich Übertragungsmenge der Startansichten")
     args = ap.parse_args()
     fh = {n: open(args.dir / f"{n}.pmtiles", "rb") for n in ("region", "ring", "core")}
     rd = {n: Reader(MmapSource(f)) for n, f in fh.items()}
@@ -63,6 +92,8 @@ def main() -> int:
             bad += not data
             print(f"{name:16} {15:>2} {'core':7} {'ja' if data else 'FEHLT':7}")
     print("Lücken:", bad)
+    if args.volume:
+        volume(rd)
     return 1 if bad else 0
 
 
