@@ -21,6 +21,7 @@ import gzip
 import json
 import logging
 import math
+import shutil
 import sys
 import time
 from collections import Counter, defaultdict
@@ -87,8 +88,29 @@ def _rep_point(geom: dict) -> tuple[float, float] | None:
     return (min(xs) + max(xs)) / 2.0, (min(ys) + max(ys)) / 2.0
 
 
-def scan(pm: PMTiles, zoom: int, bbox: tuple[float, float, float, float], only: set[str] | None = None, flip: bool | None = None) -> tuple[list[dict], bool]:
-    """Alle benannten Objekte aus Kacheln eines Zooms im Kasten: Ebene, Art, Name, Kennzeichen, Punkt. Gibt auch die geprüfte y-Ausrichtung zurück."""
+class Unfinished(Exception):
+    """Zeitbudget aufgebraucht; der Zwischenstand ist gespeichert, der Befehl wird wiederholt."""
+
+
+def core_bboxes(path: Path) -> list[tuple[float, float, float, float]]:
+    """Kerne mit Kacheln bis Zoom 15 (tools/tile_cores.yaml) als (lat_min, lon_min, lat_max, lon_max)."""
+    import yaml
+    out = []
+    for k in yaml.safe_load(path.read_text(encoding="utf-8"))["kerne"]:
+        if "bbox" in k:
+            lo0, la0, lo1, la1 = k["bbox"]
+        else:
+            c = k["kreis"]
+            dla, dlo = c["km"] / 110.57, c["km"] / (111.32 * math.cos(math.radians(c["lat"])))
+            la0, la1, lo0, lo1 = c["lat"] - dla, c["lat"] + dla, c["lon"] - dlo, c["lon"] + dlo
+        out.append((la0, lo0, la1, lo1))
+    return out
+
+
+def scan(pm: PMTiles, zoom: int, bbox: tuple[float, float, float, float], only: set[str] | None = None, flip: bool | None = None,
+         state: Path | None = None, deadline: float | None = None) -> tuple[list[dict], bool]:
+    """Alle benannten Objekte aus Kacheln eines Zooms im Kasten: Ebene, Art, Name, Kennzeichen, Punkt. Gibt auch die geprüfte y-Ausrichtung zurück.
+    Mit state und deadline fortsetzbar: bei Zeitablauf wird der Stand gespeichert und Unfinished ausgelöst."""
     import mapbox_vector_tile as mvt
 
     xr, yr = _tile_range(bbox, zoom)
@@ -97,7 +119,20 @@ def scan(pm: PMTiles, zoom: int, bbox: tuple[float, float, float, float], only: 
     log.info("%d Kacheln bei Zoom %d im Kasten", len(todo), zoom)
     out: list[dict] = []
     t0 = time.time()
+    start = 0
+    if state and state.exists():
+        st = json.loads(gzip.decompress(state.read_bytes()))
+        if st["total"] == len(todo):
+            start, out, flip = st["done"], st["out"], st["flip"] if flip is None else flip
+            log.info("Fortsetzung bei Kachel %d/%d", start, len(todo))
     for n, (tid, off, ln) in enumerate(todo, 1):
+        if n <= start:
+            continue
+        if deadline and time.time() > deadline:
+            if state:
+                state.parent.mkdir(parents=True, exist_ok=True)
+                state.write_bytes(gzip.compress(json.dumps({"total": len(todo), "done": n - 1, "flip": flip, "out": out}, ensure_ascii=False, separators=(",", ":")).encode("utf-8")))
+            raise Unfinished(f"{n - 1}/{len(todo)}")
         z, x, y = tile_xyz(tid)
         tile = mvt.decode(pm.tile(off, ln))
         if flip is None:        # Ausrichtung der y-Achse einmalig am Ortsnamen prüfen (Bibliotheksversionen unterscheiden sich)
@@ -131,6 +166,9 @@ def scan(pm: PMTiles, zoom: int, bbox: tuple[float, float, float, float], only: 
             log.info("%d/%d Kacheln, %d Objekte, %.0f s", n, len(todo), len(out), time.time() - t0)
     if flip is None:
         raise SystemExit("y-Achse nicht prüfbar (kein Ort mit Namen in einer Kachel gefunden)")
+    if state:   # Endstand behalten, damit eine Fortsetzung fertige Kästen nicht neu liest; main() räumt auf
+        state.parent.mkdir(parents=True, exist_ok=True)
+        state.write_bytes(gzip.compress(json.dumps({"total": len(todo), "done": len(todo), "flip": flip, "out": out}, ensure_ascii=False, separators=(",", ":")).encode("utf-8")))
     return out, flip
 
 
@@ -190,20 +228,30 @@ def main() -> int:
     ap.add_argument("--raw", type=Path, default=ROOT / "data" / "search_raw.json.gz", help="Zwischenstand (wird gelesen, wenn vorhanden)")
     ap.add_argument("--rescan", action="store_true", help="Kacheln neu lesen, auch wenn ein Zwischenstand vorliegt")
     ap.add_argument("--stats", action="store_true", help="nur Zählung ausgeben")
+    ap.add_argument("--cores", type=Path, default=ROOT / "tools" / "tile_cores.yaml", help="Kerne mit Zoom 15 (Nebenstraßen)")
+    ap.add_argument("--budget-s", type=float, default=0, help="nach dieser Zeit speichern und mit Exit 2 enden (Befehl wiederholen), 0 = unbegrenzt")
     a = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
     if a.raw.exists() and not a.rescan:
         raw = json.loads(gzip.decompress(a.raw.read_bytes()))
         log.info("Zwischenstand gelesen: %d Objekte", len(raw))
     else:
-        pm = PMTiles(a.tiles)
-        raw, flip = scan(pm, ZOOM, config.BBOX)
-        pm.close()
-        if a.core.exists():       # Kern: Nebenstraßen (Zoom 15); Hausnummern und Gebäude werden nicht gelesen
-            pc = PMTiles(a.core)
-            core, _ = scan(pc, pc.h.max_zoom, CORE_BBOX, only={"roads"}, flip=flip)
-            pc.close()
-            raw += core
+        deadline = time.time() + a.budget_s if a.budget_s else None
+        sdir = a.raw.parent / (a.raw.name + ".state")
+        try:
+            pm = PMTiles(a.tiles)
+            raw, flip = scan(pm, ZOOM, config.BBOX, state=sdir / "region.gz", deadline=deadline)
+            pm.close()
+            if a.core.exists():       # Kerne: Nebenstraßen (Zoom 15); Hausnummern und Gebäude werden nicht gelesen
+                pc = PMTiles(a.core)
+                for i, cb in enumerate(core_bboxes(a.cores) if a.cores.exists() else [CORE_BBOX]):
+                    core, _ = scan(pc, pc.h.max_zoom, cb, only={"roads"}, flip=flip, state=sdir / f"kern{i:02d}.gz", deadline=deadline)
+                    raw += core
+                pc.close()
+        except Unfinished as exc:
+            log.info("Zeitbudget erreicht (%s). Befehl wiederholen.", exc)
+            return 2
+        shutil.rmtree(sdir, ignore_errors=True)
         a.raw.parent.mkdir(parents=True, exist_ok=True)
         a.raw.write_bytes(gzip.compress(json.dumps(raw, ensure_ascii=False, separators=(",", ":")).encode("utf-8")))
         log.info("Zwischenstand geschrieben: %s", a.raw)
