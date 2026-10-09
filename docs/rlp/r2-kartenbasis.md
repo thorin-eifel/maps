@@ -39,7 +39,7 @@ Karten und Höhenmodell zusammen: rund 1,6 GB (vorher 869 MB für 120 km). Quell
 
 ## Messwerte
 
-- Abruf: 91 + 89 + 12 Stücke in 8 Durchgängen zu je höchstens 150 s, zusammen etwa 12 Minuten reine Laufzeit.
+- Abruf: 91 + 89 + 12 Stücke in 9 Aufrufen zu je höchstens 150 s, zusammen etwa 12 Minuten reine Laufzeit.
 - Vereinen: region 13 s, ring 18 s, cores 1 s. `pmtiles verify` ohne Fehler für alle drei.
 - Höhenmodell: 3 Durchgänge, etwa 5 Minuten, 676 MB.
 - Suchindex: 2 Minuten 14 Sekunden in einem Durchgang.
@@ -52,4 +52,4 @@ Karten und Höhenmodell zusammen: rund 1,6 GB (vorher 869 MB für 120 km). Quell
 - **Gewässernetz** (Rhein, Mosel, Nahe, Lahn, Saar, Main, Neckar, Maas): `build_gewaessernetz.py` ordnet die Pegelstationen den Flüssen zu und braucht deren Liste (`gewaesser.json`) aus den Sammlern der neuen Fläche. Das geht erst nach R3 sinnvoll.
 - **Lokaler OSM-Auszug** (Geofabrik) ist nicht gebaut. Die Karte braucht ihn nicht, nur die OSM-Sammler in R3 (Overpass-Last). Dort wird er mit der Umstellung der Sammler gebaut.
 - **Oberfläche**: Kreis, Vignette und Radar-Sweep zeichnen weiter den Radius aus `meta.radius_km` (R5). Die neuen Archive sind noch nicht in `web/tiles` eingespielt; die laufende Karte bleibt unverändert.
-- Das neue Ortsverzeichnis enthält 47 Einträge des alten nicht mehr (Overpass-Stand, Umbenennungen); 4.840 gemeinsame, 17.595 neue. Die Tests laufen unverändert (313 grün).
+- Das neue Ortsverzeichnis enthält 47 Einträge des alten nicht mehr (Overpass-Stand, Umbenennungen); 4.840 gemeinsame, 17.642 neue. Die Tests laufen unverändert (313 grün).
