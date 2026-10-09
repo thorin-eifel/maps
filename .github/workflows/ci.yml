@@ -18,6 +18,8 @@ jobs:
         run: python -m pytest -q
       - name: JavaScript-Tests
         run: node --test tests/js/*.test.mjs
+      - name: README passt zum Stand
+        run: python tools/update_readme.py --check
       - name: Keine Daten, Kacheln oder Geheimnisse im Repository
         run: |
           bad=$(git ls-files | grep -E '(^data/|\.sqlite|\.pmtiles$|(^|/)\.env$)' || true)

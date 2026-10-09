@@ -1,6 +1,6 @@
 """GTFS-Fahrplandaten auf den Radius zuschneiden.
 
-Zweck:    Aus einem GTFS-ZIP (Luxemburg, DELFI/gtfs.de) die Haltestellen im 120-km-Radius und, wenn gewünscht, die Fahrten
+Zweck:    Aus einem GTFS-ZIP (Luxemburg, DELFI/gtfs.de) die Haltestellen in der Region und, wenn gewünscht, die Fahrten
           herausziehen, die dort halten. Ergebnis ist klein (einige 100 kB bis wenige MB) und liegt im Cache der Datenbank;
           das ZIP selbst wird nicht aufbewahrt.
 Aufruf:   Nicht direkt; benutzt von app.collectors.gtfs_static (python -m app.collect --once --only gtfs_static).

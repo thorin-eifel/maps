@@ -6,7 +6,7 @@ Stand 9. Oktober 2026. Teil A ist der Ablaufplan. Der Prompt für Claude Code st
 
 ### Ausgangslage
 
-Heute deckt das Lagebild einen Kreis von 120 km um den CTW-Firmensitz in Irrel ab. Rund 40 Quellen laufen über Python-Sammler in eine SQLite-Datenbank, ein Export schreibt JSON-Dateien, ein statisches Frontend (Vanilla-JS, MapLibre, eigene PMTiles-Karte) liest sie vom IONOS-Webspace. Es gibt eine Desktop-Hülle (Tauri) mit lokalem Dienst. Die Kartendateien sind zusammen etwa 530 MB groß, die Startseite braucht noch 30 bis 45 Sekunden, bis die Karte steht.
+Heute deckt das Lagebild einen Kreis von 120 km um Irrel ab. Rund 40 Quellen laufen über Python-Sammler in eine SQLite-Datenbank, ein Export schreibt JSON-Dateien, ein statisches Frontend (Vanilla-JS, MapLibre, eigene PMTiles-Karte) liest sie vom IONOS-Webspace. Es gibt eine Desktop-Hülle (Tauri) mit lokalem Dienst. Die Kartendateien sind zusammen etwa 530 MB groß, die Startseite braucht noch 30 bis 45 Sekunden, bis die Karte steht.
 
 Was wir beim Arbeiten gelernt haben und was den Plan prägt:
 
@@ -16,7 +16,7 @@ Was wir beim Arbeiten gelernt haben und was den Plan prägt:
 
 ### Zielbild
 
-Die Region ist die Landesgrenze von Rheinland-Pfalz plus 80 km nach außen, als Polygon. Grob liegt der Kasten bei 48,25 bis 51,66 Grad Nord und 5,0 bis 9,6 Grad Ost, etwa 330 mal 380 km. Das ist rund 1,75-mal die Fläche des heutigen Kastens. In Reichweite liegen damit unter anderem Saarland, Luxemburg, Lothringen bis Nancy, Nordelsass bis Straßburg, Ostbelgien bis Lüttich, Aachen, Köln, Bonn, Frankfurt, Darmstadt, Mannheim, Karlsruhe und Stuttgart-Rand. Die Startansicht bleibt Irrel. Der Kreis wird weiter nicht gezeichnet.
+Die Region ist die Landesgrenze von Rheinland-Pfalz plus 80 km nach außen, als Polygon. Grob liegt der Kasten bei 48,25 bis 51,66 Grad Nord und 5,0 bis 9,6 Grad Ost, etwa 330 mal 380 km. Das ist rund 1,75-mal die Fläche des heutigen Kastens. In Reichweite liegen damit unter anderem Saarland, Luxemburg, Lothringen bis Metz (Nancy liegt knapp draußen), Nordelsass bis Straßburg, Ostbelgien bis Lüttich, Aachen, Köln, Bonn, Frankfurt, Darmstadt, Mannheim, Karlsruhe und Stuttgart-Rand. Die Startansicht bleibt Irrel. Der Kreis wird weiter nicht gezeichnet.
 
 Unverändert bleiben die Leitplanken aus der Projektanweisung: Ereignisse statt Personen, Quelle, Alter und Lizenz an jedem Datum, kein Tracking, keine Drittanbieter, Themenradar und Presseportal bleiben draußen, Telegram bleibt draußen.
 
@@ -44,7 +44,7 @@ Heutigen Stand ins Repository übernehmen (ohne Daten, Kacheln, Zugangsdaten), `
 Neue Region-Konfiguration (`region.yaml`: Name, Grenzquelle, Puffer, Startansicht). `geo.in_region()` mit Polygon, schneller Vorfilter über den Kasten, Tests mit Grenzfällen (Rheinufer, Luxemburger Grenze, Saarland, Punkt im Puffer, Punkt knapp draußen). Alle Stellen mit `RADIUS_KM`, `CENTER_*`, `BBOX` und "120 km" im Code, in Texten, in `sources.yaml` und im UI auf die Region umstellen. Die Entfernung zu Irrel bleibt als optionale Angabe, die Zuordnung zu Landkreis und Land (`region_tag`, `kreis`) kommt neu. Ergebnis: die bestehende Fläche läuft unverändert, nur aus der Konfiguration gespeist.
 
 **R2. Kartenbasis (3 Einheiten).**
-Lokaler OSM-Auszug (Geofabrik), Zuschnitt, Protomaps-Kacheln für die neue Fläche, Städtekerne bei Zoom 15, Ring bei Zoom 14. Geländemodell für die ganze Fläche (Terrarium-Kacheln bis Zoom 12), Reliefbild, Orientierung. Suchindex und Gazetteer für Rheinland-Pfalz und die Randgebiete, Gewässernetz für Rhein, Mosel, Nahe, Lahn, Saar, Main, Neckar, Maas und Zuflüsse. Der Bau läuft als Skript und ist wiederholbar. Weil die Kacheln aus dem Sandkasten nicht erreichbar sind, läuft dieser Teil auf dem Mac oder dem CTW-Server, Claude Code liefert Skript, Prüfskript und Größenbericht. Ergebnis: Karte für die ganze Fläche, gemessene Größen, Ladezeit unter 10 Sekunden bis zur sichtbaren Karte.
+Lokaler OSM-Auszug (Geofabrik), Zuschnitt, Protomaps-Kacheln für die neue Fläche, Städtekerne bei Zoom 15, Ring bei Zoom 14. Geländemodell für die ganze Fläche (Terrarium-Kacheln bis Zoom 12), Reliefbild, Orientierung. Suchindex und Gazetteer für Rheinland-Pfalz und die Randgebiete, Gewässernetz für Rhein, Mosel, Nahe, Lahn, Saar, Main, Neckar, Maas und Zuflüsse. Der Bau läuft als Skript und ist wiederholbar. Weil die Kacheln aus dem Sandkasten nicht erreichbar sind, läuft dieser Teil auf dem Mac oder einem Server des Betreibers, Claude Code liefert Skript, Prüfskript und Größenbericht. Ergebnis: Karte für die ganze Fläche, gemessene Größen, Ladezeit unter 10 Sekunden bis zur sichtbaren Karte.
 
 **R3. Datenpipeline (4 Einheiten).**
 Sammler quellenweise auf die Fläche bringen, je Quelle nach dem Muster "Lizenz prüfen, Fixtures, Test, Register, Lauf". Umfang je Quelle in der Tabelle unten. OSM-Sammler auf den lokalen Auszug umstellen. Datenbank messen und, falls nötig, auf PostGIS umstellen. Ergebnis: alle bisherigen Quellen liefern für die Fläche, jede mit Fixture-Test und Ausfalltest.

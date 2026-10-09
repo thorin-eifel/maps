@@ -6,7 +6,7 @@ Lizenz:     CC BY 4.0 (laut Angabe auf der Dienstseite), Namensnennung EMSC
 Intervall:  900 s
 Beispiel:   python -m app.collect --once --only emsc
 
-Abfrage der letzten 7 Tage im Bounding Box, Feinfilter auf 120 km am Rand. Die Eifel und der Hunsrück haben viele
+Abfrage der letzten 7 Tage im Bounding Box, Feinfilter auf die Region am Rand. Die Eifel und der Hunsrück haben viele
 Kleinstbeben (Magnitude unter 2), die niemand spürt: Sie stehen als Info, ab Magnitude 3,0 als Hinweis, ab 4,0 als Warnung.
 Die Orte sind Herdkoordinaten laut Katalog, keine Schadensmeldungen. Ein Beben bleibt 24 Stunden im Fenster „jetzt“.
 """

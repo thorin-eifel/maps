@@ -6,7 +6,7 @@ Lizenz:     siehe sources.yaml (nach Kenntnisstand Datenlizenz Deutschland Namen
 Intervall:  1800 s (Stundenmittelwerte, der Dienst aktualisiert stündlich)
 Beispiel:   python -m app.collect --once --only bfs_odl
 
-Ein Abruf mit Bounding Box (Achsenfolge lat,lon), Feinfilter auf 120 km am Rand. Jede Sonde ist eine Station, der
+Ein Abruf mit Bounding Box (Achsenfolge lat,lon), Feinfilter auf die Region am Rand. Jede Sonde ist eine Station, der
 Stundenwert (µSv/h, Brutto) eine Messreihe `odl`. Die BfS-Sonden decken Deutschland ab; Luxemburg und Frankreich
 (Cattenom) fehlen in diesem Dienst. Ereignisse entstehen nur über eigene Orientierungsschwellen, siehe unten.
 Schwellen (eigene Orientierung, KEIN amtlicher Grenzwert): ab 0,3 µSv/h Hinweis, ab 1,0 µSv/h Warnung. Die natürliche

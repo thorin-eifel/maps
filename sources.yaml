@@ -23,13 +23,13 @@ sources:
     intervall: 300
     ratenlimit: nicht veröffentlicht; wir fragen höchstens einmal je 5 Minuten und Region
     auth: keine
-    geo_bezug: Dashboard je Kreis-ARS, danach Geometriefilter auf Südeifel + 120 km
+    geo_bezug: Dashboard je Kreis-ARS, danach Geometriefilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
     collector: nina
     params:
-      # 12-stelliger ARS. Kreise im 120-km-Radius (Rheinland-Pfalz, Saarland, ein Stück NRW); jeder Code ist live gegen die API geprüft (404 bei falschem Code).
+      # 12-stelliger ARS. Kreise in der Region (Rheinland-Pfalz, Saarland, ein Stück NRW); jeder Code ist live gegen die API geprüft (404 bei falschem Code).
       ars:
         - {ars: "072320000000", name: "Eifelkreis Bitburg-Prüm"}
         - {ars: "072350000000", name: "Trier-Saarburg"}
@@ -68,7 +68,7 @@ sources:
     intervall: 300
     ratenlimit: nicht veröffentlicht; ein Abruf je 5 Minuten
     auth: keine
-    geo_bezug: WFS mit Bounding Box (lon,lat), danach Geometriefilter auf Südeifel + 120 km
+    geo_bezug: WFS mit Bounding Box (lon,lat), danach Geometriefilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -138,7 +138,7 @@ sources:
     intervall: 180
     ratenlimit: nicht veröffentlicht; 12 Abrufe je Lauf, nacheinander mit Pause, ein Lauf alle 3 Minuten (Stau ändert sich schnell)
     auth: keine
-    geo_bezug: A1, A48, A60, A64 bundesweit geladen, Geometriefilter auf Südeifel + 120 km am Rand
+    geo_bezug: A1, A48, A60, A64 bundesweit geladen, Geometriefilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -162,7 +162,7 @@ sources:
     intervall: 15
     ratenlimit: nicht veröffentlicht; ein Abruf alle 15 Sekunden (Live-Schleife), Mindestabstand 10 Sekunden. Bei Fehlern greift der Circuit Breaker.
     auth: keine
-    geo_bezug: Abfrage 47 NM um Irrel, danach Feinfilter auf 120 km am Rand; nur Flugzeuge in der Luft
+    geo_bezug: Abfrage 47 NM um Irrel, danach Feinfilter auf die Region am Rand; nur Flugzeuge in der Luft
     datenschutz_risiko: mittel
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -186,7 +186,7 @@ sources:
     intervall: 600
     ratenlimit: nicht veröffentlicht; 2 Abrufe je 10 Minuten (der Dienst aktualisiert alle 10 Minuten)
     auth: keine
-    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf 120 km am Rand; Verlauf als Linie, sonst Punkt
+    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf die Region am Rand; Verlauf als Linie, sonst Punkt
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -210,7 +210,7 @@ sources:
     intervall: 900
     ratenlimit: nicht veröffentlicht; ein Abruf (ca. 3 MB) alle 15 Minuten, Stammdaten 12 Stunden zwischengespeichert
     auth: keine
-    geo_bezug: alle Messstellen im 120-km-Radius (UTM-32-Koordinaten der Stammdaten, Feinfilter am Rand)
+    geo_bezug: alle Messstellen in der Region (UTM-32-Koordinaten der Stammdaten, Feinfilter am Rand)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -232,7 +232,7 @@ sources:
     intervall: 1800
     ratenlimit: nicht veröffentlicht; ein Abruf alle 30 Minuten (Stundenwerte)
     auth: keine
-    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf 120 km am Rand
+    geo_bezug: WFS-Abfrage mit Bounding Box, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -254,7 +254,7 @@ sources:
     intervall: 1800
     ratenlimit: nicht veröffentlicht; je Lauf ein Abruf pro Station (4), Stationsliste 24 Stunden zwischengespeichert
     auth: keine
-    geo_bezug: Stationsliste gefiltert auf 120 km um Irrel, Abruf je Station
+    geo_bezug: Stationsliste gefiltert auf die Region, Abruf je Station
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -274,7 +274,7 @@ sources:
     intervall: 900
     ratenlimit: nicht veröffentlicht; ein Abruf alle 15 Minuten
     auth: keine
-    geo_bezug: Bounding-Box-Abfrage der letzten 7 Tage, Feinfilter auf 120 km am Rand
+    geo_bezug: Bounding-Box-Abfrage der letzten 7 Tage, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -361,7 +361,7 @@ sources:
     intervall: 1800
     ratenlimit: 5000 Transaktionen je 10 Minuten laut Dokumentation; drei Abrufe alle 30 Minuten
     auth: MAP_KEY (kostenlos, in .env als FIRMS_MAP_KEY)
-    geo_bezug: Bounding-Box-Abfrage der letzten 2 Tage, Feinfilter auf 120 km am Rand
+    geo_bezug: Bounding-Box-Abfrage der letzten 2 Tage, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -383,7 +383,7 @@ sources:
     intervall: 604800
     ratenlimit: nicht veröffentlicht; zwei Downloads (zusammen etwa 28 MB) je Woche
     auth: keine
-    geo_bezug: Haltestellen im Radius von 120 km um den Mittelpunkt
+    geo_bezug: Haltestellen in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -429,7 +429,7 @@ sources:
     intervall: 604800
     ratenlimit: Fair Use; eine Abfrage (etwa 1 bis 3 MB) je Woche
     auth: keine
-    geo_bezug: Objekte im Radius von 120 km um den Mittelpunkt
+    geo_bezug: Objekte in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -453,7 +453,7 @@ sources:
     intervall: 604800
     ratenlimit: Fair Use; fünf kleine Abfragen je Woche
     auth: keine
-    geo_bezug: Objekte im Radius von 120 km um den Mittelpunkt
+    geo_bezug: Objekte in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-08"
@@ -475,7 +475,7 @@ sources:
     intervall: 604800
     ratenlimit: Fair Use; vier Abfragen (je etwa 1 bis 5 MB) je Woche
     auth: keine
-    geo_bezug: Flächen im Radius von 120 km um den Mittelpunkt
+    geo_bezug: Flächen in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-09"
@@ -498,7 +498,7 @@ sources:
     intervall: 604800
     ratenlimit: Fair Use; zwei Abfragen je Woche
     auth: keine
-    geo_bezug: Linien im Radius von 120 km um den Mittelpunkt
+    geo_bezug: Linien in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-08"
@@ -519,7 +519,7 @@ sources:
     intervall: 600
     ratenlimit: nicht veröffentlicht; zwei Abrufe je 10 Minuten
     auth: keine
-    geo_bezug: eine Station (Findel), Feinfilter auf 120 km am Rand
+    geo_bezug: eine Station (Findel), Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -564,7 +564,7 @@ sources:
     intervall: 600
     ratenlimit: Quelle bittet um höchstens einen Abruf je 5 Minuten; wir holen einen je 10 Minuten
     auth: keine
-    geo_bezug: Umkreisabfrage 120 km um Irrel, Feinfilter am Rand, danach Rasterung
+    geo_bezug: Umkreisabfrage um die Region (umschließender Kreis), Feinfilter am Rand, danach Rasterung
     datenschutz_risiko: mittel
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -586,7 +586,7 @@ sources:
     intervall: 600
     ratenlimit: Feed meldet ttl 6 Minuten; drei Abrufe je 10 Minuten
     auth: keine
-    geo_bezug: Ort aus Datumszeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    geo_bezug: Ort aus Datumszeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf die Region am Rand
     datenschutz_risiko: mittel
     aktiv: false   # abgeschaltet: Polizeimeldungen und Themenradar sind aus der Oberfläche genommen
     zuletzt_geprüft: "2026-09-30"
@@ -613,7 +613,7 @@ sources:
     intervall: 900
     ratenlimit: nicht veröffentlicht; ein Abruf je 15 Minuten
     auth: keine
-    geo_bezug: Ortsname in der Schlagzeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    geo_bezug: Ortsname in der Schlagzeile per lokalem Ortsverzeichnis (OSM), Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -653,7 +653,7 @@ sources:
     intervall: 300
     ratenlimit: nicht veröffentlicht; ein Abruf je 5 Minuten
     auth: keine
-    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf 120 km am Rand
+    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -673,7 +673,7 @@ sources:
     intervall: 10800
     ratenlimit: nicht veröffentlicht; höchstens 20 Dateiabrufe alle 3 Stunden mit Pause
     auth: keine
-    geo_bezug: nächste Stationen im Radius (Standard 10), Feinfilter auf 120 km
+    geo_bezug: nächste Stationen im Radius (Standard 10), Feinfilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -720,7 +720,7 @@ sources:
     intervall: 900
     ratenlimit: Dienst verlangt angemessene Abrufzahl; zwei Abrufe je 15 Minuten
     auth: API-Schlüssel (kostenlos, in .env als TANKERKOENIG_API_KEY)
-    geo_bezug: zwei Umkreise von 25 km (Irrel, Trier), Feinfilter auf 120 km
+    geo_bezug: zwei Umkreise von 25 km (Irrel, Trier), Feinfilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
@@ -766,7 +766,7 @@ sources:
     intervall: 900
     ratenlimit: Betreiber nennt rund 10 Aufrufe je Sekunde im Mittel; wir machen 2 bis 7 Aufrufe je 15 Minuten
     auth: keine
-    geo_bezug: Stationen der Bounding Box, Feinfilter auf 120 km am Rand (Mosel, Nied, Orne, Seille im Norden Lothringens)
+    geo_bezug: Stationen der Bounding Box, Feinfilter auf die Region am Rand (Mosel, Nied, Orne, Seille im Norden Lothringens)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -789,7 +789,7 @@ sources:
     intervall: 900
     ratenlimit: nicht genannt; wir machen alle 15 Minuten etwa 4 Abrufe, die Stationsliste (rund 40 Abrufe) nur alle 12 Stunden
     auth: keine
-    geo_bezug: Stationen der Bounding Box, Feinfilter auf 120 km am Rand (Maas, Ourthe, Semois, Lesse, Vesdre, Sûre-Zuflüsse, Our)
+    geo_bezug: Stationen der Bounding Box, Feinfilter auf die Region am Rand (Maas, Ourthe, Semois, Lesse, Vesdre, Sûre-Zuflüsse, Our)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
@@ -805,12 +805,12 @@ sources:
     lizenz_hinweis: >-
       Vom Sender öffentlich angebotener RSS-Feed, robots.txt sperrt ihn nicht (nur zwei Profilseiten). Nutzungsbedingungen nicht gelesen;
       vor dem öffentlichen Start klären oder Quelle streichen. Nur Rubrik Regional, nur mit Ort im Radius (aus Schlagzeile oder Schlagwort).
-      Eupen und Raeren liegen außerhalb der 120 km, deren Meldungen fallen am Rand weg.
+      Eupen und Raeren liegen außerhalb der Region, deren Meldungen fallen am Rand weg.
     namensnennung: "Schlagzeilen: BRF (Titel und Link)"
     intervall: 900
     ratenlimit: nicht veröffentlicht; ein Abruf je 15 Minuten
     auth: keine
-    geo_bezug: Ortsname in Schlagzeile oder Schlagwort per lokalem Ortsverzeichnis (OSM), Feinfilter auf 120 km am Rand
+    geo_bezug: Ortsname in Schlagzeile oder Schlagwort per lokalem Ortsverzeichnis (OSM), Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -854,7 +854,7 @@ sources:
     intervall: 600
     ratenlimit: nicht veröffentlicht; ein Abruf je 10 Minuten
     auth: keine
-    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf 120 km am Rand (Lothringen, Ardennen, Luxemburger Grenze)
+    geo_bezug: Linie oder Punkt je Situation, Feinfilter auf die Region am Rand (Lothringen, Ardennen, Luxemburger Grenze)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
@@ -897,7 +897,7 @@ sources:
     intervall: 604800
     ratenlimit: Fair Use; eine kleine Abfrage je Woche
     auth: keine
-    geo_bezug: Tankstellen im Staatsgebiet Luxemburg, Feinfilter auf 120 km am Rand
+    geo_bezug: Tankstellen im Staatsgebiet Luxemburg, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
@@ -918,7 +918,7 @@ sources:
     intervall: 1800
     ratenlimit: öffentliche Instanz, Fair Use; bis zu 60 Abrufe je 30 Minuten, Stationsliste einmal am Tag
     auth: keine
-    geo_bezug: DWD-Stationen mit SYNOP-Meldung im Radius von 120 km
+    geo_bezug: DWD-Stationen mit SYNOP-Meldung in der Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
@@ -942,7 +942,7 @@ sources:
     intervall: 1800
     ratenlimit: nicht veröffentlicht; vier Abfragen je Lauf alle 30 Minuten
     auth: keine
-    geo_bezug: Stationen in der Bounding-Box, Zeitfilter in der Abfrage, Feinfilter auf 120 km am Rand
+    geo_bezug: Stationen in der Bounding-Box, Zeitfilter in der Abfrage, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
@@ -964,7 +964,7 @@ sources:
     intervall: 1800
     ratenlimit: nicht veröffentlicht; zwei Abfragen je Lauf, die Stationsliste nur einmal am Tag
     auth: keine
-    geo_bezug: Stationsliste gefiltert auf 120 km um Irrel, eine Abfrage mit Zeitfilter für alle Stationen
+    geo_bezug: Stationsliste gefiltert auf die Region, eine Abfrage mit Zeitfilter für alle Stationen
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"

@@ -1,0 +1,12 @@
+# Stand der Phasen (Plan: docs/rlp/plan.md). Wird von tools/update_readme.py in die README übernommen.
+# Pflicht bei jedem Pull Request: stand und pr nachführen, dann `python tools/update_readme.py`.
+# stand: offen | in Arbeit | wartet auf Freigabe | fertig
+phasen:
+  - { id: R0, name: Repository und Baseline,        stand: fertig,        pr: 1 }
+  - { id: R1, name: Raumabstraktion,                stand: in Arbeit,     pr: 2 }
+  - { id: R2, name: Kartenbasis,                    stand: offen }
+  - { id: R3, name: Datenpipeline,                  stand: offen }
+  - { id: R4, name: Export und Auslieferung,        stand: offen }
+  - { id: R5, name: Frontend,                       stand: offen }
+  - { id: R6, name: Betrieb und Härtung,            stand: offen }
+  - { id: R7, name: Abnahme,                        stand: offen }
