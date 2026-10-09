@@ -3,3 +3,6 @@ pytest==9.1.1
 pytest-asyncio==1.4.0
 # Bauwerkzeuge (tools/) und ihre Tests
 numpy==2.4.6
+pmtiles==3.8.1
+shapely==2.2.0
+pyyaml
