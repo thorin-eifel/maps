@@ -59,8 +59,8 @@ Die ursprüngliche Projektanweisung steht in `docs/projektanweisung.md` (CTW-Bez
 |---|---|---|---|
 | R0 | Repository und Baseline | fertig | [#1](https://github.com/thorin-eifel/maps/pull/1) |
 | R1 | Raumabstraktion | fertig | [#2](https://github.com/thorin-eifel/maps/pull/2) |
-| R2 | Kartenbasis | wartet auf Freigabe | [#3](https://github.com/thorin-eifel/maps/pull/3) |
-| R3 | Datenpipeline | offen |  |
+| R2 | Kartenbasis | fertig | [#3](https://github.com/thorin-eifel/maps/pull/3) |
+| R3 | Datenpipeline | wartet auf Freigabe | [#4](https://github.com/thorin-eifel/maps/pull/4) |
 | R4 | Export und Auslieferung | offen |  |
 | R5 | Frontend | offen |  |
 | R6 | Betrieb und Härtung | offen |  |
@@ -71,8 +71,8 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 ### Zahlen
 
 - Quellen im Register: 42, davon aktiv: 40
-- Sammler (Module in `app/collectors/`): 42
-- Tests: 313 Python, 41 JavaScript
+- Sammler (Module in `app/collectors/`): 43
+- Tests: 334 Python, 41 JavaScript
 
 ### Quellen und Lizenzen
 
@@ -82,7 +82,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 | `dwd_warnungen` | DWD | GeoNutzV (DWD Open Data) | 5 min | ja |
 | `brightsky` | DWD via Bright Sky | DWD GeoNutzV; Bright Sky Software MIT | 15 min | ja |
 | `pegelonline` | WSV Pegelonline | Datenlizenz Deutschland – Namensnennung 2.0 (zu bestätigen) | 10 min | ja |
-| `autobahn` | Autobahn GmbH | Nutzungsbedingungen Autobahn GmbH (zu bestätigen) | 3 min | ja |
+| `autobahn` | Autobahn GmbH | Nutzungsbedingungen Autobahn GmbH (zu bestätigen) | 5 min | ja |
 | `adsblol` | adsb.lol | ODbL 1.0 (laut Betreiber-Dokumentation) | 15 s | ja |
 | `lbm_baustellen` | Mobilitätsatlas RLP | nicht angegeben (zu klären) | 10 min | ja |
 | `hochwasser_rlp` | Hochwasser RLP | nicht angegeben (zu klären) | 15 min | ja |
@@ -108,7 +108,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 | `cita_lu` | CITA Luxemburg | CC0 1.0 | 5 min | ja |
 | `dwd_waldbrand` | DWD Waldbrandindex | CC BY 4.0 | 3 h | ja |
 | `dwd_gesundheit` | DWD Pollen/UV | GeoNutzV (Namensnennung DWD), Bedingungen laut Open-Data-Hinweisen des DWD | 1 h | ja |
-| `tankerkoenig` | Tankerkönig | CC BY 4.0 | 15 min | ja |
+| `tankerkoenig` | Tankerkönig | CC BY 4.0 | 2 min | ja |
 | `mastodon_themen` | Themenradar Mastodon | keine; es werden keine Beiträge gespeichert, nur Zählungen je Hashtag | 1 h | nein |
 | `hubeau_pegel` | Hub'eau Pegel | Licence Ouverte 2.0 (Etalab), nach Kenntnis | 15 min | ja |
 | `wallonie_pegel` | SPW Pegel | keine ausdrückliche Lizenzangabe am Dienst gefunden | 15 min | ja |

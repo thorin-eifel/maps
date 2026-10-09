@@ -21,6 +21,7 @@ from .. import config, geo
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
 from .osm_routen import simplify
+from .osm_tiles import tiles
 
 ENDPOINT = "https://overpass-api.de/api/interpreter"
 MIRRORS = ("https://z.overpass-api.de/api/interpreter", ENDPOINT, "https://overpass.private.coffee/api/interpreter")
@@ -28,12 +29,15 @@ TIMEOUT_S = 120.0
 PAUSE_S = 20.0     # Overpass antwortet bei dichter Folge mit 429
 TOLERANCE_DEG = 0.00003
 MIN_AREA_M2 = 300.0
-MAX_POLYGONS = 30000
+MAX_POLYGONS = 120000
 KINDS = ("vineyard", "orchard")
 
 
 def quarters() -> list[tuple[float, float, float, float]]:
     """Vorfilter-Kasten in vier Viertel: kleine Antworten, ein Zeitlimit trifft nur ein Viertel."""
+    from ..region import REGION
+    if REGION.mode == "polygon":
+        return tiles()
     s, w, n, e = config.BBOX
     ms, mw = (s + n) / 2, (w + e) / 2
     return [(s, w, ms, mw), (s, mw, ms, e), (ms, w, n, mw), (ms, mw, n, e)]

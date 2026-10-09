@@ -24,12 +24,13 @@ from typing import Any
 from .. import config, geo
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
+from .osm_tiles import tiles
 
 ENDPOINT = "https://overpass-api.de/api/interpreter"
 MIRRORS = ("https://z.overpass-api.de/api/interpreter", ENDPOINT, "https://overpass.private.coffee/api/interpreter")  # z. antwortet, wenn der Hauptname 504 gibt; danach der Reihe nach weiter
 TIMEOUT_S = 70.0
 PAUSE_S = 3.0
-MAX_ITEMS = 20000   # Kartenradius 120 km: über 6000 Objekte; die Grenze schneidet sonst ganze Arten (Wasserfälle, Aussichtspunkte) ab
+MAX_ITEMS = 60000   # Radius 120 km: über 6000 Objekte; Rheinland-Pfalz plus 80 km mehr, die Grenze schneidet sonst ganze Arten ab
 
 # (Art, Tag-Prüfung, Name Pflicht)
 KINDS = (
@@ -54,9 +55,9 @@ KINDS = (
 )
 
 
-def build_query(entry: tuple[str, tuple[str, str], bool]) -> str:
+def build_query(entry: tuple[str, tuple[str, str], bool], box: tuple[float, float, float, float] | None = None) -> str:
     """Eine Abfrage je Eintrag in KINDS: kurze Läufe, ein Zeitlimit trifft nur eine Art statt alles."""
-    s, w, n, e = config.BBOX
+    s, w, n, e = box or config.BBOX
     _, (k, v), named = entry
     name_filter = '["name"]' if named else ""
     return f'[out:json][timeout:50];nwr["{k}"="{v}"]{name_filter}({s},{w},{n},{e});out center tags;'
@@ -109,10 +110,20 @@ def parse_elements(data: Any) -> list[dict[str, Any]]:
 
 class OsmNaturCollector(Collector):
     async def _one(self, entry: tuple[str, tuple[str, str], bool]) -> list[dict[str, Any]]:
+        """Eine Art über alle Kacheln; fällt eine Kachel aus, fällt die Art aus (kein halber Stand)."""
+        found: dict[str, dict[str, Any]] = {}
+        for n, box in enumerate(tiles()):
+            if n:
+                await asyncio.sleep(PAUSE_S)
+            for it in await self._one_box(entry, box):
+                found[it["id"]] = it
+        return list(found.values())
+
+    async def _one_box(self, entry: tuple[str, tuple[str, str], bool], box: tuple[float, float, float, float]) -> list[dict[str, Any]]:
         last: SourceError | None = None
         for url in MIRRORS:
             try:
-                resp = await self._request(url, {"data": build_query(entry)}, "application/json", False, (), TIMEOUT_S)
+                resp = await self._request(url, {"data": build_query(entry, box)}, "application/json", False, (), TIMEOUT_S)
                 assert resp is not None
                 try:
                     data = resp.json()

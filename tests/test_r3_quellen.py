@@ -180,3 +180,34 @@ def test_waldbrand_thin_spreads_stations():
     spread = thin(st, 20, 10)
     assert [s["id"] for s in spread] == ["0", "18", "36"]       # alle ≥ 20 km auseinander
     assert len(thin(st, 20, 2)) == 2
+
+
+# ------------------------------------------------------------------ Overpass-Kacheln
+def test_osm_tiles_radius_mode_single_box_polygon_mode_many(monkeypatch):
+    from app.collectors import osm_tiles
+    monkeypatch.setattr(osm_tiles, "REGION", SimpleNamespace(mode="radius"))
+    assert osm_tiles.tiles() == [tuple(osm_tiles.config.BBOX)]
+    monkeypatch.setattr(osm_tiles, "REGION", SimpleNamespace(mode="polygon", contains=lambda la, lo, margin_km=0: True))
+    monkeypatch.setattr(osm_tiles.config, "BBOX", (48.2, 5.0, 51.7, 9.6))
+    t = osm_tiles.tiles()
+    assert 12 <= len(t) <= 30
+    assert min(b[0] for b in t) == 48.2 and max(b[2] for b in t) == 51.7 and min(b[1] for b in t) == 5.0 and max(b[3] for b in t) == 9.6
+    monkeypatch.setattr(osm_tiles, "REGION", SimpleNamespace(mode="polygon", contains=lambda la, lo, margin_km=0: lo < 6.0))
+    assert 0 < len(osm_tiles.tiles()) < len(t)
+
+
+async def test_osm_natur_queries_every_tile_and_dedupes(registry, storage, settings, monkeypatch):
+    from app.collectors import osm_natur, osm_tiles
+    monkeypatch.setattr(osm_tiles, "REGION", SimpleNamespace(mode="polygon", contains=lambda la, lo, margin_km=0: True))
+    monkeypatch.setattr(osm_natur, "tiles", osm_tiles.tiles)
+    monkeypatch.setattr(osm_tiles.config, "BBOX", (49.0, 6.0, 50.0, 8.0))
+    monkeypatch.setattr(osm_natur, "PAUSE_S", 0)
+    entry = registry.get("osm_natur")
+    client, router = make_client(lambda req: httpx.Response(200, json={"elements": [
+        {"type": "node", "id": 1, "lat": 49.5, "lon": 6.5, "tags": {"waterway": "waterfall", "name": "Fall"}}]}))
+    c = load_collector_class(entry.collector)(entry, storage, client, settings, backoff_base_s=0.0)
+    items = await c._one(osm_natur.KINDS[0])
+    await client.aclose()
+    n_tiles = len(osm_tiles.tiles())
+    assert n_tiles >= 2 and len(router.calls) == n_tiles
+    assert len(items) <= 1

@@ -21,21 +21,22 @@ from typing import Any
 from .. import config, geo
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
+from .osm_tiles import tiles
 
 ENDPOINT = "https://overpass-api.de/api/interpreter"
 MIRRORS = ("https://z.overpass-api.de/api/interpreter", ENDPOINT, "https://overpass.private.coffee/api/interpreter")
 TIMEOUT_S = 120.0
 PAUSE_S = 5.0
 TOLERANCE_DEG = 0.0004
-MAX_PER_KIND = 300       # je Art; bei Überschuss gewinnen höhere Netzebene (international vor regional), dann längere Routen
-MAX_POINTS = 100000       # Gesamtbudget (je Art die Hälfte)
+MAX_PER_KIND = 800       # je Art; bei Überschuss gewinnen höhere Netzebene (international vor regional), dann längere Routen
+MAX_POINTS = 250000       # Gesamtbudget (je Art die Hälfte)
 NET_RANK = {"iwn": 0, "icn": 0, "nwn": 1, "ncn": 1, "rwn": 2, "rcn": 2}
 
 KINDS = (("hike", "hiking", "iwn|nwn|rwn"), ("bike", "bicycle", "icn|ncn|rcn"))
 
 
-def build_query(entry: tuple[str, str, str]) -> str:
-    s, w, n, e = config.BBOX
+def build_query(entry: tuple[str, str, str], box: tuple[float, float, float, float] | None = None) -> str:
+    s, w, n, e = box or config.BBOX
     _, route, nets = entry
     return f'[out:json][timeout:110];relation["route"="{route}"]["network"~"^({nets})$"]["name"]({s},{w},{n},{e});out geom;'
 
@@ -104,10 +105,20 @@ def parse_elements(data: Any, kind: str) -> list[dict[str, Any]]:
 
 class OsmRoutenCollector(Collector):
     async def _one(self, entry: tuple[str, str, str]) -> list[dict[str, Any]]:
+        """Eine Art über alle Kacheln; Routen über Kachelränder kommen mehrfach und fallen über die OSM-Kennung zusammen."""
+        found: dict[str, dict[str, Any]] = {}
+        for n, box in enumerate(tiles()):
+            if n:
+                await asyncio.sleep(PAUSE_S)
+            for it in await self._one_box(entry, box):
+                found[it["id"]] = it
+        return list(found.values())
+
+    async def _one_box(self, entry: tuple[str, str, str], box: tuple[float, float, float, float]) -> list[dict[str, Any]]:
         last: SourceError | None = None
         for url in MIRRORS:
             try:
-                resp = await self._request(url, {"data": build_query(entry)}, "application/json", False, (), TIMEOUT_S)
+                resp = await self._request(url, {"data": build_query(entry, box)}, "application/json", False, (), TIMEOUT_S)
                 assert resp is not None
                 try:
                     data = resp.json()
