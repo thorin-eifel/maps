@@ -146,3 +146,13 @@ def test_uba_region_tag():
     from app.collectors.uba_luft import region_tag
     assert region_tag("DERP012") == "DE-RLP" and region_tag("DESL019") == "DE-SL"
     assert region_tag("DEBW118") == "DE-BW" and region_tag("DENW259") == "DE-NW" and region_tag("X") == "DE"
+
+
+# ------------------------------------------------------------------ DWD Waldbrand
+def test_waldbrand_thin_spreads_stations():
+    from app.collectors.dwd_waldbrand import thin
+    st = [{"id": str(i), "lat": 49.85 + 0.01 * i, "lon": 6.45} for i in range(50)]   # 50 Stationen auf 55 km Linie
+    assert len(thin(st, 0, 10)) == 10 and thin(st, 0, 10)[0]["id"] == "0"
+    spread = thin(st, 20, 10)
+    assert [s["id"] for s in spread] == ["0", "18", "36"]       # alle ≥ 20 km auseinander
+    assert len(thin(st, 20, 2)) == 2

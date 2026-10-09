@@ -75,13 +75,27 @@ def pick_stations(stations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return sorted(res, key=lambda s: s["distance_km"])
 
 
+def thin(stations: list[dict[str, Any]], min_km: float, limit: int) -> list[dict[str, Any]]:
+    """Gleichmäßig über die Fläche verteilen: Reihenfolge nach Entfernung vom Bezugspunkt, eine Station nur, wenn keine bereits gewählte
+    näher als min_km liegt. Ohne Abstand (0) zählt nur das Limit (bisheriges Verhalten: die nächsten limit Stationen)."""
+    if min_km <= 0:
+        return stations[:limit]
+    out: list[dict[str, Any]] = []
+    for s in stations:
+        if all(geo.haversine_km(s["lat"], s["lon"], o["lat"], o["lon"]) >= min_km for o in out):
+            out.append(s)
+            if len(out) >= limit:
+                break
+    return out
+
+
 class WaldbrandCollector(Collector):
     async def collect(self) -> CollectResult:
         base = self.entry.url.rstrip("/")
         wood = f"{base}/woodland/forecast/recent/derived_germany_fire_danger_index_woodland_forecast_recent"
         grass = f"{base}/grassland/forecast/recent/derived_germany_fire_danger_index_grassland_forecast_recent"
         stations = pick_stations(parse_station_list(await self.fetch_bytes(f"{wood}_v2-3--0_stations_list.txt", timeout=30.0)))
-        stations = stations[: int(self.entry.params.get("max_stations", 10))]
+        stations = thin(stations, float(self.entry.params.get("min_spacing_km", 0)), int(self.entry.params.get("max_stations", 10)))
         if not stations:
             raise SourceError("WBI: keine Station im Radius (Liste geändert?)")
         now = utcnow()

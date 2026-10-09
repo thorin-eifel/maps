@@ -210,6 +210,7 @@ async def test_wbi_collector_events_from_level_3(registry, storage, settings):
         return httpx.Response(200, content=raw("dwd_wbi_1964.csv.gz" if "woodland" in p else "dwd_glfi_1964.csv.gz"))
     import app.collectors.dwd_waldbrand as mod
     mod.PAUSE_S = 0
+    registry.get("dwd_waldbrand").params.update({"max_stations": 10, "min_spacing_km": 0})   # nächste zehn, wie vor R3
     ok, _, _ = await run("dwd_waldbrand", registry, storage, settings, handler)
     assert ok
     # Fixture: Stufe 3 heute → notice; alle Stationen liefern dieselbe Datei

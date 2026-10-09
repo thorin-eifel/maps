@@ -665,7 +665,8 @@ sources:
     zuletzt_geprüft: "2026-09-30"
     collector: dwd_waldbrand
     params:
-      max_stations: 10
+      max_stations: 40
+      min_spacing_km: 30   # gleichmäßig über die Fläche statt die nächsten zehn um Irrel
 
   - id: dwd_gesundheit
     name: Pollenflug und UV-Index (DWD Medizin-Meteorologie)
@@ -912,7 +913,7 @@ sources:
     zuletzt_geprüft: "2026-10-07"
     collector: dwd_stationen
     params:
-      max_stations: 60
+      max_stations: 200   # SYNOP-Stationen in Rheinland-Pfalz plus 80 km, alle (die Liste wird nach Entfernung geordnet)
 
   - id: irceline
     name: Luftqualität Belgien (IRCEL-CELINE)

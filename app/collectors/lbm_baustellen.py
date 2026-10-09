@@ -28,7 +28,7 @@ from ..models import Event, Severity, utcnow
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
 
-MAX_PAGES = 5
+MAX_PAGES = 15   # Rheinland-Pfalz plus 80 km: rund 2.000 Baustellen, Verlauf mit über 5.000 Abschnitten
 PAGE = 1000
 EXCLUDED_SOURCES = {"autobahn gmbh"}
 LU_SOURCES = {"straßenbauverwaltung luxemburg"}
