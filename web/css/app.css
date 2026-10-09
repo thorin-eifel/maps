@@ -1,0 +1,683 @@
+/* OSINT by CTW — Oberfläche. Nüchtern, ruhig, Admin-Tool-Charakter. Tokens: css/tokens.css */
+*, *::before, *::after { box-sizing: border-box; }
+html { color-scheme: light; }
+/* Große Bildschirme: Schrift, Rahmenbreite und Kartenhöhe wachsen mit (alles in rem), sonst bleibt eine schmale Spalte in der Mitte */
+:root { --frame: min(90rem, 100vw); --map-h: clamp(380px, calc(100vh - 17rem), 62rem); }
+@media (min-width: 1900px) { :root { font-size: 112.5%; --frame: min(100rem, 96vw); } }
+@media (min-width: 2500px) { :root { font-size: 137.5%; --frame: min(150rem, 96vw); } }
+@media (min-width: 3100px) { :root { font-size: 162.5%; } }
+@media (min-width: 3900px) { :root { font-size: 200%; } }
+html[data-ansicht="dunkel"] { color-scheme: dark; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: var(--fs-base)/var(--lh-base) var(--font-sans);
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+a { color: inherit; text-decoration-color: var(--border-strong); text-underline-offset: 2px; }
+a:hover { text-decoration-color: currentColor; }
+:focus-visible { outline: 2px solid var(--ring); outline-offset: 2px; border-radius: var(--radius-xs); }
+.skip { position: absolute; left: -9999px; }
+.skip:focus { left: var(--space-3); top: var(--space-3); background: var(--bg-elevated); padding: var(--space-2) var(--space-3); z-index: 100; }
+.muted { color: var(--fg-muted); }
+.mono { font-family: var(--font-mono); font-size: var(--fs-sm); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Kopf */
+.top {
+  position: sticky; top: 0; z-index: 20; background: var(--material-chrome);
+  backdrop-filter: var(--blur-material); -webkit-backdrop-filter: var(--blur-material);
+  border-bottom: 1px solid var(--border);
+}
+.top-in { max-width: var(--frame, 1440px); margin: 0 auto; padding: var(--space-3) var(--space-4); display: flex; gap: var(--space-4); align-items: center; flex-wrap: wrap; }
+.brand { display: flex; flex-direction: column; line-height: 1.15; text-decoration: none; }
+.brand b { font-family: var(--font-display); font-size: var(--fs-lg); letter-spacing: var(--tracking-snug); }
+.brand span { font-size: var(--fs-xs); color: var(--fg-muted); }
+.nav { display: flex; gap: var(--space-1); margin-left: auto; align-items: center; }
+.nav a, .btn {
+  font: inherit; font-size: var(--fs-sm); padding: var(--space-2) var(--space-3); border-radius: var(--radius-md);
+  border: 1px solid transparent; background: transparent; color: var(--fg); text-decoration: none; cursor: pointer;
+}
+.nav a:hover, .btn:hover { background: var(--surface); }
+.nav a[aria-current="page"] { background: var(--surface); border-color: var(--border); }
+.btn { border-color: var(--border-strong); background: var(--bg-elevated); }
+
+/* Warnband */
+.warnband { border-bottom: 1px solid var(--border); background: var(--surface); }
+.warnband-in { max-width: var(--frame, 1440px); margin: 0 auto; padding: var(--space-3) var(--space-4); display: flex; gap: var(--space-3); align-items: baseline; flex-wrap: wrap; }
+.warnband strong { font-size: var(--fs-md); }
+.warnband[data-level="critical"] { background: var(--brand-red-600); color: #fff; }
+.warnband[data-level="warning"] { background: oklch(78% .15 65); color: oklch(22% .04 65); }
+.warnband[data-level="notice"] { background: var(--sys-yellow); color: oklch(24% .05 85); }
+.warnband[data-level="down"] { background: var(--status-warning-bg); color: var(--fg); }
+html[data-ansicht="dunkel"] .warnband[data-level="down"] { background: var(--surface); }
+.warnband ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); }
+.warnband .meta { font-size: var(--fs-xs); opacity: .85; margin-left: auto; }
+.warnband details { flex-basis: 100%; }
+.warnband summary { cursor: pointer; font-size: var(--fs-sm); width: fit-content; }
+.warnband details ul { margin-top: var(--space-2); font-size: var(--fs-sm); flex-direction: column; gap: var(--space-1); }
+@media (max-width: 600px) { .warnband-in { gap: var(--space-1) var(--space-3); } .nav { margin-left: 0; flex-wrap: wrap; } }
+
+/* Raster */
+main { flex: 1; width: 100%; max-width: var(--frame, 1440px); margin: 0 auto; padding: var(--space-4); }
+.lage { display: grid; grid-template-columns: minmax(0, 1fr) 26rem; gap: var(--space-4); align-items: start; }
+@media (max-width: 1000px) { .lage { grid-template-columns: 1fr; } }
+.card { background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: var(--shadow-xs); }
+.card-h { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.card-h h1, .card-h h2 { font-size: var(--fs-md); margin: 0; font-weight: 600; text-wrap: balance; }
+.card-h h1 { font-size: var(--fs-lg); letter-spacing: var(--tracking-snug); }
+.card-b { padding: var(--space-4); }
+.card-f { padding: var(--space-2) var(--space-4); border-top: 1px solid var(--border); font-size: var(--fs-xs); color: var(--fg-muted); display: flex; gap: var(--space-2) var(--space-4); flex-wrap: wrap; }
+
+/* Karte */
+.map-wrap { position: relative; }
+#map { height: var(--map-h); min-height: 380px; border-radius: 0 0 var(--radius-lg) var(--radius-lg); background: var(--surface); }
+.controls { display: flex; gap: var(--space-2) var(--space-4); flex-wrap: wrap; margin-left: auto; font-size: var(--fs-sm); }
+.controls fieldset { border: 0; padding: 0; margin: 0; min-width: 0; display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); align-items: center; }
+.controls legend { float: left; margin-right: var(--space-2); color: var(--fg-muted); padding: 0; }
+.controls label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; }
+.swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.town { font-size: var(--fs-xs); color: var(--fg-muted); white-space: nowrap; pointer-events: none; text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg); }
+.town.home { color: var(--fg); font-weight: 600; font-size: var(--fs-xs); }
+.town { color: var(--fg); font-weight: 600; text-shadow: 0 0 3px var(--bg), 0 0 3px var(--bg), 0 0 5px var(--bg); }
+.z-close .town:not(.home) { display: none; } /* ab Zoom 9 beschriftet die Basiskarte die Orte */
+.map-note { position: absolute; left: var(--space-3); bottom: var(--space-3); font-size: var(--fs-xs); color: var(--fg-muted); background: var(--material-thick); padding: 2px 8px; border-radius: var(--radius-full); max-width: 80%; }
+
+/* Popup */
+.maplibregl-popup-content { background: var(--bg-elevated); color: var(--fg); border-radius: var(--radius-md); font: var(--fs-sm)/1.4 var(--font-sans); padding: var(--space-3); max-width: 300px; }
+.maplibregl-popup-tip { display: none; }
+.pop h3 { margin: 0 0 var(--space-1); font-size: var(--fs-sm); }
+.pop p { margin: var(--space-1) 0; }
+.pop .k { color: var(--fg-muted); font-size: var(--fs-xs); }
+
+/* Seitenleiste */
+.tabs { display: flex; gap: 2px; padding: var(--space-2) var(--space-2) 0; border-bottom: 1px solid var(--border); }
+.tabs button { font: inherit; font-size: var(--fs-sm); padding: var(--space-2) var(--space-3); border: 1px solid transparent; border-bottom: 0; background: transparent; color: var(--fg-muted); border-radius: var(--radius-md) var(--radius-md) 0 0; cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--fg); background: var(--surface); border-color: var(--border); }
+.panel { max-height: var(--map-h); overflow: auto; }
+.panel[hidden] { display: none; }
+
+/* Tabellen */
+table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+th, td { text-align: left; padding: var(--space-2) var(--space-3); border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-weight: 600; font-size: var(--fs-xs); color: var(--fg-muted); letter-spacing: var(--tracking-wide); text-transform: uppercase; position: sticky; top: 0; background: var(--bg-elevated); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.scroll-x { overflow-x: auto; }
+tr.click { cursor: pointer; }
+tr.click:hover { background: var(--surface); }
+.empty { padding: var(--space-6) var(--space-4); color: var(--fg-muted); text-align: center; }
+
+/* Plaketten */
+.badge { display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-xs); padding: 1px 8px; border-radius: var(--radius-full); border: 1px solid var(--border-strong); white-space: nowrap; }
+.badge::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.sev-critical { color: var(--brand-red-600); } .sev-warning { color: oklch(50% .14 55); }
+.sev-notice { color: oklch(50% .10 90); } .sev-info { color: var(--fg-muted); }
+html[data-ansicht="dunkel"] .sev-critical { color: var(--danger); }
+html[data-ansicht="dunkel"] .sev-warning { color: oklch(72% .15 55); }
+html[data-ansicht="dunkel"] .sev-notice { color: var(--sys-yellow); }
+.st-ok { color: var(--status-success); } .st-degraded, .st-stale { color: var(--warn-text); }
+.st-down { color: var(--brand-red-600); } .st-pending, .st-disabled { color: var(--fg-muted); }
+.stale-note { color: var(--warn-text); font-weight: 600; }
+
+/* Gewässer, Wetter */
+.pegel { display: grid; grid-template-columns: 1fr auto; gap: var(--space-1) var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border); }
+.pegel h3 { margin: 0; font-size: var(--fs-sm); }
+.pegel .val { font-size: var(--fs-lg); font-variant-numeric: tabular-nums; text-align: right; }
+.pegel svg { grid-column: 1 / -1; width: 100%; height: 34px; }
+.spark { fill: none; stroke: var(--accent); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.spark-area { fill: color-mix(in oklab, var(--accent) 22%, transparent); stroke: none; }
+.wx-now { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); padding: var(--space-4); }
+.wx-now .big { grid-column: 1 / -1; font-size: var(--fs-3xl); font-family: var(--font-display); letter-spacing: var(--tracking-tight); line-height: 1; }
+.kv dt { font-size: var(--fs-xs); color: var(--fg-muted); } .kv dd { margin: 0 0 var(--space-2); font-variant-numeric: tabular-nums; }
+.wx-chart { padding: 0 var(--space-4) var(--space-4); }
+.wx-chart svg { width: 100%; height: 120px; }
+.bar { fill: color-mix(in oklab, var(--sys-blue) 55%, transparent); }
+.grid-line { stroke: var(--border); stroke-width: 1; }
+.lbl { fill: var(--fg-muted); font-size: 11px; font-family: var(--font-sans); }
+
+/* Statusseite / Quellen */
+.stack { display: grid; gap: var(--space-4); }
+.stack > *, .lage > * { min-width: 0; }
+.runs { display: inline-flex; gap: 3px; }
+.run { width: 8px; height: 14px; border-radius: 2px; background: var(--status-success); }
+.run.bad { background: var(--brand-red-600); }
+.src { padding: var(--space-4); border-bottom: 1px solid var(--border); }
+.src:last-child { border-bottom: 0; }
+.src h2 { margin: 0 0 var(--space-1); font-size: var(--fs-md); }
+.src dl { display: grid; grid-template-columns: 12rem 1fr; gap: var(--space-1) var(--space-4); margin: var(--space-3) 0 0; font-size: var(--fs-sm); }
+.src dt { color: var(--fg-muted); } .src dd { margin: 0; }
+@media (max-width: 600px) { .src dl { grid-template-columns: 1fr; } .src dt { margin-top: var(--space-2); } }
+.prose { max-width: var(--measure); }
+
+/* Fuß */
+footer { border-top: 1px solid var(--border); background: var(--surface); }
+.foot-in { max-width: var(--frame, 1440px); margin: 0 auto; padding: var(--space-4); font-size: var(--fs-xs); color: var(--fg-muted); display: grid; gap: var(--space-2); }
+.foot-in strong { color: var(--fg); }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.right { text-align: right; }
+.small { font-size: var(--fs-xs); }
+.wx-note { grid-column: 1 / -1; font-size: var(--fs-xs); }
+
+/* Wetter jetzt: schmale Leiste unter dem Warnband */
+.wxband { border-bottom: 1px solid var(--border); background: var(--bg); max-width: none; }
+.wxband { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); align-items: baseline; padding: var(--space-2) max(var(--space-4), calc((100% - var(--frame)) / 2 + var(--space-4))); }
+.wxband strong { font-size: var(--fs-md); }
+.wx-items { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin: 0; }
+.wx-items div { display: flex; gap: var(--space-2); align-items: baseline; }
+.wx-items dt { color: var(--fg-muted, var(--muted)); font-size: var(--fs-xs); }
+.wx-items dd { margin: 0; font-variant-numeric: tabular-nums; font-weight: 600; }
+.wxband .meta { font-size: var(--fs-xs); color: var(--fg-muted, var(--muted)); margin-left: auto; }
+
+/* Icons und Live-Hinweis */
+.controls label { white-space: nowrap; }
+.live-note { color: var(--fg-muted); }
+.pop h3 { display: flex; align-items: baseline; }
+.tabs button { display: inline-flex; align-items: center; }
+.wx-items dt { display: inline-flex; align-items: center; }
+
+/* Relief-Legende und Höhenanzeige (links oben in der Karte) */
+.relief-legend { position: absolute; left: var(--space-3); top: var(--space-3); width: 11rem; white-space: nowrap; background: var(--material-thick); backdrop-filter: var(--blur-material); -webkit-backdrop-filter: var(--blur-material); border: 1px solid var(--border); border-radius: var(--radius-md); padding: 6px 10px 7px; font-size: var(--fs-xs); color: var(--fg-muted); box-shadow: var(--shadow-md); }
+.relief-legend[hidden] { display: none; }
+.relief-title { font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+.relief-bar { height: 8px; border-radius: var(--radius-full); border: 1px solid var(--border-strong); }
+.relief-scale { display: flex; justify-content: space-between; margin-top: 2px; font-variant-numeric: tabular-nums; }
+.relief-elev { white-space: normal; margin-top: 5px; padding-top: 4px; border-top: 1px solid var(--border); font-variant-numeric: tabular-nums; color: var(--fg); min-height: 1.3em; }
+@media (max-width: 640px) { .relief-legend { width: 140px; } .relief-elev { display: none; } }
+
+/* Karte füllt den Rahmen, Bedienung und Liste schweben darüber (ab 1001 px; darunter bleibt es untereinander) */
+.controls > summary { cursor: pointer; font-weight: 600; list-style-position: inside; }
+@media (min-width: 1001px) {
+  :root { --map-h: clamp(520px, calc(100vh - 14rem), 90rem); --float-w: min(22rem, 36%); --side-w: min(26rem, 36%); }
+  .lage { display: block; }
+  .lage > .card:first-child { position: relative; overflow: hidden; }
+  .lage > .card:first-child .card-h {
+    position: absolute; z-index: 6; top: var(--space-3); left: var(--space-3); width: var(--float-w);
+    max-height: calc(100% - 2 * var(--space-3)); overflow: auto; display: grid; grid-template-columns: auto 1fr; align-items: baseline; gap: var(--space-1) var(--space-2);
+    background: var(--material-thick); backdrop-filter: var(--blur-material); -webkit-backdrop-filter: var(--blur-material);
+    border: 1px solid var(--border); border-radius: var(--radius-md); box-shadow: var(--shadow-md);
+  }
+  .lage .card-h .controls { margin-left: 0; display: block; grid-column: 1 / -1; }
+  .lage .controls fieldset:first-of-type { flex-direction: row; flex-wrap: wrap; gap: var(--space-1) var(--space-3); }
+  .lage .controls fieldset { flex-direction: column; align-items: flex-start; gap: var(--space-1); margin-top: var(--space-2); }
+  .lage .controls legend { float: none; display: block; margin: 0 0 2px; }
+  #map { border-radius: var(--radius-lg); }
+  .lage > .card:last-child {
+    position: absolute; z-index: 6; top: var(--space-3); right: var(--space-3); width: var(--side-w);
+    max-height: calc(var(--map-h) - 2 * var(--space-3)); display: flex; flex-direction: column; overflow: hidden;
+    background: var(--material-thick); backdrop-filter: var(--blur-material); -webkit-backdrop-filter: var(--blur-material); box-shadow: var(--shadow-md);
+  }
+  .lage > .card:last-child #side-body { display: flex; flex-direction: column; flex: 1 1 auto; min-height: 0; }
+  .lage > .card:last-child .panel { max-height: none; flex: 1 1 auto; min-height: 0; }
+  .lage.side-min > .card:last-child { width: auto; }
+  .lage.side-min .map-wrap .maplibregl-ctrl-top-right { right: calc(11rem + var(--space-3)); }
+  .lage { position: relative; }
+  /* das Kartenraster liegt in der ersten Karte; die zweite schwebt relativ zu .lage, also auf gleicher Höhe wie die Karte */
+  .map-wrap .maplibregl-ctrl-top-right { right: calc(var(--side-w) + var(--space-3)); top: var(--space-1); }
+  .relief-legend { top: auto; bottom: 2.6rem; }
+}
+
+/* Detailfeld ein- und ausklappen */
+.side-bar { display: flex; justify-content: flex-end; padding: 2px var(--space-2); }
+#side-toggle { display: inline-flex; align-items: center; gap: .4em; font: inherit; font-size: var(--fs-xs); color: var(--fg-muted); background: none; border: 0; padding: 4px 6px; cursor: pointer; border-radius: var(--radius-sm); }
+#side-toggle:hover { color: var(--fg); background: var(--fill-quaternary, rgba(128,128,128,.12)); }
+#side-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.side-chev { display: inline-block; transition: transform .15s; }
+#side[data-min="true"] #side-body { display: none; }
+#side[data-min="true"] .side-chev { transform: rotate(180deg); }
+
+/* Radar-Sweep (js/sweep.js) und Legende Luftverkehr */
+.sweep { position: absolute; left: 0; top: 0; pointer-events: none; z-index: 1; }
+.tl { display: inline-block; width: .8em; height: .8em; border-radius: 50%; border: 1.5px solid #fff; box-shadow: 0 0 0 1px var(--border-strong); margin-right: .3em; vertical-align: -.05em; }
+.tl-yellow { background: #f5c400; } .tl-orange { background: #f28c1a; } .tl-red { background: #d62828; } .tl-black { background: #111; }
+.ico-mil { color: #8e44ad; }
+.sound-opt { display: none !important; margin-left: 1.5em; }
+.controls:has(input[data-layer="air"]:checked) .sound-opt { display: inline-flex !important; }
+
+
+/* Eine Deckkraft für alles, was über der Karte schwebt: Ebenen, Höhenlegende, Detailfeld, Meldungsfenster, Hinweiszeile, Zoomknöpfe.
+   Innenflächen (Tabellenkopf, aktiver Reiter) sind durchsichtig und erben vom Träger; sonst entstehen dunklere Kacheln im Feld. */
+:root { --float-bg: color-mix(in oklab, var(--bg-elevated) 78%, transparent); --float-blur: blur(14px) saturate(1.3); }
+.lage > .card:first-child .card-h, .lage > .card:last-child, .relief-legend, .map-note, .maplibregl-popup-content, .maplibregl-ctrl-group {
+  background: var(--float-bg); backdrop-filter: var(--float-blur); -webkit-backdrop-filter: var(--float-blur);
+}
+.lage .card-h { background: var(--float-bg); }
+.lage > .card:last-child th { background: transparent; }
+.lage > .card:last-child .tabs button[aria-selected="true"] { background: color-mix(in oklab, var(--surface) 45%, transparent); }
+.lage > .card:last-child tbody tr { background: transparent; }
+.maplibregl-popup-content { border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+.maplibregl-ctrl-group { border: 1px solid var(--border); box-shadow: var(--shadow-md); }
+.tl-b1 { background: #ffe600; } .tl-b2 { background: #ff9600; } .tl-b3 { background: #ff3b1f; } .tl-b4 { background: #a30d0d; }
+
+/* Ebenenmenü nach Themen: je Thema ein aufklappbarer Block */
+.layer-groups { display: flex; flex-direction: column; gap: var(--space-1); margin-top: var(--space-2); }
+.layer-group > summary { cursor: pointer; font-weight: 600; color: var(--fg-muted); padding: 2px 0; }
+.layer-group[open] > summary { color: var(--fg); }
+.layer-list { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; padding: 2px 0 var(--space-2) var(--space-3); }
+.sound-opt { margin-top: var(--space-1); }
+
+/* Grundsatzentscheidung Kartenseite: Die Karte nutzt den gesamten verfügbaren Platz, ohne Rahmen, Rundung oder Gutter, auf jedem Gerät und in jeder
+   Fenstergröße gleich. Alles Übrige schwebt mit einem einzigen festen Abstand (--space-3) darüber. Kopf, Bänder und Fußzeile laufen über die volle
+   Breite mit demselben Abstand; die Karte füllt den Rest der Fensterhöhe (ab 1001 px), darunter bleibt sie randlos in einer Höhe von 78 % des Fensters.
+   Gilt nur für die Seite mit body.page-lage; Status und Quellen behalten ihr Raster. */
+.page-lage .top-in, .page-lage .warnband-in, .page-lage .foot-in { max-width: none; padding-left: var(--space-3); padding-right: var(--space-3); }
+.page-lage .wxband { padding-left: var(--space-3); padding-right: var(--space-3); }
+.page-lage main { max-width: none; padding: 0; }
+.page-lage .lage { gap: 0; }
+.page-lage .lage > .card:first-child, .page-lage .lage > .card:last-child { border-radius: 0; }
+.page-lage .lage > .card:first-child { border: 0; box-shadow: none; }
+.page-lage #map { border-radius: 0; }
+.page-lage #apidown { margin: var(--space-3); }
+@media (min-width: 1001px) {
+  .page-lage { height: 100dvh; min-height: 0; }
+  .page-lage main { min-height: 0; display: flex; flex-direction: column; }
+  .page-lage .lage { flex: 1 1 auto; min-height: 0; }
+  .page-lage .lage > .card:first-child { height: 100%; display: flex; flex-direction: column; }
+  .page-lage .map-wrap { flex: 1 1 auto; min-height: 0; }
+  .page-lage #map { height: 100%; min-height: 0; }
+  /* schwebende Felder: gleicher Abstand ringsum, auch das Detailfeld richtet sich nach der Kartenhöhe statt nach --map-h */
+  .page-lage .lage > .card:last-child { border-radius: var(--radius-md); max-height: calc(100% - 2 * var(--space-3)); }
+  .page-lage .lage > .card:first-child .card-h { border-radius: var(--radius-md); }
+}
+@media (max-width: 1000px) {
+  .page-lage #map { height: clamp(420px, 78dvh, 60rem); min-height: 0; }
+  .page-lage .lage > .card:last-child { border-left: 0; border-right: 0; }
+}
+.page-lage .foot-in { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.page-lage .foot-in { gap: 2px; }
+
+/* Themenschalter in der Gruppenüberschrift */
+.layer-group > summary .group-switch { display: inline-flex; align-items: center; gap: var(--space-2); cursor: pointer; }
+.layer-group > summary .group-toggle { margin: 0; }
+
+/* Wetter: zweites Vorhersagemodell und Tabelle weiterer Messungen */
+.spark-alt { stroke: var(--fg-muted); stroke-dasharray: 4 3; }
+.wx-others { margin-top: var(--space-3); }
+.wx-others caption { text-align: left; font-weight: 600; padding-bottom: var(--space-1); }
+.wx-others th, .wx-others td { text-align: left; padding: 2px var(--space-2) 2px 0; font-weight: normal; vertical-align: top; }
+.wx-others thead th { color: var(--fg-muted); font-size: var(--fs-xs); }
+
+/* Reiter: bei sechs Stück in der schmalen Seitenleiste in zwei Zeilen umbrechen (kein Scrollbalken); flex 0 0 auto, damit die Leiste im
+   schwebenden Feld (Spalte mit min-height 0) nicht auf Null schrumpft */
+.tabs { flex-wrap: wrap; flex: 0 0 auto; row-gap: 2px; }
+.tabs button { white-space: nowrap; }
+.side-bar { flex: 0 0 auto; }
+.tabs button { white-space: nowrap; }
+.lvl { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Ereignisliste: Sortieren und Filtern. Kompakt: Suche + Filter-Knopf, Stufen als Chips, Sortierung klein, Typ und Umkreis eingeklappt. */
+.ev-tools { display: grid; gap: 6px; padding: var(--space-2) var(--space-3); }
+.ev-row { display: flex; gap: 6px; align-items: center; }
+.ev-row > input[type="search"] { flex: 1 1 auto; min-width: 0; }
+.ev-tools input, .ev-tools select { font: inherit; font-size: var(--fs-sm); color: var(--fg); background: color-mix(in oklab, var(--surface) 60%, transparent);
+  border: 1px solid var(--border); border-radius: var(--radius-md); padding: 4px 8px; height: 30px; box-sizing: border-box; }
+.ev-tools input::placeholder { color: var(--fg-muted); }
+.ev-tools select { max-width: 100%; text-overflow: ellipsis; }
+.ev-btn { font: inherit; font-size: var(--fs-sm); color: var(--fg); background: transparent; border: 1px solid var(--border); border-radius: var(--radius-md); padding: 0 10px; height: 30px; cursor: pointer; white-space: nowrap; }
+.ev-btn:hover, .ev-chip:hover { background: color-mix(in oklab, var(--surface) 70%, transparent); }
+.ev-btn[aria-expanded="true"] { background: color-mix(in oklab, var(--surface) 70%, transparent); }
+.ev-icon { width: 30px; padding: 0; }
+.ev-n { display: inline-block; min-width: 1.3em; padding: 0 4px; margin-left: 2px; border-radius: var(--radius-full); background: var(--fg); color: var(--bg-elevated, #fff); font-size: var(--fs-xs); text-align: center; }
+.ev-more { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.ev-more[hidden] { display: none; }
+.ev-more label { display: grid; gap: 2px; font-size: var(--fs-xs); color: var(--fg-muted); }
+.ev-row2 { justify-content: space-between; flex-wrap: wrap; }
+.ev-chips { display: inline-flex; gap: 4px; }
+.ev-chip { font: inherit; font-size: var(--fs-xs); color: var(--fg-muted); background: transparent; border: 1px solid var(--border); border-radius: var(--radius-full); padding: 3px 9px; height: 26px; cursor: pointer; white-space: nowrap; }
+.ev-chip[aria-pressed="true"] { color: var(--fg); border-color: var(--fg-muted); background: color-mix(in oklab, var(--surface) 80%, transparent); font-weight: 600; }
+.ev-sortbox { display: inline-flex; gap: 4px; margin-left: auto; }
+.ev-sortbox select { width: 9.5rem; height: 26px; font-size: var(--fs-xs); padding: 2px 6px; }
+.ev-sortbox .ev-icon { height: 26px; width: 26px; }
+.ev-foot { display: flex; justify-content: space-between; align-items: center; font-size: var(--fs-xs); color: var(--fg-muted); }
+.ev-link { font: inherit; font-size: var(--fs-xs); color: var(--fg); background: none; border: 0; padding: 0; text-decoration: underline; cursor: pointer; }
+.ev-link[hidden] { display: none; }
+.th-sort { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-transform: inherit; letter-spacing: inherit; }
+th[aria-sort="ascending"] .th-sort::after { content: " ▲"; font-size: .8em; }
+th[aria-sort="descending"] .th-sort::after { content: " ▼"; font-size: .8em; }
+.ev-tools input:focus-visible, .ev-tools select:focus-visible, .ev-btn:focus-visible, .ev-chip:focus-visible, .ev-link:focus-visible, .th-sort:focus-visible { outline: 2px solid var(--fg-muted); outline-offset: 2px; }
+
+/* Seitenleiste kompakt: Reiter als Symbole, nur der aktive mit Beschriftung (sechs Reiter passen so in eine Zeile) */
+#side .tabs { flex-wrap: nowrap; gap: 2px; padding-top: var(--space-1); }
+#side .tabs button { padding: var(--space-2) var(--space-2); gap: 6px; }
+#side .tabs button:not([aria-selected="true"]) .tab-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+#side .tabs button[aria-selected="true"] { flex: 0 0 auto; }
+#side .tabs .ico { width: 1.25em; height: 1.25em; }
+.ev-tools { gap: 4px; padding: var(--space-2) var(--space-3) var(--space-1); }
+.ev-row2 { flex-wrap: nowrap; justify-content: space-between; }
+.ev-more { grid-template-columns: 1fr 1fr; padding: 6px; border: 1px solid var(--border); border-radius: var(--radius-md); background: color-mix(in oklab, var(--surface) 40%, transparent); }
+.ev-more .ev-wide { grid-column: 1 / -1; }
+.ev-more select { width: 100%; }
+.ev-more .ev-sortbox { display: flex; gap: 4px; margin: 0; }
+.ev-more .ev-sortbox select { width: auto; flex: 1 1 auto; height: 30px; font-size: var(--fs-sm); }
+.ev-more .ev-sortbox .ev-icon { height: 30px; width: 30px; }
+#panel-events thead th { padding-top: 4px; padding-bottom: 4px; }
+
+/* ==========================================================================
+   Angleichung an das CTW Design System v5.1 (Liquid Glass)
+   Steht am Ende und gewinnt bei gleicher Spezifität. Regeln: Glas aus Tokens, Kante oben hell, Schatten unten, Pillen statt Kästen,
+   leichte Überschriften, Haarlinien, ein fester Abstand (--gutter am Rand, --float-gap über der Karte). Die Kartenseite bleibt randlos
+   (Grundsatzentscheidung oben); nur was darüber schwebt, folgt dem Glas.
+   ========================================================================== */
+:root { --float-gap: var(--space-4); --float-bg: var(--glass-fill-strong); --float-blur: var(--glass-blur); }
+body { font-size: var(--fs-base); letter-spacing: var(--tracking-snug); -webkit-font-smoothing: antialiased; }
+a { color: inherit; }
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--bg-elevated); outline-offset: 2px; border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 4px var(--focus), 0 0 18px 4px color-mix(in oklab, var(--focus) 55%, transparent);
+}
+
+/* Kopf: weiße Leiste, 72 px, Lichtkante unten wie im Design System */
+.top { background: var(--bg-elevated); backdrop-filter: none; -webkit-backdrop-filter: none; border-bottom: 1px solid var(--glass-edge);
+  box-shadow: var(--glass-inset), 0 10px 30px -18px var(--shadow-ambient); }
+.top-in, .page-lage .top-in { min-height: 72px; padding: var(--space-2) var(--gutter); gap: var(--space-6); }
+.brand { gap: 2px; }
+.brand b { font-weight: var(--weight-light); font-size: var(--fs-xl); line-height: 1.05; letter-spacing: var(--tracking-tight); }
+.brand span { font-size: var(--fs-xs); color: var(--fg-muted); letter-spacing: var(--tracking-snug); }
+.nav { gap: var(--space-1); }
+.nav a { padding: var(--space-2) var(--space-3); font-size: var(--fs-base); font-weight: 500; border: 0; border-radius: var(--radius-pill);
+  transition: background var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out); }
+.nav a:hover { background: var(--surface-soft); }
+.nav a[aria-current="page"] { background: var(--bg-elevated); border: 0; box-shadow: var(--glass-inset), 0 2px 6px var(--shadow-ambient); }
+
+/* Knöpfe: Glaspille mit Kuppel, gedrückt wird sie zur Mulde */
+.btn { min-height: 38px; padding: 8px 18px; font: 600 var(--fs-button)/1.2 var(--font-sans); color: var(--fg); border-radius: var(--radius-pill);
+  background: var(--glass-btn-fill); border: 1px solid var(--glass-edge); box-shadow: var(--glass-inset), var(--glass-shadow);
+  transition: transform var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out), background var(--dur-fast) var(--ease-out); }
+.btn:hover { background: var(--glass-btn-hover); transform: translateY(-1px); }
+.btn:active { transform: translateY(1px); box-shadow: var(--chamfer-well); }
+
+/* Bänder unter dem Kopf: dieselben Ränder wie der Kopf, mehr Luft */
+.warnband-in, .page-lage .warnband-in { padding: var(--space-4) var(--gutter); gap: var(--space-2) var(--space-6); }
+.warnband strong { font-size: var(--fs-lg); font-weight: 600; letter-spacing: var(--tracking-snug); }
+.warnband .meta { font-size: var(--fs-xs); }
+.wxband, .page-lage .wxband { padding: var(--space-3) var(--gutter); border-bottom: 1px solid var(--line-soft); gap: var(--space-2) var(--space-6); background: var(--bg); }
+.wx-items { gap: var(--space-1) var(--space-6); }
+.wxband strong { font-weight: 600; }
+
+/* Karten: Glas mit heller Oberkante, Radius 20, Überschriften leicht */
+.card { background: var(--glass-fill); border: 1px solid var(--glass-edge); border-radius: var(--radius-xl);
+  box-shadow: var(--glass-inset), var(--glass-shadow); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+.card-h { padding: var(--space-4) var(--space-6); border-bottom: 1px solid var(--line-soft); gap: var(--space-3) var(--space-4); }
+.card-h h1 { font-family: var(--font-display); font-weight: var(--weight-light); font-size: var(--fs-xl); line-height: 1.1; letter-spacing: var(--tracking-tight); }
+.card-h h2 { font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--tracking-wide); text-transform: uppercase; }
+.card-b { padding: var(--space-6); }
+.card-f { padding: var(--space-3) var(--space-6); border-top: 1px solid var(--line-soft); }
+main { padding: var(--space-8) var(--gutter); }
+.page-lage main { padding: 0; }
+.stack { gap: var(--gutter); }
+.src { padding: var(--space-6); border-bottom-color: var(--line-soft); }
+.src h2 { font-family: var(--font-display); font-weight: 400; font-size: var(--fs-lg); letter-spacing: var(--tracking-snug); margin-bottom: var(--space-2); }
+.src dl { gap: var(--space-2) var(--space-6); margin-top: var(--space-4); }
+
+/* Was über der Karte schwebt: ein Abstand ringsum, Glas, Radius 20 */
+@media (min-width: 1001px) {
+  .page-lage .lage > .card:first-child .card-h { top: var(--float-gap); left: var(--float-gap); padding: var(--space-4) var(--space-5); border: 1px solid var(--glass-edge);
+    border-radius: var(--radius-xl); box-shadow: var(--glass-inset), var(--glass-shadow); max-height: calc(100% - 2 * var(--float-gap)); }
+  .page-lage .lage > .card:last-child { top: var(--float-gap); right: var(--float-gap); border-radius: var(--radius-xl); max-height: calc(100% - 2 * var(--float-gap));
+    box-shadow: var(--glass-inset), var(--glass-shadow); }
+  .map-wrap .maplibregl-ctrl-top-right { right: calc(var(--side-w) + var(--float-gap)); top: calc(var(--float-gap) - 10px); }
+  .lage.side-min .map-wrap .maplibregl-ctrl-top-right { right: calc(11rem + var(--float-gap)); }
+  .relief-legend { left: var(--float-gap); }
+}
+.lage > .card:first-child .card-h h1 { font-size: var(--fs-lg); }
+.map-note { left: var(--float-gap); bottom: var(--float-gap); border: 1px solid var(--glass-edge); box-shadow: var(--glass-inset), var(--glass-shadow); padding: 3px 12px; }
+.relief-legend { border: 1px solid var(--glass-edge); border-radius: var(--radius-lg); box-shadow: var(--glass-inset), var(--glass-shadow); padding: var(--space-3) var(--space-4); }
+/* Info-Tafeln: gleiche Glasfläche, Rundung und Schrift wie die Karten */
+.maplibregl-map .maplibregl-popup .maplibregl-popup-content { background: var(--glass-fill); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-edge); border-radius: var(--radius-xl); box-shadow: var(--glass-inset), var(--glass-shadow-lift);
+  padding: var(--space-4) var(--space-5); max-width: 22rem; font: var(--fs-sm)/1.45 var(--font-sans); color: var(--fg); }
+.pop h3 { display: flex; align-items: center; gap: var(--space-2); margin: 0 var(--space-5) var(--space-2) 0; font-family: var(--font-display); font-size: var(--fs-lg); font-weight: var(--weight-light); letter-spacing: var(--tracking-snug); line-height: 1.2; text-wrap: balance; }
+.pop h3 .ico { flex: none; }
+.pop p { margin: var(--space-2) 0; }
+.maplibregl-map .maplibregl-popup .maplibregl-popup-close-button { top: var(--space-2); right: var(--space-2); width: 1.75rem; height: 1.75rem; padding: 0; border-radius: var(--radius-pill);
+  font-size: 1.1rem; line-height: 1; color: var(--fg-muted); background: var(--glass-btn-fill); border: 1px solid var(--glass-edge); box-shadow: var(--glass-inset); }
+.maplibregl-map .maplibregl-popup .maplibregl-popup-close-button:hover { background: var(--glass-btn-hover); color: var(--fg); }
+.maplibregl-map .maplibregl-popup .maplibregl-popup-close-button:focus-visible { outline: 2px solid var(--focus, currentColor); outline-offset: 2px; }
+.maplibregl-map .maplibregl-popup-anchor-top .maplibregl-popup-content, .maplibregl-map .maplibregl-popup-anchor-bottom .maplibregl-popup-content, .maplibregl-map .maplibregl-popup-anchor-left .maplibregl-popup-content, .maplibregl-map .maplibregl-popup-anchor-right .maplibregl-popup-content, .maplibregl-map [class*="maplibregl-popup-anchor-"] .maplibregl-popup-content { border-radius: var(--radius-xl); }
+.maplibregl-ctrl-group { border: 1px solid var(--glass-edge); border-radius: var(--radius-lg); box-shadow: var(--glass-inset), var(--glass-shadow); overflow: hidden; }
+.layer-group > summary, .controls > summary { letter-spacing: var(--tracking-snug); }
+.controls legend { font-size: var(--fs-xs); font-weight: 600; letter-spacing: var(--tracking-wide); text-transform: uppercase; color: var(--fg-muted); }
+.layer-list { gap: 3px; padding: var(--space-1) 0 var(--space-3) var(--space-3); }
+
+/* Reiter der Seitenleiste als Umschalter (segmented): Mulde, darin der aktive als Puck */
+.tabs, #side .tabs { gap: 2px; margin: var(--space-3) var(--space-4) var(--space-2); padding: 3px; background: var(--surface-soft);
+  border: 1px solid var(--line-soft); border-radius: var(--radius-pill); box-shadow: var(--chamfer-well); }
+.tabs button, #side .tabs button { padding: 6px 10px; border: 0; border-radius: var(--radius-pill); color: var(--fg-muted); font-weight: 600; font-size: var(--fs-xs);
+  transition: background var(--dur-base) var(--ease-out), color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out); }
+.tabs button[aria-selected="true"], .lage > .card:last-child .tabs button[aria-selected="true"] { background: var(--bg-elevated); color: var(--fg); border: 0;
+  box-shadow: var(--glass-inset), 0 2px 6px var(--shadow-ambient), 0 4px 12px -2px var(--shadow-ambient); }
+
+/* Tabellen: Haarlinien, Kopf in Versalien, mehr Luft */
+th, td { padding: var(--space-3) var(--space-3); border-bottom-color: var(--line-soft); }
+th { color: var(--fg); border-bottom: 1px solid var(--line); letter-spacing: var(--tracking-wide); }
+tr.click:hover { background: var(--surface-soft); }
+#panel-events thead th { padding-top: var(--space-2); padding-bottom: var(--space-2); }
+.pegel { padding: var(--space-4) var(--space-5); border-bottom-color: var(--line-soft); }
+.wx-now { padding: var(--space-5); gap: var(--space-4); }
+.wx-now .big { font-weight: var(--weight-light); letter-spacing: var(--tracking-display); }
+.empty { padding: var(--space-8) var(--space-5); }
+
+/* Eingaben und kleine Knöpfe in der Liste: Mulde statt Kasten, Chips als Pillen */
+.ev-tools { padding: var(--space-3) var(--space-4) var(--space-2); gap: var(--space-2); }
+.ev-tools input, .ev-tools select { background: var(--surface-soft); border: 1px solid var(--line-soft); border-radius: var(--radius-pill); box-shadow: var(--chamfer-well); padding: 4px 12px; }
+.ev-btn { border-radius: var(--radius-pill); border: 1px solid var(--glass-edge); background: var(--glass-btn-fill); box-shadow: var(--glass-inset), 0 1px 3px var(--shadow-ambient); font-weight: 600; font-size: var(--fs-xs); }
+.ev-btn:hover, .ev-chip:hover { background: var(--glass-btn-hover); }
+.ev-btn[aria-expanded="true"] { background: var(--glass-btn-hover); box-shadow: var(--chamfer-well); }
+.ev-chip { border-color: var(--line-soft); font-weight: 600; }
+.ev-chip[aria-pressed="true"] { background: var(--bg-elevated); border-color: var(--glass-edge); color: var(--fg); box-shadow: var(--glass-inset), 0 2px 6px var(--shadow-ambient); }
+.ev-more { border-color: var(--line-soft); border-radius: var(--radius-lg); background: var(--surface-soft); padding: var(--space-3); gap: var(--space-2); }
+.badge { border-color: var(--line); font-weight: 500; padding: 2px 10px; }
+
+/* Fuß: Sandfläche, Lichtkante oben, dieselben Ränder wie der Kopf */
+footer { background: var(--surface-soft); border-top: 1px solid var(--glass-edge); box-shadow: var(--glass-inset); }
+.foot-in, .page-lage .foot-in { padding: var(--space-4) var(--gutter); gap: var(--space-1); font-size: var(--fs-xs); color: var(--fg-muted); }
+.page-lage .foot-in { padding-top: var(--space-3); padding-bottom: var(--space-3); }
+.foot-in > div:first-child { color: var(--fg); font-weight: 500; }
+
+@media (max-width: 720px) {
+  .top-in, .page-lage .top-in { gap: var(--space-2) var(--space-4); padding-block: var(--space-3); }
+  .brand b { font-size: var(--fs-lg); }
+  .card-h, .card-b, .card-f, .src { padding-inline: var(--space-4); }
+  main { padding: var(--space-5) var(--gutter); }
+}
+@media (prefers-reduced-motion: reduce) { .btn:hover, .btn:active { transform: none; } }
+
+/* Warnband schlanker: die Karte braucht die Höhe */
+.warnband-in, .page-lage .warnband-in { padding: var(--space-3) var(--gutter); gap: var(--space-1) var(--space-6); }
+.warnband ul { font-size: var(--fs-sm); gap: var(--space-1) var(--space-6); }
+.warnband strong { font-size: var(--fs-md); }
+.warnband .meta { align-self: flex-end; }
+.warnband details { flex: 1 1 12rem; }
+.wxband .meta { flex: 1 1 auto; text-align: right; }
+.btn[aria-pressed="true"] { box-shadow: var(--chamfer-well); background: var(--surface-soft); }
+
+/* Regentropfen-Animation: Canvas über der Karte, unter den Bedienelementen, nie klickbar */
+.ripples { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+
+/* CTW-Logo links im Kopf: Bild plus zweizeiliger Titel, hell/dunkel wie die Marke auf der Karte */
+.brand { flex-direction: row; align-items: center; gap: var(--space-3); }
+.brand-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.brand-logo { height: 34px; width: auto; flex: none; display: block; }
+.brand .logo-dunkel { display: none; }
+html[data-ansicht="dunkel"] .brand .logo-hell { display: none; }
+html[data-ansicht="dunkel"] .brand .logo-dunkel { display: block; }
+@media (max-width: 720px) { .brand-logo { height: 28px; } .brand { gap: var(--space-2); } }
+
+/* Laser-Knopf: unten mittig auf der Karte, zwischen Ebenenpanel und Detailpanel */
+
+/* Wind */
+.windflow { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.windflow-low { opacity: .9; }
+/* Zeichenerklärung als ein Overlay unten rechts (im breiten Layout links neben der Seitenleiste, wie die Zoom-Knöpfe) */
+.relief-legend.map-legend { left: auto; top: auto; right: var(--space-3); bottom: 2.6rem; width: 14.5rem; max-height: 45%; overflow-y: auto; z-index: 2; white-space: normal; }
+.map-legend > summary { cursor: pointer; font-weight: 600; list-style-position: inside; }
+.map-legend section + section { margin-top: var(--space-3); padding-top: var(--space-2); border-top: 1px solid var(--border); }
+.map-legend section[hidden] { display: none; }
+.map-legend .relief-elev { display: block; border-top: 0; padding-top: 0; margin-top: 4px; }
+.legend-row { line-height: 1.6; }
+.rain-strip { display: grid; grid-template-columns: repeat(15, 1fr); height: 10px; border-radius: var(--radius-full); overflow: hidden; border: 1px solid var(--border-strong); }
+.rain-cell { display: block; }
+.rain-labels { display: grid; grid-template-columns: repeat(15, 1fr); margin-top: 2px; font-size: var(--fs-xs); font-variant-numeric: tabular-nums; }
+.rain-labels span { white-space: nowrap; }
+@media (min-width: 1001px) {
+  /* Details offen: Legende links neben der Karte der Details, mit Abstand und auf einer Linie mit deren Unterkante (Abstand wie ringsum).
+     Details ausgeblendet: Legende rechts am Rand. */
+  .relief-legend.map-legend { right: calc(var(--side-w) + 2 * var(--float-gap)); bottom: var(--legend-bottom, var(--float-gap));
+    max-height: min(60%, calc(100% - var(--legend-bottom, var(--float-gap)) - var(--float-gap))); }
+  .lage.side-min .relief-legend.map-legend { right: var(--float-gap); bottom: var(--float-gap); max-height: calc(100% - 2 * var(--float-gap)); }
+}
+@media (max-width: 640px) { .relief-legend.map-legend { width: 12rem; } }
+
+/* Versteckter Schalter: winziger, fast weißer Text neben Luftverkehr (schaltet den Radarstrahl auf Laser) */
+.layer-row { display: flex; align-items: center; gap: 6px; }
+.egg { font: inherit; font-size: 9px; letter-spacing: .08em; line-height: 1; padding: 2px 3px; border: 0; background: none; color: rgb(255, 225, 225); cursor: pointer; }
+.egg[aria-pressed="true"] { color: rgb(255, 60, 40); }
+.egg:focus-visible { outline: 2px solid var(--accent, #0a84ff); outline-offset: 1px; color: rgb(255, 60, 40); }
+
+/* Detailpanel: Tabellen bekommen denselben Seitenrand wie die Fußzeilen; Preis- und Altersspalten brechen nicht um */
+.panel .scroll-x { padding-inline: var(--space-4); }
+.panel .wx-others.nums th[scope="row"] { min-width: 7rem; padding-right: var(--space-2); }
+.panel .wx-others.nums td { white-space: nowrap; text-align: right; font-variant-numeric: tabular-nums; padding-left: var(--space-2); }
+.panel .wx-others.nums thead th:not(:first-child) { text-align: right; white-space: nowrap; padding-left: var(--space-2); }
+.panel .wx-others caption { padding-top: var(--space-1); }
+.pop-prices { margin: var(--space-2) 0; width: auto; }
+.pop-prices th, .pop-prices td { padding: 2px var(--space-3) 2px 0; border: 0; font-weight: normal; text-transform: none; letter-spacing: 0; font-size: var(--fs-sm); position: static; background: none; color: inherit; }
+.pop-prices td:nth-child(2) { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; white-space: nowrap; }
+
+.panel .wx-others.nums { font-size: var(--fs-sm); }
+.panel .wx-others.nums th, .panel .wx-others.nums td { padding-top: 3px; padding-bottom: 3px; }
+.panel .wx-others.nums tbody th { text-transform: none; letter-spacing: 0; font-weight: 500; font-size: var(--fs-sm); color: inherit; }
+.panel .wx-others.nums thead th { text-transform: none; letter-spacing: 0; }
+.panel .wx-others.nums .st-name { display: block; }
+.panel .wx-others.nums .st-sub { display: block; font-weight: normal; }
+.panel .wx-others.nums th[scope="row"] { min-width: 0; width: 100%; }
+.panel .wx-others.nums td { padding-left: var(--space-3); }
+
+.layer-list .live-note { display: block; margin-left: 1.7em; white-space: normal; line-height: 1.3; }
+.layer-list label { flex-wrap: wrap; }
+
+/* Maßstab: unten mittig, durchscheinend */
+.map-wrap .maplibregl-ctrl-bottom-right { right: auto; left: 50%; transform: translateX(-50%); bottom: var(--float-gap, 1rem); }
+.map-wrap .maplibregl-ctrl-scale { margin: 0; background: color-mix(in oklab, var(--bg-elevated, #fff) 45%, transparent); color: var(--fg); border-color: var(--fg-muted);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); font-size: var(--fs-xs); }
+
+/* Gewässerbaum im Pegel-Panel */
+.gnode > summary { cursor: pointer; padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--line-soft); list-style-position: inside; }
+.gnode > summary:hover { background: var(--surface-soft); }
+.gnode > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.gnode > .gbody { margin-left: var(--space-4); border-left: 2px solid var(--line-soft); }
+.gnode.d0 > summary { background: var(--surface-soft); }
+.gtools { align-items: center; }
+.linkbtn { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; font: inherit; text-decoration: underline; }
+
+/* Höhenpanel: gleicher Abstand von unten wie die Panele rechts (Details und Zeichenerklärung), in jeder Breite */
+.relief-legend:not(.map-legend) { top: auto; bottom: 2.6rem; }
+@media (min-width: 1001px) {
+  .relief-legend:not(.map-legend) { bottom: var(--legend-bottom, var(--float-gap)); }
+  .lage.side-min .relief-legend:not(.map-legend) { bottom: var(--float-gap); }
+}
+
+/* Windrose der historischen Karte: unter den Zoomtasten, nur Zierde */
+@font-face { font-family: "Grenze Gotisch"; src: url("../fonts/grenze-gotisch.woff") format("woff"); font-weight: 400; font-style: normal; font-display: swap; }
+.windrose { position: absolute; left: var(--float-gap, 1rem); bottom: var(--float-gap, 1rem); top: auto; width: 11rem; height: auto; z-index: 2; pointer-events: none; opacity: .92;
+  filter: drop-shadow(0 1px 2px rgba(60, 40, 15, .35)); }
+.windrose[hidden] { display: none !important; }
+@media (max-width: 640px) { .windrose { width: 8.5rem; } }
+/* Zeigt die Rose nach unten, rutscht sie bei schmalem Fenster nicht unter die Details */
+.windrose-t { font-family: "Grenze Gotisch", serif; }
+
+/* Karte „um 1450“: Bedienelemente, Maßstab und Tafeln in Pergament und Tinte */
+html[data-karte="mittelalter"] .maplibregl-ctrl-group { background: #efe0b0; border: 1px solid #3a2614; box-shadow: 0 1px 3px rgba(60, 40, 15, .4); border-radius: 6px; }
+html[data-karte="mittelalter"] .maplibregl-ctrl-group button { background-color: transparent; }
+html[data-karte="mittelalter"] .maplibregl-ctrl-group button + button { border-top-color: #7a5530; }
+html[data-karte="mittelalter"] .maplibregl-ctrl-group .maplibregl-ctrl-icon { filter: sepia(1) saturate(2) hue-rotate(-12deg) brightness(.55); }
+html[data-karte="mittelalter"] .maplibregl-ctrl-scale { background: rgba(239, 224, 176, .85); border: 2px solid #3a2614; border-top: 0; color: #3a2614; font-family: "Grenze Gotisch", serif; font-size: .8rem; }
+html[data-karte="mittelalter"] .maplibregl-map .maplibregl-popup .maplibregl-popup-content { background: rgba(239, 224, 176, .94); border: 1px solid #3a2614; border-radius: var(--radius-md); color: #3a2614;
+  box-shadow: 0 0 0 3px rgba(239, 224, 176, .9), 0 0 0 4px #7a5530, 0 6px 18px rgba(60, 40, 15, .4); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-karte="mittelalter"] .pop h3 { font-family: "Grenze Gotisch", serif; font-weight: 400; font-size: 1.35rem; color: #3a2614; }
+html[data-karte="mittelalter"] .pop .k { color: #6a5238; }
+
+/* Karte um 1450: Titelschild (nur Zierde, reagiert nicht auf Eingaben) */
+.med-cartouche { position: absolute; z-index: 2; top: 14px; left: 50%; transform: translateX(-50%); pointer-events: none; text-align: center; padding: 6px 22px 7px;
+  background: rgba(232,214,166,.92); color: #3a2614; border: 1px solid #3a2614; outline: 1px solid #3a2614; outline-offset: 3px; border-radius: 2px; box-shadow: 0 2px 6px rgba(58,38,20,.25); }
+.med-cartouche-t { font-family: "Grenze Gotisch", serif; font-size: 1.6rem; line-height: 1.1; }
+.med-cartouche-u { font-family: "Grenze Gotisch", serif; font-size: .85rem; letter-spacing: .04em; }
+.med-cartouche[hidden] { display: none; }
+@media (max-width: 700px) { .med-cartouche { top: 8px; padding: 3px 14px 4px; } .med-cartouche-t { font-size: 1.15rem; } }
+
+/* Karte um 1450: Legenden in Pergament und Tinte */
+html[data-karte="mittelalter"] .relief-legend { background: rgba(239, 224, 176, .94); color: #3a2614; border: 1px solid #3a2614; border-radius: 4px;
+  box-shadow: 0 0 0 3px rgba(239, 224, 176, .9), 0 0 0 4px #7a5530, 0 4px 12px rgba(60, 40, 15, .35); -webkit-backdrop-filter: none; backdrop-filter: none; font-family: "Grenze Gotisch", serif; font-size: .95rem; }
+html[data-karte="mittelalter"] .map-legend > summary, html[data-karte="mittelalter"] .relief-title { font-family: "Grenze Gotisch", serif; font-weight: 400; font-size: 1.15rem; color: #3a2614; }
+html[data-karte="mittelalter"] .map-legend section + section { border-top-color: #7a5530; }
+html[data-karte="mittelalter"] .relief-scale, html[data-karte="mittelalter"] .relief-elev { color: #5a4026; }
+html[data-karte="mittelalter"] .relief-bar { border: 1px solid #3a2614; border-radius: 1px; filter: sepia(.8) saturate(.7); }
+.legend-h { margin: 0 0 2px; font-size: inherit; font-weight: 600; }
+.med-leg-row { display: flex; align-items: center; gap: 6px; line-height: 1.1; }
+.med-leg-sym { width: 30px; height: 30px; flex: none; }
+html[data-karte="mittelalter"] .town { font-family: "Grenze Gotisch", serif; font-weight: 400; font-size: 1.1rem; color: #3a2614; text-transform: none; letter-spacing: 0; text-shadow: 0 0 3px rgba(238,224,182,.95), 0 0 2px rgba(238,224,182,.95); }
+
+/* Karte um 1450: Ebenenmenü und Detailfeld als Pergamentblätter mit Tintenrand; Farben über die Token der Karten, die Schrift ist die der Legenden */
+html[data-karte="mittelalter"] .lage > .card:first-child, html[data-karte="mittelalter"] .lage > .card:last-child {
+  --fg: #3a2614; --fg-muted: #6a5238; --border: rgba(58, 38, 20, .28); --accent: #3f6b72;
+  --surface: rgba(226, 205, 150, .75); --surface-soft: rgba(205, 180, 122, .4); --bg-elevated: #efe0b0; --float-bg: rgba(239, 224, 176, .94);
+  --glass-edge: rgba(122, 85, 48, .45); --shadow-md: 0 4px 12px rgba(60, 40, 15, .3);
+  background: rgba(239, 224, 176, .94); color: #3a2614; border: 1px solid #3a2614; border-radius: 4px; accent-color: #7a1c14;
+  box-shadow: 0 0 0 3px rgba(239, 224, 176, .9), 0 0 0 4px #7a5530, 0 6px 18px rgba(60, 40, 15, .4);
+  -webkit-backdrop-filter: none; backdrop-filter: none; font-family: "Grenze Gotisch", serif; font-size: 1.2em;
+}
+html[data-karte="mittelalter"] .lage > .card:last-child .card-h { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; }
+/* Die erste Karte ist der Kartenrahmen selbst; das Pergament gehört nur dem schwebenden Menü (.card-h) */
+html[data-karte="mittelalter"] .lage > .card:first-child { background: none; border: 0; border-radius: 0; box-shadow: none; font-size: inherit; }
+html[data-karte="mittelalter"] .lage > .card:first-child .card-h { background: rgba(239, 224, 176, .94); border: 1px solid #3a2614; border-radius: 4px; font-size: 1.2em;
+  box-shadow: 0 0 0 3px rgba(239, 224, 176, .9), 0 0 0 4px #7a5530, 0 6px 18px rgba(60, 40, 15, .4); -webkit-backdrop-filter: none; backdrop-filter: none; }
+html[data-karte="mittelalter"] .lage > .card:first-child *, html[data-karte="mittelalter"] .lage > .card:last-child * { font-family: inherit; }
+html[data-karte="mittelalter"] .lage > .card:first-child h1, html[data-karte="mittelalter"] .lage > .card:last-child h2, html[data-karte="mittelalter"] .lage > .card:last-child h3 { font-weight: 400; }
+html[data-karte="mittelalter"] .lage > .card:first-child .controls legend { text-transform: none; letter-spacing: 0; font-size: 1.05rem; font-weight: 400; }
+html[data-karte="mittelalter"] .lage > .card:last-child .tabs, html[data-karte="mittelalter"] .lage > .card:last-child #side .tabs { background: rgba(205, 180, 122, .45); border: 1px solid rgba(58, 38, 20, .35); }
+html[data-karte="mittelalter"] .lage > .card:last-child .tabs button[aria-selected="true"] { background: #efe0b0; color: #3a2614; box-shadow: 0 0 0 1px #7a5530; }
+html[data-karte="mittelalter"] .lage > .card:last-child tr, html[data-karte="mittelalter"] .lage > .card:last-child td, html[data-karte="mittelalter"] .lage > .card:last-child th { border-color: rgba(58, 38, 20, .25); }
+html[data-karte="mittelalter"] .lage > .card:last-child .spark { stroke: #3f6b72; }
+html[data-karte="mittelalter"] .lage > .card:last-child .spark-area { fill: rgba(63, 107, 114, .2); }
+html[data-karte="mittelalter"] .lage > .card:last-child a { color: #7a1c14; }
+html[data-karte="mittelalter"] .lage > .card:last-child button:focus-visible, html[data-karte="mittelalter"] .lage > .card:first-child :focus-visible { outline-color: #7a1c14; }
+
+/* Im Altmodus ist der Maßstab Teil der Windrose */
+html[data-karte="mittelalter"] .map-wrap .maplibregl-ctrl-scale { display: none; }
+
+/* Im Altmodus sitzt die Windrose dort, wo sonst die Höhenlegende steht */
+html[data-karte="mittelalter"] #relief-legend { display: none; }
+
+/* Vollbild: die ganze Kartenfläche, nicht nur das Canvas */
+.map-wrap:fullscreen { background: var(--bg, #fff); width: 100%; height: 100%; }
+.map-wrap:fullscreen #map { width: 100%; height: 100%; }
+
+/* Menü: Kurzzeile unter dem Themenkopf */
+.layer-group .group-hint { margin: 0; padding: 0 0 var(--space-1) var(--space-3); }
+
+/* Suche über alle Namen: Zeile im schwebenden Menükopf (so überlagert sie nichts); im Vollbild wandert sie oben links in die Karte (js/lage.js) */
+.map-search { position: relative; flex: 1 1 100%; grid-column: 1 / -1; margin: var(--space-1) 0 0; min-width: 0; }
+.map-wrap > .map-search { position: absolute; top: var(--space-3); left: var(--space-3); z-index: 3; width: min(22rem, calc(100% - 9rem)); flex: none; margin: 0; }
+.map-search input { width: 100%; box-sizing: border-box; padding: 7px 12px; font: inherit; font-size: var(--fs-sm); color: var(--fg);
+  background: var(--material-thick); backdrop-filter: var(--blur-material); -webkit-backdrop-filter: var(--blur-material);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-full); box-shadow: var(--shadow-md); }
+.map-search input:focus-visible { outline: 2px solid var(--ring); outline-offset: 1px; }
+.map-search ul { list-style: none; margin: 4px 0 var(--space-2); padding: 4px; max-height: min(24rem, 55vh); overflow-y: auto; background: var(--bg-elevated);
+  border: 1px solid var(--border-strong); border-radius: var(--radius-md); box-shadow: var(--shadow-md); }
+.map-search li { display: flex; justify-content: space-between; gap: var(--space-3); padding: 6px 10px; border-radius: var(--radius-sm); cursor: pointer; font-size: var(--fs-sm); }
+.map-search li[aria-selected="true"], .map-search li:hover { background: var(--accent); color: var(--accent-fg); }
+.map-search .suche-name { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-search .suche-meta { font-size: var(--fs-xs); color: var(--fg-muted); white-space: nowrap; flex: none; }
+.map-search li[aria-selected="true"] .suche-meta, .map-search li:hover .suche-meta { color: inherit; }
+.search-pin { width: 26px; height: 34px; display: grid; place-items: end center; pointer-events: none; }
+.search-pin span { width: 20px; height: 20px; margin-bottom: 4px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); background: var(--danger); border: 2px solid #fff; box-shadow: 0 1px 4px rgb(0 0 0 / .45); }
+.search-pop { min-width: 9rem; padding-right: var(--space-4); }
+.search-pop h3 { font-size: var(--fs-md); margin: 0 var(--space-6) var(--space-1) 0; white-space: nowrap; }
+.search-pop p { margin: 0; }
+.map-wrap > .map-search ul { position: absolute; left: 0; right: 0; margin-bottom: 0; }
+@media (max-width: 640px) { .map-wrap > .map-search { width: calc(100% - 7rem); } }
+html[data-karte="mittelalter"] .map-search input { font-family: "Grenze Gotisch", serif; font-size: 1.05rem; background: #efe0bd; color: #3a2614; border-color: #7a5530; }
+html[data-karte="mittelalter"] .map-search ul { background: #efe0bd; border-color: #7a5530; color: #3a2614; }
+html[data-karte="mittelalter"] .map-search .suche-meta { color: #5a3d20; }
+
+/* Zeitraum und Ebenen sind getrennte Klappen; nebeneinander linksbündig statt an die Ränder gespreizt */
+.card-h .controls { margin-left: 0; }

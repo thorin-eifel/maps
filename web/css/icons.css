@@ -1,0 +1,29 @@
+/* Icons (uxwing.com, siehe web/icons/README.txt): als Maske, damit sie die Textfarbe (currentColor) übernehmen.
+   Die Karte zeichnet dieselben Dateien selbst (js/icons.js). Fehlt eine Datei, bleibt die Fläche leer und der Text daneben trägt die Bedeutung. */
+.ico { display: inline-block; width: 1.15em; height: 1.15em; flex: none; vertical-align: -.2em; margin-right: .35em; background: currentColor;
+  -webkit-mask: var(--ico) center / contain no-repeat; mask: var(--ico) center / contain no-repeat; }
+
+.ico-flug { --ico: url(../icons/flug.svg); }
+.ico-stau { --ico: url(../icons/stau.svg); width: 1.7em; }
+.ico-baustelle { --ico: url(../icons/baustelle.svg); }
+.ico-sperrung { --ico: url(../icons/sperrung.svg); }
+.ico-warnung { --ico: url(../icons/warnung.svg); }
+.ico-hochwasser { --ico: url(../icons/hochwasser.svg); }
+.ico-pegel { --ico: url(../icons/pegel.svg); }
+.ico-temperatur { --ico: url(../icons/temperatur.svg); }
+.ico-wolken { --ico: url(../icons/wolken.svg); }
+.ico-regen { --ico: url(../icons/regen.svg); }
+.ico-blitz { --ico: url(../icons/blitz.svg); }
+.ico-wind { --ico: url(../icons/wind.svg); }
+.ico-feuchte { --ico: url(../icons/feuchte.svg); }
+.ico-druck { --ico: url(../icons/druck.svg); }
+.ico-relief { --ico: url(../icons/relief.svg); }
+.ico-strahlung { --ico: url(../icons/strahlung.svg); }
+.ico-luft { --ico: url(../icons/luft.svg); }
+.ico-beben { --ico: url(../icons/beben.svg); }
+.ico-feuer { --ico: url(../icons/feuer.svg); }
+.ico-bahn { --ico: url(../icons/bahn.svg); }
+.ico-natur { --ico: url(../icons/natur.svg); }
+.ico-hubschrauber { --ico: url(../icons/hubschrauber.svg); }
+.ico-tanken { --ico: url(../icons/tanken.svg); }
+.ico-ton { --ico: url(../icons/ton.svg); }

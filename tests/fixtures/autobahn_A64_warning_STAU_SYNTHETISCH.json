@@ -1,0 +1,154 @@
+{
+ "warning": [
+  {
+   "identifier": "SYNTH--stau-lang",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "49.745,6.64,49.752,6.7",
+   "point": "49.745,6.64",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Luxemburg -> Koblenz",
+   "title": "A64 | Trier-Mitte - Trier-Ehrang",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 49.745,
+    "long": 6.64
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A64: Luxemburg -> Koblenz"
+   ],
+   "abnormalTrafficType": "QUEUING_TRAFFIC",
+   "delayTimeValue": "35",
+   "averageSpeed": "15"
+  },
+  {
+   "identifier": "SYNTH--stau-kurz",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "49.76,6.72,49.766,6.735",
+   "point": "49.76,6.72",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Luxemburg -> Koblenz",
+   "title": "A64 | Trier-Ehrang - Kreuz Mosel",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 49.76,
+    "long": 6.72
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A64: Luxemburg -> Koblenz"
+   ],
+   "abnormalTrafficType": "QUEUING_TRAFFIC",
+   "delayTimeValue": "8",
+   "averageSpeed": "25"
+  },
+  {
+   "identifier": "SYNTH--zaeh",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "49.74,6.6,49.742,6.59",
+   "point": "49.74,6.6",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Koblenz -> Luxemburg",
+   "title": "A64 | Trier-Zentrum - Trier-Ost",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 49.74,
+    "long": 6.6
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A64: Koblenz -> Luxemburg"
+   ],
+   "abnormalTrafficType": "SLOW_TRAFFIC",
+   "averageSpeed": "40"
+  },
+  {
+   "identifier": "SYNTH--stillstand",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "49.77,6.76,49.775,6.775",
+   "point": "49.77,6.76",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Koblenz -> Luxemburg",
+   "title": "A64 | Kreuz Mosel - Trier-Ehrang",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 49.77,
+    "long": 6.76
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A64: Koblenz -> Luxemburg"
+   ],
+   "abnormalTrafficType": "STATIONARY_TRAFFIC"
+  },
+  {
+   "identifier": "SYNTH--weit-weg",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "52.338,10.324,52.336,10.275",
+   "point": "52.338,10.324",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Braunschweig -> Hannover",
+   "title": "A2 | Zweidorfer Holz Süd - Peine-Ost",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 52.338,
+    "long": 10.324
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A2: Braunschweig -> Hannover"
+   ],
+   "abnormalTrafficType": "QUEUING_TRAFFIC",
+   "delayTimeValue": "5",
+   "averageSpeed": "30"
+  },
+  {
+   "identifier": "SYNTH--gefahr",
+   "icon": "101",
+   "isBlocked": "false",
+   "future": false,
+   "extent": "49.75,6.65,49.751,6.652",
+   "point": "49.75,6.65",
+   "startLcPosition": "100",
+   "display_type": "WARNING",
+   "subtitle": " Luxemburg -> Koblenz",
+   "title": "A64 | Trier - Trier-Ost",
+   "startTimestamp": "2026-09-29T16:46:00Z",
+   "coordinate": {
+    "lat": 49.75,
+    "long": 6.65
+   },
+   "description": [
+    "Beginn: 29.09.26 um 18:46 Uhr",
+    "",
+    "Angespannte Verkehrslage, seit 29.09.2026, 16:46",
+    "A64: Luxemburg -> Koblenz"
+   ]
+  }
+ ]
+}

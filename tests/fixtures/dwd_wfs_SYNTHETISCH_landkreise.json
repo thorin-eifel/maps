@@ -1,0 +1,16 @@
+{"_comment": "SYNTHETISCH — aus der DWD-Dokumentation nachgebaut, nicht live aufgenommen (am 2026-09-29 lag bundesweit keine Warnung vor). Gegen echte Warnlage ersetzen.",
+ "type": "FeatureCollection",
+ "features": [
+  {"type": "Feature", "properties": {"ID": "2.49.0.0.276.0.DWD.PVW.TEST1", "EVENT": "STARKREGEN", "SEVERITY": "Moderate", "STATUS": "Actual", "MSGTYPE": "Alert",
+    "HEADLINE": "Amtliche WARNUNG vor STARKREGEN", "DESCRIPTION": "Es tritt <b>Starkregen</b> auf.<br/>Menge 20 l/qm.", "ONSET": "2026-09-30T10:00:00Z", "EXPIRES": "2026-09-30T18:00:00Z"},
+   "geometry": {"type": "MultiPolygon", "coordinates": [[[[6.3, 49.8], [6.6, 49.8], [6.6, 50.0], [6.3, 50.0], [6.3, 49.8]]]]}},
+  {"type": "Feature", "properties": {"ID": "2.49.0.0.276.0.DWD.PVW.TEST1", "EVENT": "STARKREGEN", "SEVERITY": "Moderate", "STATUS": "Actual", "MSGTYPE": "Alert",
+    "HEADLINE": "Amtliche WARNUNG vor STARKREGEN", "DESCRIPTION": "Es tritt Starkregen auf.", "ONSET": "2026-09-30T10:00:00Z", "EXPIRES": "2026-09-30T18:00:00Z"},
+   "geometry": {"type": "MultiPolygon", "coordinates": [[[[6.6, 49.8], [6.9, 49.8], [6.9, 50.0], [6.6, 50.0], [6.6, 49.8]]]]}},
+  {"type": "Feature", "properties": {"ID": "2.49.0.0.276.0.DWD.PVW.TEST2", "EVENT": "FROST", "SEVERITY": "Minor", "STATUS": "Actual", "MSGTYPE": "Alert",
+    "HEADLINE": "Frost weit weg", "DESCRIPTION": "Nur in Norddeutschland", "ONSET": "2026-09-30T10:00:00Z", "EXPIRES": "2026-09-30T18:00:00Z"},
+   "geometry": {"type": "MultiPolygon", "coordinates": [[[[9.0, 53.0], [9.3, 53.0], [9.3, 53.2], [9.0, 53.2], [9.0, 53.0]]]]}},
+  {"type": "Feature", "properties": {"ID": "2.49.0.0.276.0.DWD.PVW.TEST3", "EVENT": "STURM", "SEVERITY": "Severe", "STATUS": "Actual", "MSGTYPE": "Cancel",
+    "HEADLINE": "Aufgehoben", "DESCRIPTION": ""},
+   "geometry": {"type": "MultiPolygon", "coordinates": [[[[6.3, 49.8], [6.6, 49.8], [6.6, 50.0], [6.3, 50.0], [6.3, 49.8]]]]}}
+ ]}

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- launchd-Job: Sammelzyklus alle 5 Minuten (macOS-Pendant zu crontab.example).
+     Installation: siehe README, Abschnitt "Sammelstelle auf dem Mac". -->
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>de.ctw.osint-cycle</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/Users/thorin/Claude/OSINT/deploy/run-cycle.sh</string>
+  </array>
+  <key>WorkingDirectory</key><string>/Users/thorin/Claude/OSINT</string>
+  <key>StartInterval</key><integer>300</integer>
+  <key>RunAtLoad</key><true/>
+  <key>StandardOutPath</key><string>/Users/thorin/Library/Logs/osint-cycle.log</string>
+  <key>StandardErrorPath</key><string>/Users/thorin/Library/Logs/osint-cycle.log</string>
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+  </dict>
+</dict>
+</plist>

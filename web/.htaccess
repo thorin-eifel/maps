@@ -1,0 +1,50 @@
+# Apache-Konfiguration für IONOS-Webspace (Linux-Hosting). Liegt im Wurzelordner der Seite.
+# Ungeprüft auf dem Ziel: mod_headers, mod_mime, mod_expires, mod_deflate sind bei IONOS üblich,
+# aber nach dem ersten Upload mit `curl -sI https://<domain>/` (Header) gegenprüfen.
+Options -Indexes
+
+<IfModule mod_mime.c>
+  AddType text/javascript .js
+  AddType application/geo+json .geojson
+  AddType application/json .json
+  AddType application/octet-stream .pmtiles
+</IfModule>
+
+<IfModule mod_headers.c>
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "no-referrer"
+  Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
+  Header always set Strict-Transport-Security "max-age=31536000"
+  # Seite, Skripte, Stile, Icons: immer nachfragen (Änderungen sofort sichtbar; 304 bleibt billig)
+  <FilesMatch "\.(html|js|css|svg)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  # Datendateien nie aus dem Browser-Cache bedienen: sie ändern sich alle paar Minuten
+  <FilesMatch "\.json$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+  # Kartendatei: ändert sich selten, wird in Teilen gelesen (HTTP Range). Nicht komprimieren,
+  # sonst stimmen die Byte-Positionen nicht (mod_deflate greift nur für die unten gelisteten Typen).
+  <FilesMatch "\.pmtiles$">
+    Header set Cache-Control "public, max-age=86400"
+  </FilesMatch>
+</IfModule>
+
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css "access plus 1 hour"
+  ExpiresByType text/javascript "access plus 1 hour"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/javascript application/json application/geo+json
+  # .pmtiles bewusst nicht in dieser Liste
+</IfModule>
+
+# Nur HTTPS
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
