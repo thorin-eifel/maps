@@ -124,14 +124,14 @@ def test_brf_rejects_doctype():
 
 # ---------------------------------------------------------------- MeteoAlarm
 def test_meteoalarm_areas_file_covers_expected_regions():
-    assert {"BE33", "BE34", "FR411", "FR412", "FR413", "LU00"} <= set(AREAS)
+    assert {"BE22", "BE33", "BE34", "BE35", "FR211", "FR411", "FR412", "FR413", "FR414", "FR421", "LU00"} <= set(AREAS)
 
 
 def test_meteoalarm_france_real_fixture_yellow_only_in_radius_area():
     data = fixture("meteoalarm_france.json")
     ev, st = meteoalarm.parse_feed(data, "FR", datetime(2026, 9, 30, 8, 0, tzinfo=timezone.utc), AREAS)
     assert ev and all(e.severity == "notice" and e.region_tag == "FR" and e.type == "weather" for e in ev)
-    assert all("Meuse" in e.title or "Meurthe" in e.title or "Moselle" in e.title for e in ev)
+    assert all(any(n in e.title for n in ("Meuse", "Meurthe", "Moselle", "Ardennes", "Bas-Rhin", "Vosges")) for e in ev)
     assert all(e.raw_ref is None or e.raw_ref.startswith("https://") for e in ev)
     assert len({e.id for e in ev}) == len(ev)           # keine Sprachdopplung
     assert st["outside"] >= 1

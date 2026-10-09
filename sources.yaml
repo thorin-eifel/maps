@@ -821,10 +821,10 @@ sources:
     intervall: 600
     ratenlimit: nicht veröffentlicht; 3 Abrufe je 10 Minuten
     auth: keine
-    geo_bezug: NUTS-Gebiet (BE33, BE34, FR411 bis FR413, LU00) als Fläche, nur Gebiete im Radius
+    geo_bezug: NUTS-2013-Gebiet (BE22, BE33 bis BE35, FR211, FR411 bis FR414, FR421, LU00) als Fläche, nur Gebiete in der Region. Niederlande fehlen (Feed nutzt EMMA_ID statt NUTS)
     datenschutz_risiko: niedrig
     aktiv: true
-    zuletzt_geprüft: "2026-09-30"
+    zuletzt_geprüft: "2026-10-09"
     collector: meteoalarm
 
   - id: bison_fute
