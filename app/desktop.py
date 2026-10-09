@@ -108,7 +108,7 @@ class App:
 
 
 def ua() -> str:
-    return f"OSINT-by-CTW/1.0 (+{os.environ.get('OSINT_CONTACT', 'kontakt@example.invalid')})"
+    return f"WasIstLosBeiUns/1.0 (+{os.environ.get('OSINT_CONTACT', 'kontakt@example.invalid')})"
 
 
 def geocode(q: str) -> list[dict]:

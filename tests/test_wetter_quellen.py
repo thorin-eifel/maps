@@ -104,7 +104,7 @@ async def test_metno_collector_sends_limited_coordinates_and_identifies(registry
     assert ok
     q = router.calls[0].url.params
     assert len(q["lat"].split(".")[1]) <= 4 and len(q["lon"].split(".")[1]) <= 4   # Bedingung der Quelle (sonst HTTP 403)
-    assert router.calls[0].headers["user-agent"].startswith("OSINT-by-CTW")
+    assert router.calls[0].headers["user-agent"].startswith("WasIstLosBeiUns")
     assert storage.cache_get("forecast_metno")["payload"]["hours"]
 
 

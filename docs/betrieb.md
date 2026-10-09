@@ -1,6 +1,6 @@
 # Was ist los bei uns?
 
-Die aktuelle Lage rund um unsere Heimat. Open Source Information Dashboard von CTW Computer (Arbeitstitel im Code und in den Ordnern: OSINT by CTW).
+Die aktuelle Lage rund um unsere Heimat. Open Source Information Dashboard von CTW Computer (Arbeitstitel im Code und in den Ordnern: Was ist los bei uns?).
 
 Regionales Lagebild aus offenen Daten für die Südeifel und ihre Nachbarregionen (120 km um Irrel, mehr wird es nicht): Warnungen, Verkehr, Pegel, Wetter. Kein Tracking, keine US-Cloud, kein Überwachungswerkzeug: gespeichert werden Orte, Zeiten und Zahlen, keine Personen.
 

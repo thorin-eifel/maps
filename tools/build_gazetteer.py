@@ -35,7 +35,7 @@ def fetch() -> dict:
     last: Exception | None = None
     for url in MIRRORS:
         try:
-            req = urllib.request.Request(url, data=body, headers={"User-Agent": f"OSINT-by-CTW/1.0 (+{config.CONTACT})"})
+            req = urllib.request.Request(url, data=body, headers={"User-Agent": f"WasIstLosBeiUns/1.0 (+{config.CONTACT})"})
             with urllib.request.urlopen(req, timeout=120) as r:  # noqa: S310 (feste https-Ziele)
                 return json.load(r)
         except Exception as exc:  # noqa: BLE001

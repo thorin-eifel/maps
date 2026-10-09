@@ -20,7 +20,7 @@ Keine Cookies, keine Drittanbieter, keine externen Schriften/Kacheln. Die Seite 
 Offen vor dem Start: Vertrag zur Auftragsverarbeitung mit IONOS abschließen, Speicherdauer und IP-Kürzung der Logs beim Hoster prüfen, Angaben in „Datenschutz“ ergänzen.
 
 ## Sammelstelle
-Ein Rechner von CTW ruft die Quellen ab und lädt ausschließlich fertige JSON-Dateien (Ereignisse, Messwerte, Quellenstatus) per SFTP hoch. Kontaktadresse im User-Agent gegenüber den Quellen ist eine Funktionsadresse, keine Personenadresse.
+Ein Rechner des Betreibers ruft die Quellen ab und lädt ausschließlich fertige JSON-Dateien (Ereignisse, Messwerte, Quellenstatus) per SFTP hoch. Kontaktadresse im User-Agent gegenüber den Quellen ist eine Funktionsadresse, keine Personenadresse.
 
 ## Risiken und Restrisiko
 Gering. Offen: Prüfung der Freitexte aus NINA im Echtbetrieb (Stichprobe), Lizenz- und Nutzungsbedingungen je Quelle.

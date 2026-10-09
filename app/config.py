@@ -14,7 +14,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Räumlicher Zuschnitt (Projektanweisung Abschnitt 1)
-# Mittelpunkt des Radius: Firmensitz CTW in Irrel (Wert vom Betreiber vorgegeben), vorher Ortsmitte 49.850 / 6.450.
+# Mittelpunkt des Radius: Irrel (Wert vom Betreiber vorgegeben), vorher Ortsmitte 49.850 / 6.450.
 # Das Lagebild gilt der Region, nicht dem Ort: 120 km, mehr wird es nicht (Entscheidung des Betreibers).
 # Die Desktop-App setzt den Mittelpunkt bei der Ersteinrichtung über OSINT_CENTER_LAT/-LON (Radius bleibt 120 km).
 CENTER_LAT = float(os.environ.get("OSINT_CENTER_LAT", 49.84615562322509))
@@ -81,7 +81,7 @@ class Settings:
             db_path=Path(os.environ.get("OSINT_DB_PATH", BASE_DIR / "data" / "osint.sqlite")),
             sources_path=Path(os.environ.get("OSINT_SOURCES", BASE_DIR / "sources.yaml")),
             web_dir=Path(os.environ.get("OSINT_WEB_DIR", BASE_DIR / "web")),
-            user_agent=f"OSINT-by-CTW/1.0 (+{contact})",
+            user_agent=f"WasIstLosBeiUns/1.0 (+{contact})",
             http_timeout_s=float(os.environ.get("OSINT_HTTP_TIMEOUT", "20")),
             http_max_attempts=int(os.environ.get("OSINT_HTTP_ATTEMPTS", "3")),
             breaker_threshold=int(os.environ.get("OSINT_BREAKER_THRESHOLD", "5")),

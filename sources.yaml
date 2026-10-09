@@ -1,4 +1,4 @@
-# Quellenregister — OSINT by CTW
+# Quellenregister — Was ist los bei uns?
 # Ohne Eintrag hier läuft kein Collector. Diese Datei speist auch die UI-Seite „Quellen und Lizenzen“.
 #
 # Felder: id, name, betreiber, url, lizenz, lizenz_geprueft, lizenz_hinweis, namensnennung,

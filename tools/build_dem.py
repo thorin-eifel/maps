@@ -28,7 +28,7 @@ BBOX = {"lat_min": 48.50, "lat_max": 51.20, "lon_min": 4.40, "lon_max": 8.50}  #
 BBOX_WIDE = {"lat_min": 47.6, "lat_max": 52.0, "lon_min": 3.0, "lon_max": 10.0}
 WIDE_MAX_ZOOM = 9
 URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-UA = "OSINT-by-CTW/1.0 (DEM tiles, one-off fetch)"
+UA = "WasIstLosBeiUns/1.0 (DEM tiles, one-off fetch)"
 DEST = Path(__file__).resolve().parent.parent / "web" / "tiles" / "dem"
 
 

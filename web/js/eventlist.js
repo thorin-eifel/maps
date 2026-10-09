@@ -1,6 +1,6 @@
 /* Ereignisliste: Sortierung und Filter als reine Funktionen (testbar ohne DOM).
  *
- * Standard: Schwere absteigend, dann Entfernung zu CTW aufsteigend, dann Alter (neu zuerst).
+ * Standard: Schwere absteigend, dann Entfernung zu Irrel aufsteigend, dann Alter (neu zuerst).
  * Die Sortierschlüssel sind stabil gestaffelt: jeder Schlüssel hat einen Tie-Breaker,
  * damit die Liste bei gleichen Werten nicht springt, wenn sie alle 15 s neu gebaut wird.
  */
