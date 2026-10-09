@@ -3,8 +3,8 @@
 # stand: offen | in Arbeit | wartet auf Freigabe | fertig
 phasen:
   - { id: R0, name: Repository und Baseline,        stand: fertig,        pr: 1 }
-  - { id: R1, name: Raumabstraktion,                stand: in Arbeit,     pr: 2 }
-  - { id: R2, name: Kartenbasis,                    stand: offen }
+  - { id: R1, name: Raumabstraktion,                stand: fertig,        pr: 2 }
+  - { id: R2, name: Kartenbasis,                    stand: wartet auf Freigabe, pr: 3 }
   - { id: R3, name: Datenpipeline,                  stand: offen }
   - { id: R4, name: Export und Auslieferung,        stand: offen }
   - { id: R5, name: Frontend,                       stand: offen }

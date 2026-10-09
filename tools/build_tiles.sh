@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Hinweis:  Für Rheinland-Pfalz plus 80 km gilt tools/build_region_tiles.py (Stücke, wiederaufnehmbar, siehe docs/rlp/r2-kartenbasis.md).
+#           Dieses Skript baut den 120-km-Kreis um Irrel und bleibt für den Betrieb der bisherigen Region.
 # Zweck:    Baut den Kartenausschnitt (OSM, Protomaps-Basiskarte) als PMTiles-Datei für das Lagebild.
 # Aufruf:   tools/build_tiles.sh [BUILD_DATUM]   z. B. tools/build_tiles.sh 20260929
 #           Ohne Datum wird der neueste Build aus build-metadata.protomaps.dev genommen.
