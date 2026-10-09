@@ -80,3 +80,62 @@ def test_extent_legacy_in_radius_mode_and_wide_in_polygon_mode(monkeypatch):
     lon0, lat0, lon1, lat1 = extent.image_extent()
     assert (lon0, lat0, lon1, lat1) == (4.6, 47.9, 10.01, 52.01)
     assert 240 < extent.image_width() < 260
+
+
+# ------------------------------------------------------------------ Autobahn
+@pytest.fixture
+def _ab_clean():
+    yield
+
+
+def _ab_item(ident, lat=49.85, lon=6.45):
+    return {"identifier": ident, "title": "A64", "subtitle": "x", "coordinate": {"lat": str(lat), "long": str(lon)},
+            "isBlocked": "false", "startTimestamp": "2026-10-01T08:00:00.000+02:00", "description": ["Test"], "future": False,
+            "extent": "", "display_type": "ROADWORKS"}
+
+
+async def _ab_run(registry, storage, settings, handler, params_patch=None):
+    entry = registry.get("autobahn")
+    entry = entry.model_copy(update={"params": {**entry.params, **(params_patch or {})}})
+    client, router = make_client(handler)
+    c = load_collector_class(entry.collector)(entry, storage, client, settings, backoff_base_s=0.0)
+    c.pause_s = 0
+    res = await c.collect()
+    await client.aclose()
+    return res, router
+
+
+async def test_autobahn_verify_roads_skips_unknown_without_failure(registry, storage, settings, _ab_clean):
+    def h(req):
+        parts = req.url.path.strip("/").split("/")
+        if parts == ["o", "autobahn"]:
+            return {"roads": ["A64", "A1", "A99"]}
+        svc = parts[-1]
+        return {svc: [_ab_item(f"{parts[-3]}-{svc}")] if svc == "closure" else []}
+    res, router = await _ab_run(registry, storage, settings, h, {"roads": ["A64", "A1", "A3"], "services": ["closure"]})
+    assert res.complete is True
+    paths = {c.url.path for c in router.calls}
+    assert "/o/autobahn/A3/services/closure" not in paths           # nicht in der Liste → gar nicht gefragt
+    assert "/o/autobahn/A64/services/closure" in paths and len(res.events) == 2
+
+
+async def test_autobahn_roadworks_cached_between_runs(registry, storage, settings, _ab_clean):
+    def h(req):
+        parts = req.url.path.strip("/").split("/")
+        if parts == ["o", "autobahn"]:
+            return {"roads": ["A64"]}
+        svc = parts[-1]
+        return {svc: [_ab_item(f"{svc}-1")]}
+    patch = {"roads": ["A64"], "services": ["roadworks", "closure"]}
+    r1, router1 = await _ab_run(registry, storage, settings, h, patch)
+    r2, router2 = await _ab_run(registry, storage, settings, h, patch)
+    assert sum(c.url.path.endswith("roadworks") for c in router1.calls) == 1
+    assert sum(c.url.path.endswith("roadworks") for c in router2.calls) == 0     # aus dem Speicher
+    assert sum(c.url.path.endswith("closure") for c in router2.calls) == 1       # Sperrungen jedes Mal frisch
+    assert {e.id for e in r2.events} == {e.id for e in r1.events} and len(r2.events) == 2
+
+
+async def test_autobahn_list_missing_is_an_error(registry, storage, settings, _ab_clean):
+    from app.collectors.base import SourceError
+    with pytest.raises(SourceError):
+        await _ab_run(registry, storage, settings, lambda r: {"foo": []}, {"roads": ["A64"], "services": ["closure"]})

@@ -25,6 +25,8 @@ async def run(name, registry, storage, settings, handler):
 def autobahn_handler(fail=None, stau=False):
     def h(req: httpx.Request):
         parts = req.url.path.strip("/").split("/")  # o/autobahn/A64/services/roadworks
+        if len(parts) == 2:   # Streckenliste: nur die Strecken, zu denen echte Antworten als Fixture vorliegen
+            return {"roads": ["A1", "A48", "A60", "A64"]}
         road, service = parts[-3], parts[-1]
         if fail and (road, service) == fail:
             return httpx.Response(503)
@@ -61,7 +63,7 @@ async def test_autobahn_congestion_disappears_when_gone(registry, storage, setti
 
 async def test_autobahn_filters_at_the_edge(registry, storage, settings):
     ok, router, _ = await run("autobahn", registry, storage, settings, autobahn_handler())
-    assert ok and len(router.calls) == 12
+    assert ok and len(router.calls) == 13  # Streckenliste plus 4 Strecken zu je 3 Diensten
     evs = storage.active_events()
     assert evs and all(e["distance_km"] <= 120 for e in evs)  # nichts außerhalb des Radius gespeichert
     assert all(e["type"] == "traffic" for e in evs)
@@ -81,7 +83,7 @@ async def test_autobahn_idempotent(registry, storage, settings):
 async def test_autobahn_partial_failure_keeps_old_events(registry, storage, settings):
     await run("autobahn", registry, storage, settings, autobahn_handler())
     n = len(storage.active_events())
-    ok, _, _ = await run("autobahn", registry, storage, settings, autobahn_handler(fail=("A1", "roadworks")))
+    ok, _, _ = await run("autobahn", registry, storage, settings, autobahn_handler(fail=("A1", "warning")))
     assert ok  # Lauf gilt als Erfolg mit Hinweis …
     assert len(storage.active_events()) == n  # … aber nichts wird abgeräumt
     st = storage.get_state("autobahn")
@@ -172,12 +174,6 @@ def nina_handler(lists=None, detail=None, geo=None):
 
 WID = "mow.DE-SL-SLS-W038-20260904-000"
 ENTRY = [{"id": WID, "version": 19}]
-
-
-@pytest.fixture(autouse=True)
-def _nina_cache_clear():
-    from app.collectors import nina
-    nina._CACHE.clear()
 
 
 async def test_nina_real_edge_case_inside_radius(registry, storage, settings):

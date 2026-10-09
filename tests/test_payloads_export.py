@@ -73,11 +73,11 @@ def test_source_status_rules(registry):
 
 
 def test_is_due(registry):
-    e = registry.get("autobahn")  # 180 s
+    e = registry.get("autobahn")  # 300 s
     now = utcnow()
     assert is_due(e, {"last_attempt": None}, now)
     assert not is_due(e, {"last_attempt": iso(now - timedelta(seconds=100))}, now)
-    assert is_due(e, {"last_attempt": iso(now - timedelta(seconds=165))}, now)  # ≥ 90 %
+    assert is_due(e, {"last_attempt": iso(now - timedelta(seconds=275))}, now)  # ≥ 90 %
     assert is_due(e, {"last_attempt": iso(now - timedelta(seconds=3000))}, now)
 
 
