@@ -19,7 +19,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from .. import config, geo
+from .. import geo
 from ..models import Event, Measurement, Severity, Station, utcnow
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
@@ -62,7 +62,7 @@ class HochwasserRlpCollector(Collector):
                 lat, lon = geo.utm32_to_wgs84(float(s["easting"]), float(s["northing"]))
             except (KeyError, TypeError, ValueError):
                 continue
-            if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if not geo.in_region(lat, lon):
                 continue  # Filter am Rand: außerhalb wird gar nicht erst gemerkt
             op = (raw.get("operators") or {}).get(num) or {}
             rivers = [raw.get("rivers", {}).get(r, {}).get("name") for r in s.get("rivers") or []]

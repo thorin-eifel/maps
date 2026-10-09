@@ -37,7 +37,7 @@ def test_hubeau_stations_radius_and_mine_overflow_dropped():
     assert all(s.meta["land"] == "FR" for s in st.values())
     assert not any("minier" in s.name.lower() for s in st.values())
     from app import config, geo
-    assert all(geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, s.lat, s.lon) <= config.RADIUS_KM for s in st.values())
+    assert all(geo.in_region(s.lat, s.lon) for s in st.values())
 
 
 def test_hubeau_station_name_is_place_not_river_sentence():

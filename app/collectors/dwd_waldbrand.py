@@ -22,7 +22,7 @@ import zlib
 from datetime import datetime, timedelta
 from typing import Any
 
-from .. import config, geo
+from .. import geo
 from ..models import Event, Severity, utcnow
 from .base import Collector, CollectResult, SourceError
 
@@ -70,11 +70,8 @@ def parse_series(gz: bytes, prefix: str) -> tuple[str, list[int]] | None:
 def pick_stations(stations: list[dict[str, Any]]) -> list[dict[str, Any]]:
     res = []
     for s in stations:
-        if not geo.in_bbox(s["lat"], s["lon"]):
-            continue
-        dist = geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, s["lat"], s["lon"])
-        if dist <= config.RADIUS_KM:
-            res.append({**s, "distance_km": round(dist, 1)})
+        if geo.in_region(s["lat"], s["lon"]):
+            res.append({**s, "distance_km": round(geo.distance_to_ref_km(s["lat"], s["lon"]), 1)})
     return sorted(res, key=lambda s: s["distance_km"])
 
 

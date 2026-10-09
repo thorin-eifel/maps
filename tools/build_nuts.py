@@ -71,7 +71,7 @@ def select(path: Path, prefixes: tuple[str, ...]) -> dict:
         if not code.startswith(prefixes):
             continue
         g = simplify(f["geometry"])
-        if g and geo.geometry_within_radius(g):
+        if g and geo.geometry_in_region(g):
             res[code] = {"name": f["properties"].get("NAME_LATN") or f["properties"].get("NUTS_NAME"), "geometry": g}
     return res
 

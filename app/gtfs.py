@@ -17,7 +17,7 @@ import io
 import zipfile
 from typing import Any, Iterator
 
-from . import config, geo
+from . import geo
 
 # Verkehrsart aus route_type (GTFS-Basis und erweiterte Typen der Verkehrsverbünde)
 def mode_of(route_type: int) -> str:
@@ -36,7 +36,7 @@ def _rows(zf: zipfile.ZipFile, name: str) -> Iterator[dict[str, str]]:
 
 
 def _in_radius(lat: float, lon: float) -> bool:
-    return geo.in_bbox(lat, lon) and geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) <= config.RADIUS_KM
+    return geo.in_region(lat, lon)
 
 
 def build_index(zip_bytes: bytes, keep_trips: bool) -> dict[str, Any]:

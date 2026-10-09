@@ -1,5 +1,7 @@
-# Nur für tools/build_search_index.py (Kartenbau auf dem Mac oder CTW-Server), nicht für Betrieb und Tests.
+# Nur für tools/ (Kartenbau, Regionsbau auf dem Mac oder einem Server), nicht für Betrieb und Tests.
 # Eigene venv: pip kann mapbox-vector-tile nicht neben protobuf==7.x auflösen.
 -r requirements.txt
 numpy==2.4.6
 mapbox-vector-tile==2.2.0
+shapely==2.2.0
+pyshp==3.1.6

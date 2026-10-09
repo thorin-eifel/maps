@@ -86,7 +86,7 @@ class NasaFirmsCollector(Collector):
                 low += 1
                 continue
             t = _when(str(r.get("acq_date", "")), str(r.get("acq_time", "")))
-            if t is None or not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if t is None or not geo.in_region(lat, lon):
                 continue
             bucket = f"{t:%Y%m%d}{t.hour // 3}"
             uid = f"firms:{lat:.2f}:{lon:.2f}:{bucket}"

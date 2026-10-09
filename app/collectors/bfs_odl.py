@@ -60,7 +60,7 @@ class BfsOdlCollector(Collector):
             end = _dt(p.get("end_measure"))
             if end is None or now - end > MAX_AGE or p.get("site_status") != 1:
                 continue
-            if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if not geo.in_region(lat, lon):
                 continue
             sid = str(p.get("id") or p.get("kenn"))
             name = clean_text(str(p.get("name") or sid), 80)

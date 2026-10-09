@@ -52,7 +52,7 @@ def build(data: dict) -> list[dict]:
         if not name or kind not in RANK or "lat" not in el:
             continue
         lat, lon = float(el["lat"]), float(el["lon"])
-        if geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM + 5:
+        if not geo.in_region(lat, lon, margin_km=5):
             continue
         key = (name, round(lat, 3), round(lon, 3))
         if key in seen:

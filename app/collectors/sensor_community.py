@@ -52,7 +52,7 @@ def aggregate(data: Any) -> tuple[list[Station], list[Measurement]]:
             ts = datetime.strptime(str(s["timestamp"]), "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)   # UTC laut Quelle
         except (KeyError, TypeError, ValueError):
             continue
-        if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+        if not geo.in_region(lat, lon):
             continue
         vals: dict[str, float] = {}
         for v in s.get("sensordatavalues") or []:
@@ -92,7 +92,7 @@ def aggregate(data: Any) -> tuple[list[Station], list[Measurement]]:
 
 class SensorCommunityCollector(Collector):
     async def collect(self) -> CollectResult:
-        url = f"{self.entry.url.rstrip('/')}/airrohr/v1/filter/area={config.CENTER_LAT:.3f},{config.CENTER_LON:.3f},{config.RADIUS_KM:g}&type={TYPES}"
+        url = f"{self.entry.url.rstrip('/')}/airrohr/v1/filter/area={config.QUERY_LAT:.3f},{config.QUERY_LON:.3f},{config.QUERY_RADIUS_KM:g}&type={TYPES}"
         data = await self.fetch_json(url)
         stations, meas = aggregate(data)
         note = None if stations else f"keine Rasterzelle mit mindestens {MIN_SENSORS} Außensensoren"

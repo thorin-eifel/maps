@@ -53,7 +53,7 @@ class EmscCollector(Collector):
             except (KeyError, TypeError, ValueError):
                 continue
             t = _dt(p.get("time"))
-            if t is None or not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if t is None or not geo.in_region(lat, lon):
                 continue
             if p.get("evtype") not in (None, "ke", "se"):  # ke = bekanntes Erdbeben; Sprengungen und Sonstiges nicht
                 continue

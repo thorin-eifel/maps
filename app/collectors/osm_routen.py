@@ -93,7 +93,7 @@ def parse_elements(data: Any, kind: str) -> list[dict[str, Any]]:
                     continue
             if len(pts) < 2:
                 continue
-            if not any(geo.in_bbox(la, lo) and geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, la, lo) <= config.RADIUS_KM for lo, la in pts):
+            if not any(geo.in_region(la, lo) for lo, la in pts):
                 continue
             lines.append([[round(lo, 4), round(la, 4)] for lo, la in simplify(pts)])
         if lines:

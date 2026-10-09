@@ -35,8 +35,8 @@ class PegelonlineCollector(Collector):
         base = self.entry.url.rstrip("/")
         param = self.entry.params.get("parameter", "W")
         stations_raw = await self.fetch_json(f"{base}/stations.json", params={
-            "latitude": config.CENTER_LAT, "longitude": config.CENTER_LON,
-            "radius": int(config.RADIUS_KM),
+            "latitude": config.QUERY_LAT, "longitude": config.QUERY_LON,
+            "radius": int(config.QUERY_RADIUS_KM),
             "includeTimeseries": "true", "includeCurrentMeasurement": "true",
         })
         if not isinstance(stations_raw, list):
@@ -50,7 +50,7 @@ class PegelonlineCollector(Collector):
                 lat, lon = float(s["latitude"]), float(s["longitude"])
             except (KeyError, TypeError, ValueError):
                 continue  # Station ohne Koordinaten ist nicht verortbar
-            if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if not geo.in_region(lat, lon):
                 continue
             ts = next((t for t in s.get("timeseries", []) if t.get("shortname") == param), None)
             if ts is None:

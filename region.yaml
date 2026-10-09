@@ -1,0 +1,7 @@
+# Aktive Region des Lagebilds (siehe app/region.py).
+# Standard bleibt der Kreis um Irrel, bis Karte, Quellen und Frontend für die Landesfläche bereit sind (R2 bis R5).
+# Die Landesfläche liegt in region-rlp.yaml; aktivieren mit OSINT_REGION=region-rlp.yaml.
+name: Südeifel und Umgebung (120 km um Irrel)
+mode: radius
+reference: { name: Irrel, lat: 49.84615562322509, lon: 6.456057281843173 }
+radius_km: 120

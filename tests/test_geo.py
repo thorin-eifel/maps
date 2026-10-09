@@ -29,13 +29,13 @@ def test_haversine_irrel_bitburg():
     ("121 km östlich (knapp außen)", 49.850, 6.450 + 121 / (111.195 * 0.6461), False),
 ])
 def test_point_radius(name, lat, lon, expected):
-    assert geo.geometry_within_radius(pt(lat, lon)) is expected, name
+    assert geo.geometry_in_region(pt(lat, lon)) is expected, name
 
 
 def test_bbox_is_only_prefilter():
     corner = pt(50.92, 8.12)
     assert geo.in_bbox(50.92, 8.12)
-    assert not geo.geometry_within_radius(corner)
+    assert not geo.geometry_in_region(corner)
 
 
 def test_polygon_containing_center_has_distance_zero():
@@ -60,19 +60,19 @@ def test_real_nina_polygon_just_inside():
     g = fixture("nina_warning_geo.json")["features"][0]["geometry"]
     d = geo.geometry_distance_km(g)
     assert 48.0 < d < 49.0
-    assert geo.geometry_within_radius(g)
+    assert geo.geometry_in_region(g)
 
 
 def test_real_nina_polygon_shifted_outside():
     g = copy.deepcopy(fixture("nina_warning_geo.json")["features"][0]["geometry"])
     g["coordinates"] = [[[x, y - 1.3] for x, y in ring] for ring in g["coordinates"]]  # ca. 145 km nach Süden
     assert geo.geometry_distance_km(g) > 120
-    assert not geo.geometry_within_radius(g)
+    assert not geo.geometry_in_region(g)
 
 
 def test_geometry_collection_and_unknown_type():
     gc = {"type": "GeometryCollection", "geometries": [pt(53.0, 9.0), pt(49.86, 6.46)]}
-    assert geo.geometry_within_radius(gc)
+    assert geo.geometry_in_region(gc)
     with pytest.raises(ValueError):
         geo.geometry_distance_km({"type": "Blob", "coordinates": []})
 
@@ -81,3 +81,19 @@ def test_representative_point():
     assert geo.representative_point(pt(49.5, 6.5)) == (49.5, 6.5)
     lat, lon = geo.representative_point({"type": "LineString", "coordinates": [[6.0, 49.0], [7.0, 50.0]]})
     assert (lat, lon) == (49.5, 6.5)
+
+
+# ---------------------------------------------------------------- Polygon-Region (Rheinland-Pfalz plus 80 km)
+def test_geometry_in_region_polygon_mode(monkeypatch):
+    from pathlib import Path
+
+    from app import region
+    rlp = region.load(Path(__file__).resolve().parent.parent / "region-rlp.yaml")
+    monkeypatch.setattr(region, "REGION", rlp)
+    line = {"type": "LineString", "coordinates": [[2.0, 48.0], [14.0, 52.5]]}               # quert die Region ohne Stützpunkt darin
+    assert geo.geometry_in_region(line)
+    assert not geo.geometry_in_region({"type": "LineString", "coordinates": [[2.0, 52.0], [3.0, 52.5]]})
+    assert geo.geometry_in_region({"type": "Point", "coordinates": [8.27, 50.0]})          # Mainz
+    assert not geo.geometry_in_region({"type": "Point", "coordinates": [13.4, 52.5]})      # Berlin
+    big = {"type": "Polygon", "coordinates": [[[0, 40], [20, 40], [20, 60], [0, 60], [0, 40]]]}   # Fläche umschließt alles
+    assert geo.geometry_in_region(big)

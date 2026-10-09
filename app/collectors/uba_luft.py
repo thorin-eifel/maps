@@ -18,7 +18,7 @@ import asyncio
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
-from .. import config, geo
+from .. import geo
 from ..models import Event, Measurement, Severity, Station, utcnow
 from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
@@ -56,7 +56,7 @@ class UbaLuftCollector(Collector):
                 continue
             if v[6] is not None:
                 continue  # Station stillgelegt
-            if not geo.in_bbox(lat, lon) or geo.haversine_km(config.CENTER_LAT, config.CENTER_LON, lat, lon) > config.RADIUS_KM:
+            if not geo.in_region(lat, lon):
                 continue
             out.append({"id": str(v[0]), "code": v[1], "name": v[2], "city": v[3], "lat": lat, "lon": lon,
                         "setting": v[14], "type": v[16]})
