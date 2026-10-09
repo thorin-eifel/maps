@@ -1,6 +1,6 @@
 # Offene Punkte und Dinge, die nicht funktioniert haben
 
-Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R1.
+Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R2.
 
 ## Technik
 
@@ -8,6 +8,11 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R1.
 - **Bundle-Kennung und launchd-Labels** heißen noch `de.ctw.osint`. Umbenennen verschiebt das Datenverzeichnis der Desktop-App und braucht eine Migration. Nicht in R1.
 - **Texte mit festem Radius** in `docs/betrieb.md`, `web/einrichtung.html`, `tools/build_tiles.sh`, `tools/build_dem.py`, `app/tilebuild.py`, `app/collectors/dwd_radar.py` und `web/js/*` (Kreis, Vignette, Sweep nutzen `meta.radius_km`) werden mit Karte (R2) und Frontend (R5) angepasst. Im Polygonmodus liefert `meta.radius_km` den umschließenden Kreis, die Darstellung ist bis R5 nur für den Kreis richtig.
 - **Länderkennung außerhalb Deutschlands** (LU, BE, FR): `Gliederung.kreis()` kennt nur VG250. Für ausländische Punkte bleibt die bisherige Logik der Sammler (`region_tag`). Eine einheitliche Länderzuordnung braucht Landesgrenzen (z. B. Natural Earth, gemeinfrei) und kommt in R3, wenn sie gebraucht wird.
+
+- **Ladezeit der Karte im Browser** nicht gemessen (nur Übertragungsmenge, `docs/rlp/r2-kartenbasis.md`). Die Baseline zeigte 30 bis 45 s Beobachtung; Ursache nicht geklärt.
+- **Gewässernetz** für die neue Fläche erst nach R3 (braucht die Pegelliste der Sammler). **Lokaler OSM-Auszug** (Geofabrik) für R3.
+- **Neue Archive** liegen auf dem Mac unter `~/r2/final`, `~/r2/dem` (Sandkasten-VM), noch nicht in `web/tiles`. Einspielen und Upload gehören zu R4.
+- **Heimatkern** (Zoom 15 um Irrel) bleibt als Kern erhalten, abweichend von der Regel "nur Städte" aus Entscheidung 5. Vorschlag steht im PR.
 
 ## Recht und Lizenz
 

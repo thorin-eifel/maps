@@ -1,0 +1,16 @@
+# Orte mit Zoom 15 (Gebäude und Hausnummern). Alles andere der Region hat Gebäudeumrisse bis Zoom 14 (ring.pmtiles).
+# Entscheidung 5 in docs/rlp/plan.md. kreis: Mittelpunkt und Radius in km, bbox: lon_min,lat_min,lon_max,lat_max.
+# Der Heimatkern um Irrel (Südeifel, Trier, Bitburg, Echternach, Luxemburg) bleibt, weil er schon gebaut ist und dort der Alltag liegt.
+kerne:
+  - { name: Heimatkern Südeifel, bbox: [5.90, 49.49, 7.02, 50.21] }
+  - { name: Mainz,               kreis: { lat: 49.9929, lon: 8.2473, km: 8 } }
+  - { name: Koblenz,             kreis: { lat: 50.3569, lon: 7.5890, km: 7 } }
+  - { name: Kaiserslautern,      kreis: { lat: 49.4432, lon: 7.7689, km: 7 } }
+  - { name: Ludwigshafen und Mannheim, kreis: { lat: 49.4875, lon: 8.4660, km: 9 } }
+  - { name: Worms,               kreis: { lat: 49.6341, lon: 8.3507, km: 5 } }
+  - { name: Speyer,              kreis: { lat: 49.3173, lon: 8.4312, km: 4 } }
+  - { name: Landau,              kreis: { lat: 49.1991, lon: 8.1170, km: 4 } }
+  - { name: Neuwied,             kreis: { lat: 50.4286, lon: 7.4616, km: 4 } }
+  - { name: Bad Kreuznach,       kreis: { lat: 49.8454, lon: 7.8670, km: 4 } }
+  - { name: Saarbrücken,         kreis: { lat: 49.2402, lon: 6.9969, km: 8 } }
+  - { name: Metz,                kreis: { lat: 49.1193, lon: 6.1757, km: 7 } }
