@@ -102,7 +102,9 @@ def to_geojson(geom: Any) -> dict[str, Any]:
 # ------------------------------------------------------------------ Abruf
 def latest_build() -> str:
     import urllib.request
-    with urllib.request.urlopen("https://build-metadata.protomaps.dev/builds.json", timeout=30) as r:
+    req = urllib.request.Request("https://build-metadata.protomaps.dev/builds.json",
+                                 headers={"User-Agent": "WasIstLosBeiUns/1.0 (+thorin.eifel@icloud.com)"})
+    with urllib.request.urlopen(req, timeout=30) as r:
         return sorted(x["key"] for x in json.load(r))[-1].split(".")[0]
 
 
