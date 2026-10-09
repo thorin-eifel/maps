@@ -116,9 +116,9 @@ sources:
       und gehört in die Lizenzanfrage. Abgedeckt sind nur Autobahnen, keine Bundes- und Landesstraßen.
     namensnennung: "Quelle: Die Autobahn GmbH des Bundes"
     intervall: 300
-    ratenlimit: nicht veröffentlicht; 1 Abruf der Streckenliste, je Strecke Warnungen und Sperrungen in jedem Lauf (rund 70 Abrufe, 0,4 s Pause), Baustellen alle 15 Minuten (rund 35 Abrufe), ein Lauf alle 5 Minuten
+    ratenlimit: nicht veröffentlicht; 1 Abruf der Streckenliste, je Strecke Warnungen und Sperrungen in jedem Lauf (rund 80 Abrufe, 0,4 s Pause), Baustellen alle 15 Minuten (rund 40 Abrufe), ein Lauf alle 5 Minuten
     auth: keine
-    geo_bezug: Kandidatenliste von 35 Autobahnen (verify_roads gegen die Streckenliste der API), bundesweit je Strecke geladen, Geometriefilter auf die Region am Rand
+    geo_bezug: Kandidatenliste von 40 Autobahnen (verify_roads gegen die Streckenliste der API), bundesweit je Strecke geladen, Geometriefilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
@@ -126,8 +126,8 @@ sources:
     params:
       # Kandidaten: Autobahnen, die Rheinland-Pfalz plus 80 km berühren (Rheinland-Pfalz, Saarland, Süd-NRW, Süd-Hessen, Nord-Baden-Württemberg,
       # Unterfranken). verify_roads: nur Namen, die die API in ihrer Streckenliste führt, werden abgefragt.
-      roads: [A1, A3, A4, A5, A6, A8, A44, A45, A48, A59, A60, A61, A62, A63, A64, A65, A66, A67, A81,
-              A480, A544, A555, A560, A565, A602, A620, A623, A643, A648, A650, A656, A659, A661, A671, A672]
+      roads: [A1, A3, A4, A5, A6, A8, A44, A45, A48, A57, A59, A60, A61, A62, A63, A64, A65, A66, A67, A81,
+              A480, A544, A553, A555, A559, A560, A562, A565, A571, A602, A620, A623, A643, A648, A656, A659, A661, A671]
       services: [roadworks, warning, closure]
       verify_roads: true
       slow_services: [roadworks]
