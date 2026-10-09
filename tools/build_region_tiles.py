@@ -232,6 +232,7 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--jobs", type=int, default=3)
     ap.add_argument("--threads", type=int, default=2, help="Threads je Abruf")
     ap.add_argument("--budget-s", type=float, default=150.0, help="nach dieser Zeit keine neuen Abrufe mehr")
+    ap.add_argument("--keep-chunks", action="store_true", help="Stücke nach dem Vereinen behalten (Standard: löschen)")
     ap.add_argument("--dry-run", action="store_true")
     args = ap.parse_args(argv)
     logging.basicConfig(level="INFO", format="%(asctime)s %(levelname)s %(message)s")
@@ -270,6 +271,8 @@ def main(argv: list[str] | None = None) -> int:
             tmp.unlink(missing_ok=True)
             return 1
         os.replace(tmp, target)
+        if not args.keep_chunks:
+            shutil.rmtree(args.work / "chunks" / st, ignore_errors=True)   # Platz sparen, Stufe ist fertig
         log.info("Stufe %s fertig: %s", st, json.dumps(stats))
     if unfinished:
         log.info("Noch offen: %d Stücke. Befehl wiederholen.", unfinished)
