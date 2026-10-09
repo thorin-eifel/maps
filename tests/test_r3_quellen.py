@@ -139,3 +139,10 @@ async def test_autobahn_list_missing_is_an_error(registry, storage, settings, _a
     from app.collectors.base import SourceError
     with pytest.raises(SourceError):
         await _ab_run(registry, storage, settings, lambda r: {"foo": []}, {"roads": ["A64"], "services": ["closure"]})
+
+
+# ------------------------------------------------------------------ UBA
+def test_uba_region_tag():
+    from app.collectors.uba_luft import region_tag
+    assert region_tag("DERP012") == "DE-RLP" and region_tag("DESL019") == "DE-SL"
+    assert region_tag("DEBW118") == "DE-BW" and region_tag("DENW259") == "DE-NW" and region_tag("X") == "DE"

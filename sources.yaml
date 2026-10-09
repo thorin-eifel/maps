@@ -757,6 +757,8 @@ sources:
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
     collector: hubeau_pegel
+    params:
+      hours: 6   # Fenster der Beobachtungen je Lauf; bei Rheinland-Pfalz plus 80 km sind 24 h über das Seitenlimit gegangen (16.000 Werte, 80 s)
 
   - id: wallonie_pegel
     name: Pegel Wallonien (SPW Hydrométrie, KiWIS-Webdienst)
