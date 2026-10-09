@@ -27,10 +27,11 @@ import httpx
 from PIL import Image, ImageFilter
 
 from ..models import iso, utcnow
+from ..extent import image_extent, image_width
 from .base import Collector, CollectResult, SourceError
 
-LON0, LAT0, LON1, LAT1 = 4.4, 48.4, 8.5, 51.3   # wie das Regenradar
-WIDTH = 187          # gleiche Auflösung wie zuvor (~45 Bildpunkte je Grad), nur größerer Ausschnitt
+LON0, LAT0, LON1, LAT1 = image_extent()   # Region plus Rand, siehe app/extent.py
+WIDTH = image_width()   # 45,6 Bildpunkte je Grad, wie bisher
 STEPS = 9            # 9 × 5 Minuten
 LAG_MIN = 10
 UPSCALE = 6

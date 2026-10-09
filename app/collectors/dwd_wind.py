@@ -19,9 +19,10 @@ from typing import Any
 
 from ..grib import GribError, GribField, read_field
 from ..models import iso, utcnow
+from ..extent import image_extent
 from .base import Collector, CollectResult, SourceError
 
-LON0, LAT0, LON1, LAT1 = 4.4, 48.4, 8.5, 51.3   # wie das Radarbild
+LON0, LAT0, LON1, LAT1 = image_extent()   # Region plus Rand, siehe app/extent.py
 STRIDE = 2
 RUN_STEP_H = 3
 MAX_RUNS_BACK = 4   # bis 12 Stunden zurück

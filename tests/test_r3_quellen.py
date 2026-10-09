@@ -69,3 +69,14 @@ async def test_tank_partial_failure_keeps_rest_and_flags_incomplete(registry, st
     await client.aclose()
     assert res.complete is False and "fehlgeschlagen" in res.note
     assert 0 < len(res.stations) < 59 and "Punkte fehlgeschlagen" in res.note
+
+
+# ------------------------------------------------------------------ Bildausschnitt
+def test_extent_legacy_in_radius_mode_and_wide_in_polygon_mode(monkeypatch):
+    from app import extent
+    monkeypatch.setattr(extent, "REGION", SimpleNamespace(mode="radius", bbox=(48.76, 4.78, 50.93, 8.13)))
+    assert extent.image_extent() == (4.4, 48.4, 8.5, 51.3) and extent.image_width() == 187
+    monkeypatch.setattr(extent, "REGION", SimpleNamespace(mode="polygon", bbox=(48.247, 4.996, 51.661, 9.612)))
+    lon0, lat0, lon1, lat1 = extent.image_extent()
+    assert (lon0, lat0, lon1, lat1) == (4.6, 47.9, 10.01, 52.01)
+    assert 240 < extent.image_width() < 260
