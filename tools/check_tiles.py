@@ -17,7 +17,7 @@ from pathlib import Path
 from pmtiles.reader import MmapSource, Reader
 from pmtiles.tile import zxy_to_tileid  # noqa: F401  (Reader.get nimmt z, x, y)
 
-PLACES = [("Irrel", 49.850, 6.450, False), ("Trier", 49.7596, 6.6442, False), ("Koblenz", 50.3569, 7.5890, True),
+PLACES = [("Irrel", 49.850, 6.450, True), ("Trier", 49.7596, 6.6442, True), ("Koblenz", 50.3569, 7.5890, True),
           ("Mainz", 49.9929, 8.2473, True), ("Kaiserslautern", 49.4432, 7.7689, True), ("Saarbrücken", 49.2402, 6.9969, True),
           ("Landau", 49.1991, 8.1170, True), ("Neuwied", 50.4286, 7.4616, True), ("Pirmasens", 49.2010, 7.6050, False),
           ("Idar-Oberstein", 49.7130, 7.3100, False)]
