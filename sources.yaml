@@ -21,36 +21,16 @@ sources:
       steht in der OpenAPI-Beschreibung (bund.dev) nicht. Nutzungsbedingungen beim BBK bestätigen.
     namensnennung: "Quelle: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), NINA-Warnungen"
     intervall: 300
-    ratenlimit: nicht veröffentlicht; wir fragen höchstens einmal je 5 Minuten und Region
+    ratenlimit: nicht veröffentlicht; fünf Listenabrufe je 5 Minuten, Detail und GeoJSON nur für neue oder geänderte Meldungen
     auth: keine
-    geo_bezug: Dashboard je Kreis-ARS, danach Geometriefilter auf die Region
+    geo_bezug: mapData je Kanal (bundesweit aktive Meldungen), Detail und GeoJSON je neue Meldung, Geometriefilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
     collector: nina
     params:
-      # 12-stelliger ARS. Kreise in der Region (Rheinland-Pfalz, Saarland, ein Stück NRW); jeder Code ist live gegen die API geprüft (404 bei falschem Code).
-      ars:
-        - {ars: "072320000000", name: "Eifelkreis Bitburg-Prüm"}
-        - {ars: "072350000000", name: "Trier-Saarburg"}
-        - {ars: "072110000000", name: "Stadt Trier"}
-        - {ars: "072330000000", name: "Vulkaneifelkreis"}
-        - {ars: "072310000000", name: "Bernkastel-Wittlich"}
-        - {ars: "100420000000", name: "Merzig-Wadern"}
-        - {ars: "071350000000", name: "Cochem-Zell"}
-        - {ars: "071340000000", name: "Birkenfeld"}
-        - {ars: "071370000000", name: "Mayen-Koblenz"}
-        - {ars: "071310000000", name: "Ahrweiler"}
-        - {ars: "071400000000", name: "Rhein-Hunsrück-Kreis"}
-        - {ars: "071110000000", name: "Stadt Koblenz"}
-        - {ars: "071330000000", name: "Bad Kreuznach"}
-        - {ars: "100410000000", name: "Regionalverband Saarbrücken"}
-        - {ars: "100430000000", name: "Neunkirchen (Saar)"}
-        - {ars: "100440000000", name: "Saarlouis"}
-        - {ars: "100450000000", name: "Saarpfalz-Kreis"}
-        - {ars: "100460000000", name: "St. Wendel"}
-        - {ars: "053660000000", name: "Euskirchen"}
-        - {ars: "053340000000", name: "Städteregion Aachen"}
+      # Kanäle mit mapData.json (bundesweit, nur aktive Meldungen). dwd fehlt mit Absicht: kommt über den Sammler dwd_warnungen.
+      channels: [mowas, katwarn, biwapp, lhp, police]
 
   - id: dwd_warnungen
     name: DWD Wetterwarnungen (Landkreise)
