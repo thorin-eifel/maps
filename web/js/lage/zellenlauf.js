@@ -117,7 +117,10 @@ export function applyCells(force = false) {
 
 export function pushDichte() {
   if (!mapReady || !state.start || !map.getSource('dichte')) return;
-  map.getSource('dichte').setData({ type: 'FeatureCollection', features: dichtePunkte(state.start.cells) });
+  const pts = dichtePunkte(state.start.cells);
+  map.getSource('dichte').setData({ type: 'FeatureCollection', features: pts });
+  const hint = document.getElementById('dichte-hinweis');
+  if (hint) hint.textContent = `Übersicht: ${pts.reduce((a, f) => a + f.properties.n, 0)} Ereignisse in ${pts.length} Rasterzellen. Ab Zoomstufe ${EVENTS_MIN_ZOOM} erscheinen die Einzelmeldungen, die Tabelle zeigt schon jetzt alle Warnungen.`;
 }
 
 /** Gebiet geändert (Auswahl im Ereignisfilter): neu einsetzen und zeichnen. */

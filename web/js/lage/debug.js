@@ -11,7 +11,7 @@ export function debugHook(m) {
     if (cmd.zellen && state.zellen) await zellenWarten();
     const out = { zoom: m.getZoom() };
     if (cmd.zellen) { // Zellenbetrieb: gehaltene Zellen, Fehler, Anzahl gezeichneter Ereignisse und Dichtepunkte
-      out.zellen = state.zellen ? { ...state.zellen.status(), version: state.zellen.version, events: state.events.length, base: state.base.length, band: state.base.some((f) => f.properties.stub) ? 'stubs' : 'zellen' } : 'aus';
+      out.zellen = state.zellen ? { ...state.zellen.status(), version: state.zellen.version, bytes: [...state.zellen.held.keys()].reduce((a, rel) => a + (state.zellen.files[rel]?.bytes ?? 0), 0), events: state.events.length, base: state.base.length, band: state.base.some((f) => f.properties.stub) ? 'stubs' : 'zellen' } : 'aus';
     }
     for (const id of cmd.layers ?? []) out[id] = m.getLayer(id) ? m.queryRenderedFeatures({ layers: [id] }).length : 'fehlt';
     for (const im of cmd.images ?? []) out[`img:${im}`] = m.hasImage(im);

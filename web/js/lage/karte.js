@@ -93,7 +93,7 @@ export async function initMap() {
     paint: { 'circle-radius': ['interpolate', ['linear'], ['sqrt', ['get', 'n']], 1, 9, 30, 26], 'circle-color': sevColor(c, 'sev'), 'circle-opacity': 0.85, 'circle-stroke-color': c.white, 'circle-stroke-width': 1.5 } });
   map.addLayer({ id: 'dichte-zahl', type: 'symbol', source: 'dichte', maxzoom: KIND_MIN_ZOOM.events,
     layout: { 'text-field': ['to-string', ['get', 'n']], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true },
-    paint: { 'text-color': c.white } });
+    paint: { 'text-color': ['match', ['get', 'sev'], 'warning', '#111', 'notice', '#111', c.white] } });   // dunkle Schrift auf Orange und Gelb (Kontrast), weiß auf Rot und Blau
 
   // Luftverkehr: eigene Quelle, weil sie sich jede Sekunde bewegt
   map.addSource('air', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
