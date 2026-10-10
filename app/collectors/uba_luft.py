@@ -6,7 +6,7 @@ Lizenz:     siehe sources.yaml (nach Kenntnisstand Datenlizenz Deutschland Namen
 Intervall:  1800 s (Stundenwerte, vorläufig geprüft)
 Beispiel:   python -m app.collect --once --only uba_luft
 
-Stationsliste (112 KB) wird 24 Stunden zwischengespeichert und auf den Radius gefiltert. Je Station ein Abruf der
+Stationsliste (112 KB) wird 24 Stunden zwischengespeichert und auf die Region gefiltert. Je Station ein Abruf der
 letzten Stunden: `lqi` (Luftqualitätsindex 0 sehr gut bis 4 sehr schlecht) und die Komponenten PM10, PM2.5, NO2, O3, SO2, CO.
 Die API rechnet in MEZ (UTC+1, ohne Sommerzeit); der Endzeitpunkt der Stunde wird nach UTC umgerechnet.
 Luxemburg und Frankreich fehlen (das UBA-Netz endet an der deutschen Grenze).
@@ -39,7 +39,15 @@ def _cet(value: str) -> datetime:
     return base.replace(tzinfo=CET).astimezone(timezone.utc)
 
 
+def region_tag(code: str) -> str:
+    """Stationskennung DExxNNN: die zwei Buchstaben nach DE sind das Land (RP → DE-RLP, sonst DE-xx)."""
+    land = code[2:4].upper() if code.startswith("DE") and len(code) >= 4 else ""
+    return {"RP": "DE-RLP", "": "DE"}.get(land, f"DE-{land}")
+
+
 class UbaLuftCollector(Collector):
+    pause_s = 0.4   # je Station ein Abruf; ohne Pause antwortet die API bei über 100 Stationen mit HTTP 429
+
     async def _stations(self, base: str) -> list[dict[str, Any]]:
         row = await asyncio.to_thread(self.storage.cache_get, "uba:stations")
         if row and utcnow() - datetime.fromisoformat(row["payload"]["fetched"]) < STATIONS_TTL:
@@ -73,7 +81,9 @@ class UbaLuftCollector(Collector):
         measurements: list[Measurement] = []
         events: list[Event] = []
         failed: list[str] = []
-        for s in stations_raw:
+        for n, s in enumerate(stations_raw):
+            if n and self.pause_s:
+                await asyncio.sleep(self.pause_s)
             try:
                 resp = await self.fetch_json(f"{base}/airquality/json", params={
                     "station": s["id"], "lang": "de", "date_from": f"{start:%Y-%m-%d}", "time_from": start.hour,
@@ -110,7 +120,7 @@ class UbaLuftCollector(Collector):
                         f"Luftqualitätsindex {latest_lqi} ({LQI_NAME[latest_lqi]}) an der Station {s['name']}, Stunde bis {latest_end:%H:%M} UTC.", 300),
                     severity=sev, geometry={"type": "Point", "coordinates": [s["lon"], s["lat"]]},
                     valid_from=latest_end, valid_to=latest_end + timedelta(hours=3), fetched_at=now,
-                    region_tag="DE-SL" if s["code"].startswith("DESL") else "DE-RLP", raw_ref="https://luftdaten.umweltbundesamt.de/",
+                    region_tag=region_tag(s["code"]), raw_ref="https://luftdaten.umweltbundesamt.de/",
                     attrs={"kind": "luft", "lqi": latest_lqi},
                 ))
         if not stations:

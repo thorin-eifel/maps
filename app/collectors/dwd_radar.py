@@ -26,11 +26,12 @@ import httpx
 from PIL import Image, ImageFilter
 
 from ..models import iso, utcnow
+from ..extent import image_extent, image_width
 from .base import Collector, CollectResult, SourceError
 
 # Bildausschnitt: großzügig um die Region, damit auch bei kleinem Maßstab Regen von außen zu sehen ist
-LON0, LAT0, LON1, LAT1 = 4.4, 48.4, 8.5, 51.3   # deckt Radius 120 km plus Verlauf (150 km) ab, sonst schneidet die Kante das Bild sichtbar
-WIDTH = 187          # gleiche Auflösung wie zuvor (~45 Bildpunkte je Grad), nur größerer Ausschnitt
+LON0, LAT0, LON1, LAT1 = image_extent()   # Region plus Rand, siehe app/extent.py
+WIDTH = image_width()   # 45,6 Bildpunkte je Grad, wie bisher
 UPSCALE = 6          # Glättung hier: bilinear vergrößern und leicht weichzeichnen, damit die Karte keine Klötzchen zeigt
 BLUR_PX = 2.0
 NODATA_GREY = (126, 126, 126)

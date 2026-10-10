@@ -5,7 +5,9 @@ Zweck:     MeteoAlarm nennt Warngebiete nur als NUTS-Code (BE34, FR413 ...), ohn
            als Fläche erscheinen und der Radiusfilter greift, liegen die Grenzen der betroffenen Gebiete im Repository.
 Quelle:    Eurostat GISCO, NUTS 2021, 1:3 Mio (EPSG:4326). Nachweis: "© EuroGeographics bezüglich der Verwaltungsgrenzen"
            (Hinweis des Anbieters; Bedingungen vor Veröffentlichung gegenlesen, siehe lizenz_hinweis in sources.yaml).
-Aufruf:    python tools/build_nuts.py --lvl2 NUTS_RG_03M_2021_4326_LEVL_2.geojson --lvl3 NUTS_RG_03M_2021_4326_LEVL_3.geojson
+Aufruf:    OSINT_REGION=region-rlp.yaml python tools/build_nuts.py --lvl2 NUTS_RG_03M_2021_4326_LEVL_2.geojson --lvl3 NUTS_RG_03M_2021_4326_LEVL_3.geojson
+NUTS-Fassung: 2013 (so nennt der MeteoAlarm-Feed die Gebiete, z. B. FR421 für Bas-Rhin; die 2021er Codes wie FRF11 passen nicht).
+           Niederlande: der Feed nennt dort EMMA_ID (NL007 …), keine NUTS-Codes; ohne Zuordnungstabelle nicht abbildbar, bleibt draußen.
 Ergebnis:  {"BE34": {"name": ..., "geometry": {...}}}: Belgien und Luxemburg auf Ebene 2, Frankreich auf Ebene 3,
            nur Gebiete, die den Radius berühren. Vereinfacht auf rund 300 m, das genügt für Warnflächen.
 """

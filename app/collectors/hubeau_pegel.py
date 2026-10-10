@@ -8,7 +8,7 @@ Lizenz:     Licence Ouverte 2.0 (Etalab) nach Kenntnis des Betreibers; Wortlaut 
 Intervall:  900 s
 Beispiel:   python -m app.collect --once --only hubeau_pegel
 
-Wir holen die Stationen der Bounding Box, die in Betrieb sind, und die Wasserstände der letzten 24 Stunden (Cursor-Seiten, höchstens
+Wir holen die Stationen der Bounding Box, die in Betrieb sind, und die Wasserstände der letzten params.hours Stunden (Standard 24; Cursor-Seiten, höchstens
 MAX_PAGES). Werte kommen in Millimetern und werden zu Zentimetern. Bergbau-Überläufe ("Débordement minier") sind keine Gewässerpegel
 und fallen weg; Stationen außerhalb des Radius fallen am Rand weg. Warnstufen liefert diese Quelle nicht (das wäre Vigicrues);
 die Kachel zeigt Wert und Trend ohne Farbe. Reine Messwerte, kein Personenbezug.
@@ -26,7 +26,7 @@ from .base import Collector, CollectResult, SourceError
 
 BASE = "https://hubeau.eaufrance.fr/api/v2/hydrometrie"
 PLAUSIBLE_CM = (-100.0, 2500.0)
-MAX_PAGES = 6
+MAX_PAGES = 10
 PAGE = 5000
 SKIP_NAME = re.compile(r"d[ée]bordement minier", re.I)
 ABROAD = re.compile(r"^.{2,80}? en (Belgique|Allemagne|Luxembourg|France)\s*\[([^\]]{2,60})\]\s*$")  # "La Semoy en Belgique [Tintigny]"
@@ -111,7 +111,7 @@ class HubeauPegelCollector(Collector):
             "bbox": _bbox_param(), "en_service": 1, "size": 500, "format": "json",
             "fields": "code_station,libelle_site,libelle_station,libelle_cours_eau,latitude_station,longitude_station,libelle_region,en_service"})
         stations = parse_stations(st_raw)
-        since = (utcnow() - timedelta(hours=24)).strftime("%Y-%m-%dT%H:%M:%SZ")
+        since = (utcnow() - timedelta(hours=float(self.entry.params.get("hours", 24)))).strftime("%Y-%m-%dT%H:%M:%SZ")
         pages: list[Any] = []
         nxt: str | None = f"{BASE}/observations_tr"
         params: dict[str, Any] | None = {"bbox": _bbox_param(), "grandeur_hydro": "H", "date_debut_obs": since, "size": PAGE, "format": "json",

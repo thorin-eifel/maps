@@ -60,3 +60,12 @@ class Router:
 def make_client(handler) -> tuple[httpx.AsyncClient, Router]:
     router = Router(handler)
     return httpx.AsyncClient(transport=httpx.MockTransport(router)), router
+
+
+@pytest.fixture(autouse=True)
+def _clear_collector_memory():
+    """Sammler merken sich Ergebnisse im Arbeitsspeicher (NINA je Version, Autobahn-Baustellen). Tests dürfen sich nicht beeinflussen."""
+    from app.collectors import autobahn, nina
+    nina._CACHE.clear()
+    autobahn._SLOW.clear()
+    yield

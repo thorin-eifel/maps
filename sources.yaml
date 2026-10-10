@@ -21,36 +21,16 @@ sources:
       steht in der OpenAPI-Beschreibung (bund.dev) nicht. Nutzungsbedingungen beim BBK bestätigen.
     namensnennung: "Quelle: Bundesamt für Bevölkerungsschutz und Katastrophenhilfe (BBK), NINA-Warnungen"
     intervall: 300
-    ratenlimit: nicht veröffentlicht; wir fragen höchstens einmal je 5 Minuten und Region
+    ratenlimit: nicht veröffentlicht; fünf Listenabrufe je 5 Minuten, Detail und GeoJSON nur für neue oder geänderte Meldungen
     auth: keine
-    geo_bezug: Dashboard je Kreis-ARS, danach Geometriefilter auf die Region
+    geo_bezug: mapData je Kanal (bundesweit aktive Meldungen), Detail und GeoJSON je neue Meldung, Geometriefilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
     collector: nina
     params:
-      # 12-stelliger ARS. Kreise in der Region (Rheinland-Pfalz, Saarland, ein Stück NRW); jeder Code ist live gegen die API geprüft (404 bei falschem Code).
-      ars:
-        - {ars: "072320000000", name: "Eifelkreis Bitburg-Prüm"}
-        - {ars: "072350000000", name: "Trier-Saarburg"}
-        - {ars: "072110000000", name: "Stadt Trier"}
-        - {ars: "072330000000", name: "Vulkaneifelkreis"}
-        - {ars: "072310000000", name: "Bernkastel-Wittlich"}
-        - {ars: "100420000000", name: "Merzig-Wadern"}
-        - {ars: "071350000000", name: "Cochem-Zell"}
-        - {ars: "071340000000", name: "Birkenfeld"}
-        - {ars: "071370000000", name: "Mayen-Koblenz"}
-        - {ars: "071310000000", name: "Ahrweiler"}
-        - {ars: "071400000000", name: "Rhein-Hunsrück-Kreis"}
-        - {ars: "071110000000", name: "Stadt Koblenz"}
-        - {ars: "071330000000", name: "Bad Kreuznach"}
-        - {ars: "100410000000", name: "Regionalverband Saarbrücken"}
-        - {ars: "100430000000", name: "Neunkirchen (Saar)"}
-        - {ars: "100440000000", name: "Saarlouis"}
-        - {ars: "100450000000", name: "Saarpfalz-Kreis"}
-        - {ars: "100460000000", name: "St. Wendel"}
-        - {ars: "053660000000", name: "Euskirchen"}
-        - {ars: "053340000000", name: "Städteregion Aachen"}
+      # Kanäle mit mapData.json (bundesweit, nur aktive Meldungen). dwd fehlt mit Absicht: kommt über den Sammler dwd_warnungen.
+      channels: [mowas, katwarn, biwapp, lhp, police]
 
   - id: dwd_warnungen
     name: DWD Wetterwarnungen (Landkreise)
@@ -135,17 +115,23 @@ sources:
       Kennungen tragen den Vermerk INRIX, die Herkunft dieser Verkehrslage ist also ein Drittanbieter
       und gehört in die Lizenzanfrage. Abgedeckt sind nur Autobahnen, keine Bundes- und Landesstraßen.
     namensnennung: "Quelle: Die Autobahn GmbH des Bundes"
-    intervall: 180
-    ratenlimit: nicht veröffentlicht; 12 Abrufe je Lauf, nacheinander mit Pause, ein Lauf alle 3 Minuten (Stau ändert sich schnell)
+    intervall: 300
+    ratenlimit: nicht veröffentlicht; 1 Abruf der Streckenliste, je Strecke Warnungen und Sperrungen in jedem Lauf (rund 80 Abrufe, 0,4 s Pause), Baustellen alle 15 Minuten (rund 40 Abrufe), ein Lauf alle 5 Minuten
     auth: keine
-    geo_bezug: A1, A48, A60, A64 bundesweit geladen, Geometriefilter auf die Region am Rand
+    geo_bezug: Kandidatenliste von 40 Autobahnen (verify_roads gegen die Streckenliste der API), bundesweit je Strecke geladen, Geometriefilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-29"
     collector: autobahn
     params:
-      roads: [A1, A48, A60, A64]
+      # Kandidaten: Autobahnen, die Rheinland-Pfalz plus 80 km berühren (Rheinland-Pfalz, Saarland, Süd-NRW, Süd-Hessen, Nord-Baden-Württemberg,
+      # Unterfranken). verify_roads: nur Namen, die die API in ihrer Streckenliste führt, werden abgefragt.
+      roads: [A1, A3, A4, A5, A6, A8, A44, A45, A48, A57, A59, A60, A61, A62, A63, A64, A65, A66, A67, A81,
+              A480, A544, A553, A555, A559, A560, A562, A565, A571, A602, A620, A623, A643, A648, A656, A659, A661, A671]
       services: [roadworks, warning, closure]
+      verify_roads: true
+      slow_services: [roadworks]
+      slow_every_s: 900
 
   - id: adsblol
     name: Luftverkehr (ADS-B, adsb.lol)
@@ -679,7 +665,8 @@ sources:
     zuletzt_geprüft: "2026-09-30"
     collector: dwd_waldbrand
     params:
-      max_stations: 10
+      max_stations: 40
+      min_spacing_km: 30   # gleichmäßig über die Fläche statt die nächsten zehn um Irrel
 
   - id: dwd_gesundheit
     name: Pollenflug und UV-Index (DWD Medizin-Meteorologie)
@@ -690,18 +677,18 @@ sources:
     lizenz_geprueft: false
     lizenz_hinweis: >-
       Die Dateien s31fg.json und uvi.json tragen keine Lizenzzeile; der DWD stellt seine Open Data nach GeoNutzV bereit. Wortlaut der
-      Bedingungen für diesen Ordner vor dem öffentlichen Start bestätigen. Pollen: Teilregionen 101 und 102; UV: Station Hahn.
+      Bedingungen für diesen Ordner vor dem öffentlichen Start bestätigen. Pollen: zehn Teilregionen der Fläche (siehe params); UV: nur Station Hahn, weitere Stationen (Bonn, Frankfurt/Main, Weinbiet) folgen mit der Oberfläche in R5.
     namensnennung: "Pollenflug- und UV-Gefahrenindex: Deutscher Wetterdienst"
     intervall: 3600
     ratenlimit: nicht veröffentlicht; zwei Abrufe je Stunde
     auth: keine
-    geo_bezug: Teilregionen Rhein/Mosel und Mittelgebirge RLP; UV-Station Hahn (Hunsrück)
+    geo_bezug: zehn Pollen-Teilregionen der Fläche; UV-Station Hahn (Hunsrück)
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
     collector: dwd_gesundheit
     params:
-      pollen_regions: [101, 102]
+      pollen_regions: [101, 102, 103, 41, 43, 91, 92, 111, 113, 124]   # RLP, Saarland, Rhein-Westfäl. Tiefland, Mittelgebirge NRW, Hessen (2), Baden-Württemberg (2), Mainfranken
       uv_station: Hahn
 
   - id: tankerkoenig
@@ -716,14 +703,14 @@ sources:
       ist persönlich und kostenlos. Aktiv seit 2026-10-07 (Schlüssel liegt in .env, nie im Code oder in Logs). Nur Deutschland: für Luxemburg gibt es keine
       offenen Preise je Tankstelle (Suche auf data.public.lu am 2026-09-30 ohne Treffer), der Grenzpreisvergleich zeigt deshalb nur die
       deutsche Seite. Straße und Hausnummer werden nicht gespeichert.
-    namensnennung: "Spritpreise: Tankerkönig (creativecommons.tankerkoenig.de), Daten MTS-K, CC BY 4.0"
-    intervall: 900
-    ratenlimit: Dienst verlangt angemessene Abrufzahl; zwei Abrufe je 15 Minuten
+    namensnennung: "Spritpreise: Tankerkönig (www.tankerkoenig.de), Daten MTS-K, CC BY 4.0"
+    intervall: 120
+    ratenlimit: Betreiber begrenzt auf einen Request je Minute (Stand 2026-10-09); der Collector fragt je Lauf einen Punkt, alle 2 Minuten, reihum
     auth: API-Schlüssel (kostenlos, in .env als TANKERKOENIG_API_KEY)
-    geo_bezug: zwei Umkreise von 25 km (Irrel, Trier), Feinfilter auf die Region
+    geo_bezug: Umkreise von 25 km (Gitter über die deutsche Fläche, bei Irrel-Region fünf Punkte), Feinfilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true
-    zuletzt_geprüft: "2026-10-07"
+    zuletzt_geprüft: "2026-10-09"
     collector: tankerkoenig
 
   - id: mastodon_themen
@@ -771,6 +758,8 @@ sources:
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
     collector: hubeau_pegel
+    params:
+      hours: 6   # Fenster der Beobachtungen je Lauf; bei Rheinland-Pfalz plus 80 km sind 24 h über das Seitenlimit gegangen (16.000 Werte, 80 s)
 
   - id: wallonie_pegel
     name: Pegel Wallonien (SPW Hydrométrie, KiWIS-Webdienst)
@@ -832,10 +821,10 @@ sources:
     intervall: 600
     ratenlimit: nicht veröffentlicht; 3 Abrufe je 10 Minuten
     auth: keine
-    geo_bezug: NUTS-Gebiet (BE33, BE34, FR411 bis FR413, LU00) als Fläche, nur Gebiete im Radius
+    geo_bezug: NUTS-2013-Gebiet (BE22, BE33 bis BE35, FR211, FR411 bis FR414, FR421, LU00) als Fläche, nur Gebiete in der Region. Niederlande fehlen (Feed nutzt EMMA_ID statt NUTS)
     datenschutz_risiko: niedrig
     aktiv: true
-    zuletzt_geprüft: "2026-09-30"
+    zuletzt_geprüft: "2026-10-09"
     collector: meteoalarm
 
   - id: bison_fute
@@ -924,7 +913,7 @@ sources:
     zuletzt_geprüft: "2026-10-07"
     collector: dwd_stationen
     params:
-      max_stations: 60
+      max_stations: 200   # SYNOP-Stationen in Rheinland-Pfalz plus 80 km, alle (die Liste wird nach Entfernung geordnet)
 
   - id: irceline
     name: Luftqualität Belgien (IRCEL-CELINE)

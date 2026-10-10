@@ -25,6 +25,8 @@ async def run(name, registry, storage, settings, handler):
 def autobahn_handler(fail=None, stau=False):
     def h(req: httpx.Request):
         parts = req.url.path.strip("/").split("/")  # o/autobahn/A64/services/roadworks
+        if len(parts) == 2:   # Streckenliste: nur die Strecken, zu denen echte Antworten als Fixture vorliegen
+            return {"roads": ["A1", "A48", "A60", "A64"]}
         road, service = parts[-3], parts[-1]
         if fail and (road, service) == fail:
             return httpx.Response(503)
@@ -61,7 +63,7 @@ async def test_autobahn_congestion_disappears_when_gone(registry, storage, setti
 
 async def test_autobahn_filters_at_the_edge(registry, storage, settings):
     ok, router, _ = await run("autobahn", registry, storage, settings, autobahn_handler())
-    assert ok and len(router.calls) == 12
+    assert ok and len(router.calls) == 13  # Streckenliste plus 4 Strecken zu je 3 Diensten
     evs = storage.active_events()
     assert evs and all(e["distance_km"] <= 120 for e in evs)  # nichts außerhalb des Radius gespeichert
     assert all(e["type"] == "traffic" for e in evs)
@@ -81,7 +83,7 @@ async def test_autobahn_idempotent(registry, storage, settings):
 async def test_autobahn_partial_failure_keeps_old_events(registry, storage, settings):
     await run("autobahn", registry, storage, settings, autobahn_handler())
     n = len(storage.active_events())
-    ok, _, _ = await run("autobahn", registry, storage, settings, autobahn_handler(fail=("A1", "roadworks")))
+    ok, _, _ = await run("autobahn", registry, storage, settings, autobahn_handler(fail=("A1", "warning")))
     assert ok  # Lauf gilt als Erfolg mit Hinweis …
     assert len(storage.active_events()) == n  # … aber nichts wird abgeräumt
     st = storage.get_state("autobahn")
@@ -157,13 +159,13 @@ async def test_dwd_groups_filters_and_maps_severity(registry, storage, settings)
 
 
 # ------------------------------------------------------------------ NINA
-def nina_handler(dashboards=None, detail=None, geo=None):
-    dashboards = dashboards or {}
+def nina_handler(lists=None, detail=None, geo=None):
+    """lists: Kanal → mapData-Liste. Nicht genannte Kanäle liefern []."""
+    lists = lists or {}
     def h(req):
         p = req.url.path
-        if "/dashboard/" in p:
-            ars = p.rsplit("/", 1)[1].removesuffix(".json")
-            return dashboards.get(ars, [])
+        if p.endswith("/mapData.json"):
+            return lists.get(p.rsplit("/", 2)[1], [])
         if p.endswith(".geojson"):
             return geo if geo is not None else fixture("nina_warning_geo.json")
         return detail if detail is not None else fixture("nina_warning_detail.json")
@@ -171,10 +173,11 @@ def nina_handler(dashboards=None, detail=None, geo=None):
 
 
 WID = "mow.DE-SL-SLS-W038-20260904-000"
+ENTRY = [{"id": WID, "version": 19}]
 
 
 async def test_nina_real_edge_case_inside_radius(registry, storage, settings):
-    h = nina_handler({"100420000000": [{"id": WID}], "072320000000": [{"id": WID}]})  # doppelt gemeldet → einmal
+    h = nina_handler({"mowas": ENTRY, "katwarn": ENTRY})  # doppelt gemeldet → einmal
     ok, router, _ = await run("nina", registry, storage, settings, h)
     assert ok
     evs = storage.active_events()
@@ -184,41 +187,57 @@ async def test_nina_real_edge_case_inside_radius(registry, storage, settings):
     assert 48 < e["distance_km"] < 49 and e["confidence"] == 1.0
     assert "<" not in e["summary"]
     assert sum(1 for c in router.calls if c.url.path.endswith(f"{WID}.json")) == 1
+    assert not any("/dwd/" in c.url.path for c in router.calls)   # DWD kommt über dwd_warnungen
 
 
-async def test_nina_outside_radius_is_dropped(registry, storage, settings):
+async def test_nina_detail_fetched_once_per_version(registry, storage, settings):
+    h = nina_handler({"mowas": ENTRY})
+    _, r1, _ = await run("nina", registry, storage, settings, h)
+    _, r2, _ = await run("nina", registry, storage, settings, h)
+    assert sum(c.url.path.endswith(f"{WID}.json") for c in r2.calls) == 0   # aus dem Speicher
+    assert len(storage.active_events()) == 1
+    _, r3, _ = await run("nina", registry, storage, settings, nina_handler({"mowas": [{"id": WID, "version": 20}]}))
+    assert sum(c.url.path.endswith(f"{WID}.json") for c in r3.calls) == 1   # neue Version → neu holen
+
+
+async def test_nina_outside_region_is_dropped(registry, storage, settings):
     geo = copy.deepcopy(fixture("nina_warning_geo.json"))
     for f in geo["features"]:
-        f["geometry"]["coordinates"] = [[[x, y - 1.3] for x, y in ring] for ring in f["geometry"]["coordinates"]]
-    await run("nina", registry, storage, settings, nina_handler({"100420000000": [{"id": WID}]}, geo=geo))
+        f["geometry"]["coordinates"] = [[[x, y - 4.0] for x, y in ring] for ring in f["geometry"]["coordinates"]]
+    await run("nina", registry, storage, settings, nina_handler({"mowas": ENTRY}, geo=geo))
     assert storage.active_events() == []
 
 
-async def test_nina_without_geometry_falls_back_to_seat_with_low_confidence(registry, storage, settings):
-    await run("nina", registry, storage, settings, nina_handler({"072320000000": [{"id": WID}]}, geo={"type": "FeatureCollection", "features": []}))
-    e = storage.active_events()[0]
-    assert e["confidence"] == 0.5 and e["summary"].startswith("Ort ungenau")
-    assert e["distance_km"] < 20  # Kreissitz Bitburg
+async def test_nina_without_geometry_is_dropped_and_counted(registry, storage, settings):
+    ok, _, c = await run("nina", registry, storage, settings, nina_handler({"mowas": ENTRY}, geo={"type": "FeatureCollection", "features": []}))
+    assert ok and storage.active_events() == []
+    from app.collectors import nina
+    assert nina._CACHE[(WID, "19")] == (None, True)   # gemerkt: nur die Fläche fehlte
 
 
 async def test_nina_cancel_and_test_messages_dropped(registry, storage, settings):
     for patch in ({"msgType": "Cancel"}, {"status": "Test"}):
         d = {**fixture("nina_warning_detail.json"), **patch}
-        await run("nina", registry, storage, settings, nina_handler({"100420000000": [{"id": WID}]}, detail=d))
+        await run("nina", registry, storage, settings, nina_handler({"mowas": ENTRY}, detail=d))
         assert storage.active_events() == []
 
 
-async def test_nina_partial_region_failure_is_not_a_wipe(registry, storage, settings):
-    await run("nina", registry, storage, settings, nina_handler({"100420000000": [{"id": WID}]}))
+async def test_nina_partial_failure_is_not_a_wipe(registry, storage, settings):
+    await run("nina", registry, storage, settings, nina_handler({"mowas": ENTRY}))
     assert len(storage.active_events()) == 1
     def h(req):
-        if "/dashboard/072320000000" in req.url.path:
+        if "/katwarn/" in req.url.path:
             return httpx.Response(500)
-        return nina_handler({})(req)  # alle anderen Regionen: leer
+        return nina_handler({})(req)  # alle anderen Kanäle: leer
     ok, _, _ = await run("nina", registry, storage, settings, h)
     assert ok and len(storage.active_events()) == 1  # unvollständiger Lauf räumt nicht ab
     ok, _, _ = await run("nina", registry, storage, settings, nina_handler({}))
     assert ok and storage.active_events() == []  # vollständiger, leerer Lauf schon
+
+
+async def test_nina_all_channels_down_is_an_error(registry, storage, settings):
+    ok, _, _ = await run("nina", registry, storage, settings, lambda r: httpx.Response(500))
+    assert not ok
 
 
 # ------------------------------------------------------------------ Fehlerfälle

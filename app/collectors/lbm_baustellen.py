@@ -29,7 +29,7 @@ from ..sanitize import clean_text
 from .base import Collector, CollectResult, SourceError
 
 MAX_PAGES = 5
-PAGE = 1000
+PAGE = 20000   # eine Abfrage statt Seiten: der Dienst sortiert ohne sortBy nicht stabil, Seiten verlieren und doppeln Einträge (gemessen 2026-10-10: 200 abweichende Kennungen bei zwei Läufen); ganz Rheinland-Pfalz plus 80 km sind rund 3.800 Baustellen in 2,5 MB
 EXCLUDED_SOURCES = {"autobahn gmbh"}
 LU_SOURCES = {"straßenbauverwaltung luxemburg"}
 
@@ -83,7 +83,9 @@ class LbmBaustellenCollector(Collector):
                 raise SourceError(f"{layer}: Schlüssel 'features' fehlt")
             out.extend(f for f in feats if isinstance(f, dict))
             matched = data.get("numberMatched")
-            if len(feats) < PAGE or (isinstance(matched, int) and len(out) >= matched):
+            if (isinstance(matched, int) and len(out) >= matched) or (not isinstance(matched, int) and len(feats) < PAGE):
+                return out
+            if not feats:
                 return out
         raise SourceError(f"{layer}: mehr als {MAX_PAGES * PAGE} Treffer, Abbruch")
 

@@ -5,9 +5,14 @@ Lizenz:     siehe sources.yaml (Nutzungsbedingungen noch zu bestätigen)
 Intervall:  600 s
 Beispiel:   python -m app.collect --once --only autobahn
 
-Die API liefert je Autobahn das ganze Bundesgebiet; der Radiusfilter passiert hier am Rand.
-Abrufe laufen nacheinander mit kleiner Pause (12 je Lauf). Schlägt einer fehl, ist der Lauf
-unvollständig: geschrieben wird, abgeräumt wird nichts.
+Die API liefert je Autobahn das ganze Bundesgebiet; der Regionsfilter passiert hier am Rand.
+Abrufe laufen nacheinander mit kleiner Pause. Schlägt einer fehl, ist der Lauf unvollständig: geschrieben wird,
+abgeräumt wird nichts.
+Strecken: params.roads sind Kandidaten. Mit params.verify_roads fragt der Sammler einmal je Lauf die Streckenliste der API
+({base}) ab und nimmt nur Kandidaten, die es dort gibt; ein falscher Name ist dann kein Fehler. Liste der Kandidaten
+und Ableitung: tools/check_autobahn_roads.py, docs/rlp/r3-datenpipeline.md.
+Baustellen ändern sich langsam: params.slow_services (Standard roadworks) werden höchstens alle params.slow_every_s Sekunden
+(Standard 900) neu geholt, die übrigen Dienste in jedem Lauf. Dazwischen kommen die Baustellen aus dem Arbeitsspeicher.
 Zeitangaben: Laufende Meldungen übernehmen `startTimestamp`. Geplante Baustellen (`future`) nennen
 ihren Beginn nur im Fließtext; dort wird der erste Termin („TT.MM.JJ von HH:MM“) gelesen. Findet
 sich keiner, bleibt valid_from leer und der Titel trägt „(geplant)“.
@@ -16,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import re
+import time
 from datetime import datetime, timezone
 from typing import Any
 from zoneinfo import ZoneInfo
@@ -97,35 +103,70 @@ def _geometry(item: dict[str, Any]) -> dict[str, Any] | None:
     return None
 
 
+_SLOW: dict[tuple[str, str], tuple[float, list[Event]]] = {}   # (Strecke, Dienst) → (Abrufzeit, Ereignisse)
+
+
 class AutobahnCollector(Collector):
     pause_s = 0.4
 
+    async def _roads(self, base: str) -> list[str]:
+        roads = list(self.entry.params["roads"])
+        if not self.entry.params.get("verify_roads"):
+            return roads
+        data = await self.fetch_json(base)
+        listed = data.get("roads") if isinstance(data, dict) else None
+        if not isinstance(listed, list) or not listed:
+            raise SourceError("Streckenliste fehlt oder ist leer")
+        known = {str(r) for r in listed}
+        unknown = [r for r in roads if r not in known]
+        if unknown:
+            self.log.info("Nicht in der Streckenliste der API: %s", ", ".join(unknown))
+        return [r for r in roads if r in known]
+
     async def collect(self) -> CollectResult:
         base = self.entry.url.rstrip("/")
-        roads = self.entry.params["roads"]
         services = self.entry.params["services"]
+        slow = set(self.entry.params.get("slow_services", ["roadworks"] if self.entry.params.get("verify_roads") else []))
+        slow_every = float(self.entry.params.get("slow_every_s", 900))
+        roads = await self._roads(base)
         now = utcnow()
+        mono = time.monotonic()
         events: dict[str, Event] = {}
         failed: list[str] = []
         ok_calls = 0
+        calls = 0
         for road in roads:
             for service in services:
+                key = (road, service)
+                if service in slow and key in _SLOW and mono - _SLOW[key][0] < slow_every:
+                    for ev in _SLOW[key][1]:
+                        events[ev.id] = ev   # Abrufzeit bleibt die echte des letzten Abrufs
+                    continue
+                if calls:
+                    await asyncio.sleep(self.pause_s)
+                calls += 1
                 try:
                     data = await self.fetch_json(f"{base}/{road}/services/{service}")
                 except SourceError as exc:
                     self.log.warning("%s/%s fehlgeschlagen: %s", road, service, exc)
                     failed.append(f"{road}/{service}")
+                    if key in _SLOW:
+                        for ev in _SLOW[key][1]:   # lieber den letzten Stand zeigen als eine Lücke
+                            events[ev.id] = ev
                     continue
                 ok_calls += 1
                 items = data.get(service) if isinstance(data, dict) else None
                 if not isinstance(items, list):
                     raise SourceError(f"{road}/{service}: Schlüssel '{service}' fehlt")
+                got = []
                 for item in items:
                     ev = self._normalize(road, service, item, now)
                     if ev is not None:
                         events[ev.id] = ev
-                await asyncio.sleep(self.pause_s)
-        if ok_calls == 0:
+                        got.append(ev)
+                if service in slow:
+                    _SLOW[key] = (mono, got)
+        if ok_calls == 0 and calls:
             raise SourceError("Kein Abruf erfolgreich")
         note = f"teilweise: {', '.join(failed[:4])} fehlgeschlagen" if failed else None
         return CollectResult(events=list(events.values()), complete=not failed, note=note)
