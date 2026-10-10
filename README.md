@@ -61,8 +61,8 @@ Die ursprüngliche Projektanweisung steht in `docs/projektanweisung.md` (CTW-Bez
 | R1 | Raumabstraktion | fertig | [#2](https://github.com/thorin-eifel/maps/pull/2) |
 | R2 | Kartenbasis | fertig | [#3](https://github.com/thorin-eifel/maps/pull/3) |
 | R3 | Datenpipeline | fertig | [#4](https://github.com/thorin-eifel/maps/pull/4) |
-| R4 | Export und Auslieferung | wartet auf Freigabe | [#5](https://github.com/thorin-eifel/maps/pull/5) |
-| R5 | Frontend | offen |  |
+| R4 | Export und Auslieferung | fertig | [#5](https://github.com/thorin-eifel/maps/pull/5) |
+| R5 | Frontend | wartet auf Freigabe | [#11](https://github.com/thorin-eifel/maps/pull/11) |
 | R6 | Betrieb und Härtung | offen |  |
 | R7 | Abnahme | offen |  |
 
@@ -72,7 +72,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 
 - Quellen im Register: 42, davon aktiv: 40
 - Sammler (Module in `app/collectors/`): 43
-- Tests: 395 Python, 41 JavaScript
+- Tests: 398 Python, 60 JavaScript
 
 ### Quellen und Lizenzen
 
@@ -128,6 +128,7 @@ Vollständig mit Namensnennung: `sources.yaml` und die Seite „Quellen und Lize
 - `docs/baseline.md`
 - `docs/betrieb.md`
 - `docs/dsfa-entwurf.md`
+- `docs/perf.md`
 - `docs/projektanweisung.md`
 - `docs/rlp/` (Plan, Prompt, Status, offene Punkte)
 - `docs/adr/` (Entscheidungen)

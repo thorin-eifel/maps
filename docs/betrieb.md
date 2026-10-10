@@ -258,7 +258,7 @@ Ab 1800 px Breite skaliert die Oberfläche über die Schriftgröße der Wurzel (
 
 **Layout.** Ab 1001 px Breite füllt die Karte den ganzen Rahmen. Zeitraum/Ebenen (links, einklappbar) und die Liste (rechts) schweben darüber; darunter stehen die Teile untereinander. Kartensteuerung und Höhenlegende weichen den schwebenden Karten aus (`app.css`, letzter Abschnitt).
 
-**Straßen.** Autobahnen, Bundes-/Landstraßen und Anschlüsse (auch Brücken, Tunnel) sind gelborange (`#f6a81c`) mit 1 px schwarzer Kontur. Die Umstellung passiert beim Aufbau des Basiskartenstils (`mainRoad` in `lage.js`); Grenzlinien des Stils (`boundaries*`) werden nicht gezeichnet.
+**Straßen.** Autobahnen, Bundes-/Landstraßen und Anschlüsse (auch Brücken, Tunnel) sind gelborange (`#f6a81c`) mit 1 px schwarzer Kontur. Die Umstellung passiert beim Aufbau des Basiskartenstils (`mainRoad` in `web/js/lage/stil.js`); Grenzlinien des Stils (`boundaries*`) werden nicht gezeichnet.
 
 **Radius und Sweep.** Der 120-km-Kreis ist grün (Fläche 1 % Deckkraft, Rand 2 px voll). Ist die Luftverkehr-Ebene an und mindestens ein Flugzeug aktiv, läuft ein Radarstrahl (6 s je Umlauf, Zeichnung auf einer eigenen Canvas, `web/js/sweep.js`); überstreicht er ein Flugzeug, sendet es einen Ping. Ohne aktive Flugzeuge, bei ausgeblendeter Ebene, verstecktem Tab oder „weniger Bewegung“ im System steht alles still.
 
@@ -268,7 +268,7 @@ Ab 1800 px Breite skaliert die Oberfläche über die Schriftgröße der Wurzel (
 
 ### Gebäude, Straßenschilder, Beschriftung, Verkehrsfarben
 
-- **Gebäude** bordeaux (`#800020` hell, `#9c2a4b` dunkel), 60 % transparent (`BUILDING_OPACITY` in `lage.js`). Standardmäßig an. Die Ebene beginnt bei Zoom 13 (nur große Gebäude, die Kacheln führen darunter nicht mehr). Alle Gebäude gibt es ab Kartenzoom 14: der Kern wird mit `tileSize: 256` eingebunden, dadurch gelten die Zoom-15-Kacheln eine Stufe früher. Weiter vorzuziehen (Zoom 13) würde viermal so viele Kacheln je Bild laden; dafür bräuchte es eigene Gebäudekacheln.
+- **Gebäude** bordeaux (`#800020` hell, `#9c2a4b` dunkel), 60 % transparent (`BUILDING_OPACITY` in `web/js/lage/stil.js`). Standardmäßig an. Die Ebene beginnt bei Zoom 13 (nur große Gebäude, die Kacheln führen darunter nicht mehr). Alle Gebäude gibt es ab Kartenzoom 14: der Kern wird mit `tileSize: 256` eingebunden, dadurch gelten die Zoom-15-Kacheln eine Stufe früher. Weiter vorzuziehen (Zoom 13) würde viermal so viele Kacheln je Bild laden; dafür bräuchte es eigene Gebäudekacheln.
 - **Autobahnen** blau mit schwarzer Kontur; auf der Strecke Schilder mit der OSM-Nummer (`ref`): A blau/weiß, B gelb, L und K weiß. Nur Nummern bis 8 Zeichen ohne Semikolon; Anschlussstellen tragen kein Schild.
 - **Straßennamen** ab Zoom 13, **Hausnummern** ab Zoom 16 (Kacheln bis Zoom 15, darüber wird vergrößert). Es sind Kartenbeschriftungen aus OSM, keine Adresssuche und kein Geocoding; die Daten liegen in den Kacheln, nicht in der Datenbank. Wo OSM keine Namen oder Nummern kennt (kleine Weiler), bleibt die Karte leer.
 - **Verkehrsmeldungen** in vier Stufen (`trafficLevel` in `rules.js`): gelb Baustelle, orange Behinderung oder Stau, rot langer Stau (ab 30 Min.) oder eine Richtung gesperrt, schwarz Vollsperrung. Die Stufe folgt aus `type`, `severity` und `attrs.sperr` (`voll`/`richtung`, gesetzt von den Collectoren `lbm_baustellen` und `autobahn`); die Liste rechts zeigt weiter die Stufe der Quelle. Schwarze Linien bekommen einen weißen Saum.
@@ -277,7 +277,7 @@ Ab 1800 px Breite skaliert die Oberfläche über die Schriftgröße der Wurzel (
 
 ## Radius: 120 km, endgültig
 
-Das Lagebild gilt der Region, nicht dem Ort. `RADIUS_KM` in `app/config.py` steht auf 120; die Bounding Box wird daraus berechnet (`config.BBOX`, nach außen auf 0,01° gerundet), es gibt keine zweite Stelle, an der sie stehen müsste. Außerhalb blendet die Karte in 14 Stufen von je 5 km in die Hintergrundfarbe aus (Vignette, `vig-0` bis `vig-13` in `web/js/lage.js`); das Kartenfenster (`maxBounds`) endet kurz dahinter. Größer wird es nicht.
+Das Lagebild gilt der Region, nicht dem Ort. `RADIUS_KM` in `app/config.py` steht auf 120; die Bounding Box wird daraus berechnet (`config.BBOX`, nach außen auf 0,01° gerundet), es gibt keine zweite Stelle, an der sie stehen müsste. Außerhalb blendet die Karte über die letzten 30 km in 200 Ringen in die Hintergrundfarbe aus (Vignette, `VIG_*` in `web/js/lage/geometrie.js`); das Kartenfenster (`maxBounds`) endet kurz dahinter. Größer wird es nicht.
 
 Nach einer Änderung des Radius neu bauen, in dieser Reihenfolge: `tools/build_tiles.sh`, `tools/build_dem.py`, `tools/build_gazetteer.py` (Ortsverzeichnis für das Geoparsing), `tools/build_nuts.py` (MeteoAlarm-Flächen), danach `tools/check_range.py <URL>` gegen den Server. NINA fragt 21 Kreise ab (RLP, Saarland, Euskirchen, Aachen), Tankerkönig fünf Umkreise zu je 25 km.
 
@@ -295,7 +295,7 @@ Die Karte im Stil des 15. Jahrhunderts hat keine Papiertextur mehr (Foto und Üb
 
 ## Vegetation und Wasserbewegung
 
-**Vegetation:** `web/js/lage.js` (`LAND`, `LAND_KINDS`) zeichnet 13 Klassen nach Naturfarben (Wald, Wiese, Rasen/Park, Busch, Heide, Acker, Obst, Wein, Kleingarten, Moor, Fels, Sand, Friedhof). Ab Zoom 12 liegen feine Signaturen darüber (`icons.js`, `registerLandPatterns`). Schutzgebiete haben eine gestrichelte grüne Kante. Die Kacheln tragen keinen Blatttyp, Laub-, Nadel- und Mischwald sind daher nicht trennbar (dafür wäre ein OSM-Collector für `leaf_type` nötig).
+**Vegetation:** `web/js/lage/stil.js` (`LAND`, `LAND_KINDS`) zeichnet 13 Klassen nach Naturfarben (Wald, Wiese, Rasen/Park, Busch, Heide, Acker, Obst, Wein, Kleingarten, Moor, Fels, Sand, Friedhof). Ab Zoom 12 liegen feine Signaturen darüber (`icons.js`, `registerLandPatterns`). Schutzgebiete haben eine gestrichelte grüne Kante. Die Kacheln tragen keinen Blatttyp, Laub-, Nadel- und Mischwald sind daher nicht trennbar (dafür wäre ein OSM-Collector für `leaf_type` nötig).
 
 **Wasserbewegung** (Ebene „Wasserbewegung“, standardmäßig aus, `web/js/fluss.js`): Striche und Pfeile entlang der Gewässerlinien zeigen die Fließrichtung (Digitalisierungsrichtung der OSM-Linien, geprüft an Mosel, Saar, Our, Sûre, Kyll, Prüm, Nims, Alzette, Lieser, Ruwer). Tempo ist eine Klasse (Bach, Fluss, gestaut), kein gemessener Abfluss. `IMPOUNDED` (Mosel, Saar) bewegt sich kaum: staugeregelt. Seen, Teiche und Becken zeigen Wellenzeichen, die mit dem Modellwind (ICON-D2, Kartenmitte) ziehen; bei Flaute oder ohne Windmodell bleibt das Wasser glatt. Flächen ohne Gewässerart gelten als Stillgewässer. Bei `prefers-reduced-motion` stehen die Zeichen still. Tests: `node tests/js/fluss.test.mjs`. Prüfhilfe: `#debug` schreibt Seitenfehler nach `data-debug-err` am `<html>`.
 
@@ -329,3 +329,15 @@ desktop/build-sidecar.sh && cd desktop && npm install --include=dev && npx tauri
 ```
 
 Grenzen der ersten Fassung: Suchindex, Gewässernetz, Höhenkacheln und Routen (`web/geo`, `web/tiles/dem`, `tools/build_*.py`) sind noch auf Irrel gebaut und werden nicht für einen anderen Mittelpunkt erzeugt. Quellen für Luxemburg, Rheinland-Pfalz und Ostbelgien liefern nur dort Daten; bundesweite (DWD, NINA, Autobahn, Bright Sky) funktionieren überall in Deutschland. Das Bündeln mit PyInstaller und die Installer sind hier nicht gebaut worden (Sandbox ohne WebKit, nur Linux): erster Build auf Mac, Windows und Linux steht aus.
+
+## Frontend: Zellenbetrieb (ab R5)
+
+Die Seite lädt `data/manifest.json` und `data/start.json` und holt danach nur die Zellen im Bildausschnitt (`data/z/<x>_<y>/<art>.json`, Raster 0,5 Grad). Fehlt das Manifest, läuft sie wie bisher aus den Flachdateien. Code: `web/js/zellen.js` (rein, getestet), `web/js/lage/zellenlauf.js` (Anbindung an Karte und Zustand).
+
+- **Stufen.** Unter Zoom 8 keine Zellen: die Karte zeigt je Rasterzelle eine Zahl (Dichte-Ebene aus `start.json`), das Warnband und die Tabelle stammen aus dem Warnband des Startpakets. Ab Zoom 8 Ereignisse, Pegel und Umweltstationen, ab 9 Kraftstoff, ab 10 Haltestellen, Landmarken und Routen, ab 11 Infrastruktur und Anbau (`KIND_MIN_ZOOM`). Unter Zoom 9 werden nur Meldungen ab Stufe „Hinweis“ gezeichnet, höchstens 1500 (`ebenenBudget`).
+- **Rand und Obergrenze.** Ab Zoom 9 wird eine Zelle Rand mitgeladen, höchstens 60 Zellen gleichzeitig, die Bildmitte hat Vorrang. Zellen außerhalb werden verworfen.
+- **Änderungen.** Das Manifest trägt je Datei eine Prüfsumme; eine Datei wird nur neu geholt, wenn sie sich geändert hat. Ein Fehler in einer Zelle lässt die übrigen stehen, die Statuszeile neben „Lagekarte“ nennt die Zahl der nicht erreichbaren Dateien (Einzelheiten als Tooltip), nach 30 Sekunden folgt ein neuer Versuch.
+- **Alter.** Zellen tragen keine Abrufzeit. `fetched_at`, `source_status` und `age_s` setzt das Frontend beim Zusammenführen aus dem Quellenzustand des Startpakets (`anreichern`).
+- **Gebiet.** Land und Landkreis stehen im Ereignisfilter („Filter“). Das Backend schreibt `ars` und `land` an Ereignisse und Messstellen (VG250, `app/export_cells.py`); außerhalb Deutschlands kommt `land` aus dem `region_tag` des Sammlers, ein deutsches Kürzel ohne Kreis bleibt „unbekannt“.
+- **Prüfzugang.** `#debug` kennt den Befehl `zellen` (gehaltene Dateien, Fehler, Bytes, Ereignisse) und wartet auf laufende Abrufe.
+

@@ -37,5 +37,15 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 - **Flachdateien** (`events.json` usw.) bleiben bis R5; `events.json` dort weiter bei 2.000 Einträgen, im alten Frontend fehlen damit Ereignisse im Osten der Region. Abhilfe ist das Zellenfrontend, nicht eine größere Flachdatei.
 - **Radar, Wind, Suchindex** sind global (1,2 MB / 110 KB / 136 KB), nicht in Zellen; Nachladestrategie in R5.
 - **Herzschlag** (162 KB je Zyklus) trägt den Quellenzustand. Wird das zu viel, kann `start.json` auf Zustand und Warnband verkleinert werden.
-- **Kraftstoff:** `stats` und der Luxemburger Teil liegen nur in der Flachdatei `kraftstoff.json`, nicht in den Zellen.
 - Neue Kachelarchive (913 MB) und Höhenmodell (676 MB) liegen weiter auf dem Mac; Einspielen und Hochladen ist nicht Teil dieses PR (siehe PR-Text, Frage 1).
+
+## Aus R5 (Frontend)
+
+- **60 fps beim Schwenken** ist nicht belegt: gemessen wurde mit Software-Rendering und synthetischen Daten (`docs/perf.md`). Messung auf dem Mac (Browser und Tauri-Hülle) mit den echten Archiven steht aus; Werkzeug `tools/perf_messung.py`.
+- **Verdichtung** ist eine Zähl-Ebene je Rasterzelle unter Zoom 8 plus Mengenbegrenzung der Einzelmeldungen (`ebenenBudget`), kein MapLibre-Clustering. Pegel und Umweltstationen werden nicht verdichtet, sondern erst ab Zoom 8 geladen; darunter sind die Reiter Gewässer und Umwelt leer.
+- **Dichte-Ebene per Tastatur:** Die Zahlen lassen sich nur mit der Maus anklicken. Ersatz für Tastaturnutzer sind Zoomtasten, der Landkreisfilter und die Tabelle (Warnungen sind auch unter Zoom 8 in der Tabelle).
+- **Länderkennung** außerhalb Deutschlands bleibt `region_tag` des Sammlers; `EU` und ein deutsches Kürzel ohne Kreis ergeben „unbekannt“ und fallen bei gesetztem Filter heraus. Landesgrenzen (Natural Earth) wären die saubere Lösung.
+- **Kraftstoff:** Statistik und Luxemburg-Block liegen landesweit im Startpaket, die Stationen kommen aus den Zellen; die Flachdatei kappt bei 200 Stationen, die Zellen nicht.
+- **Flachdateien** werden weiter exportiert (Rückfall ohne Manifest). Abschaffen in R6, wenn alle Stellen auf Zellen laufen.
+- **Suchindex** für ganz RLP: Rechenzeit gemessen (bis 300 000 Einträge unter 100 ms), Dateigröße mit echten Namen ungemessen.
+- **Abruf je Ereignis:** Im Zellenbetrieb ist `fetched_at` die letzte erfolgreiche Abrufzeit der Quelle, nicht die der einzelnen Meldung.

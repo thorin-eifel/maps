@@ -703,3 +703,5 @@ body.einrichtung .klein { font-size: .8rem; }
 .zugang-status { min-height: 1.2em; margin: var(--space-2) 0 0; }
 @media (max-width: 700px) { .zugang-zeile { grid-template-columns: 1fr; } }
 .klein { font-size: .8rem; }
+.zellen-status { margin-left: var(--space-2); font-size: var(--fs-xs); }
+.zellen-status[data-state="error"] { color: var(--brand-red-600); font-weight: 600; }

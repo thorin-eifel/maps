@@ -16,6 +16,7 @@ Budgets:    Zelle je Datei 500 KB, Startpaket 2 MB. Überschreitung wird nicht a
 """
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import logging
@@ -25,6 +26,7 @@ from typing import Any, Callable
 
 from . import cells as cellmod
 from . import payloads
+from . import region as regionmod
 from .db import Storage
 from .models import iso, utcnow
 from .registry import Registry
@@ -69,6 +71,41 @@ KINDS: dict[str, tuple[str, Callable[[dict[str, Any]], set[cellmod.Cell]]]] = {
     "anbau": ("features", _cells_anbau),
     "kraftstoff": ("stations", _cells_point),
 }
+
+
+GEO_KINDS = {"events", "gewaesser", "umwelt", "haltestellen", "kraftstoff"}   # Arten mit Punktbezug, die Kreis und Land tragen
+_gliederung: regionmod.Gliederung | None = None
+_kreis_cache: dict[tuple[float, float], dict[str, str] | None] = {}
+
+
+def _gl() -> regionmod.Gliederung:
+    global _gliederung
+    if _gliederung is None:
+        _gliederung = regionmod.Gliederung()
+    return _gliederung
+
+
+def kreis_of(lat: Any, lon: Any) -> dict[str, str] | None:
+    """Kreis (ARS, Name, Land) zu einem Punkt; None außerhalb Deutschlands. Ergebnis wird auf 0,001 Grad (ca. 100 m) gemerkt."""
+    if not isinstance(lat, (int, float)) or not isinstance(lon, (int, float)):
+        return None
+    key = (round(lat, 3), round(lon, 3))
+    if key not in _kreis_cache:
+        _kreis_cache[key] = _gl().kreis(lat, lon)
+    return _kreis_cache[key]
+
+
+def _tag_geo(item: dict[str, Any]) -> None:
+    """Hängt `ars` und `land` an (Ereignisse: in properties). Außerhalb Deutschlands bleibt `ars` leer, `land` kommt aus `region_tag`."""
+    holder = item.get("properties") if isinstance(item.get("properties"), dict) else item
+    k = kreis_of(holder.get("lat"), holder.get("lon"))
+    if k:
+        holder["ars"], holder["land"] = k["ars"], k["land"]
+    else:
+        tag = holder.get("region_tag")
+        holder["ars"] = None
+        # Standardwert des Modells ist "DE-RLP", auch für Punkte außerhalb Deutschlands: ein deutsches Kürzel ohne Kreis heißt "unbekannt"
+        holder["land"] = tag if isinstance(tag, str) and tag and not tag.startswith("DE") else None
 
 
 def _strip(o: Any) -> Any:
@@ -126,6 +163,9 @@ def split_payload(kind: str, payload: dict[str, Any], registry: Registry) -> dic
             log.warning("%s: %s (%s), Eintrag fehlt im Export", kind, exc, item.get("id") or item.get("name"))
             continue
         sid = _item_source_id(item)
+        if kind in GEO_KINDS:
+            item = copy.deepcopy(item)
+            _tag_geo(item)
         for c in cs:
             buckets.setdefault(c, []).append(_strip(item))
             if sid:
@@ -203,7 +243,7 @@ def build_cell_files(flat: dict[str, dict[str, Any]], registry: Registry, now_is
     return files, info, state
 
 
-def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any], events_payload: dict[str, Any]) -> dict[str, Any]:
+def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any], events_payload: dict[str, Any], fuel_payload: dict[str, Any] | None = None) -> dict[str, Any]:
     """Startpaket: alles, was die Seite beim ersten Bild braucht. Klein halten, kein Verlauf, keine Listen von Messstellen."""
     st = payloads.statuses(storage, registry)
     sources = [{"id": s["id"], "name": s["name"], "short_name": s["short_name"], "status": s["status"], "last_success": s["last_success"],
@@ -221,9 +261,10 @@ def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any],
         for c in cs:
             sev_by_cell[c] = max(sev_by_cell.get(c, 0), r)
         if r >= 2 and p["type"] != "aircraft":
-            warn.append({"id": p["id"], "title": p["title"], "severity": p["severity"], "type": p["type"], "source_id": p["source_id"],
+            kr = kreis_of(p.get("lat"), p.get("lon"))
+            warn.append({"ars": kr["ars"] if kr else None, "land": kr["land"] if kr else p.get("region_tag"), **{"id": p["id"], "title": p["title"], "severity": p["severity"], "type": p["type"], "source_id": p["source_id"],
                          "source_short": p["source_short"], "valid_from": p["valid_from"], "valid_to": p["valid_to"],
-                         "lat": p["lat"], "lon": p["lon"], "region_tag": p["region_tag"], "cells": cs[:12]})
+                         "lat": p["lat"], "lon": p["lon"], "region_tag": p["region_tag"], "cells": cs[:12]}})
     warn.sort(key=lambda w: (-SEV_RANK[w["severity"]], w["title"]))
     cells: dict[str, dict[str, Any]] = {}
     totals: dict[str, int] = {}
@@ -239,8 +280,15 @@ def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any],
     return {
         "version": MANIFEST_VERSION, "generated_at": iso(utcnow()), "meta": payloads.meta_payload(storage),
         "overall": overall, "sources": sources, "warnband": warn[:300], "warnband_total": len(warn),
-        "counts": totals, "cells": cells, "disclaimer": payloads.DISCLAIMER,
+        "counts": totals, "cells": cells, "kreise": kreise_table(),
+        "kraftstoff": {"stats": (fuel_payload or {}).get("stats"), "lu": (fuel_payload or {}).get("lu")},   # landesweit, nicht an Zellen gebunden
+        "disclaimer": payloads.DISCLAIMER,
     }
+
+
+def kreise_table() -> list[dict[str, str]]:
+    """Alle Kreise (ARS, Name, Land) für das Filtermenü; ändert sich nur mit der Gliederungsdatei."""
+    return sorted(({"ars": k["ars"], "name": k["name"], "land": k["land"]} for k, _ in _gl()._items), key=lambda r: (r["land"], r["name"]))
 
 
 HASH_DROP = {"generated_at", "age_s", "last_attempt", "last_success", "fetched_at", "source_status", "status", "failing_since",

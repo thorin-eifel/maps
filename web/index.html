@@ -22,12 +22,13 @@
     <button class="btn" id="theme" type="button" aria-pressed="false">Dunkel</button>
   </nav>
 </div></header>
+<div class="warnband" id="warnband" data-level="none" role="status" aria-live="polite" aria-label="Warnband"><div class="warnband-in" id="warnband-in"></div></div>
 <main id="inhalt">
   <p id="apidown" class="card card-b stale-note" hidden>Die Datendateien konnten nicht geladen werden. Angezeigt wird, was zuletzt geladen wurde.</p>
   <div class="lage side-min">
     <section class="card" aria-labelledby="karte-h">
       <div class="card-h">
-        <h1 id="karte-h">Lagekarte</h1><span class="muted" id="count"></span>
+        <h1 id="karte-h">Lagekarte</h1><span class="muted" id="count"></span><span class="muted zellen-status" id="zellen" role="status" aria-live="polite"></span>
         <form class="map-search" role="search" id="suche">
           <label class="sr-only" for="suche-q">Ort, Straße, Gewässer oder Einrichtung suchen</label>
           <input id="suche-q" type="search" role="combobox" aria-expanded="false" aria-controls="suche-liste" aria-autocomplete="list" autocomplete="off" spellcheck="false" maxlength="80" placeholder="Suchen: Ort, Straße, Bach, Schule …" title="Taste / oder Strg+K springt in die Suche">
@@ -175,7 +176,8 @@
         </details>
       </div>
       <div class="map-wrap">
-        <div id="map" role="application" aria-label="Lagekarte Südeifel und Umgebung. Dieselben Daten stehen rechts als Tabelle."></div>
+        <div id="map" role="application" aria-label="Lagekarte. Dieselben Daten stehen rechts als Tabelle; Land und Landkreis lassen sich dort unter Filter wählen." aria-describedby="dichte-hinweis"></div>
+        <p class="sr-only" id="dichte-hinweis" aria-live="polite"></p>
         <details class="relief-legend map-legend" id="map-legend" hidden>
           <summary>Zeichenerklärung</summary>
           <section data-legend="medieval" hidden><h3 class="legend-h">Karte um 1450</h3></section>
