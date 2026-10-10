@@ -73,3 +73,10 @@ def test_use_certifi_sets_bundle_and_respects_user_value(monkeypatch):
     assert path and path.endswith("cacert.pem") and desktop.os.environ["SSL_CERT_FILE"] == path
     monkeypatch.setenv("SSL_CERT_FILE", "/etc/eigenes.pem")
     assert desktop.use_certifi() == "/etc/eigenes.pem"
+
+
+def test_user_agent_has_real_contact_by_default(monkeypatch):
+    monkeypatch.delenv("OSINT_CONTACT", raising=False)
+    assert ".invalid" not in desktop.ua() and desktop.PROJECT_URL in desktop.ua()    # Nominatim: 403 bei Platzhalteradresse
+    monkeypatch.setenv("OSINT_CONTACT", "mail@beispiel.de")
+    assert "mail@beispiel.de" in desktop.ua()

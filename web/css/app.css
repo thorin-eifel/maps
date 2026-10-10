@@ -681,3 +681,16 @@ html[data-karte="mittelalter"] .map-search .suche-meta { color: #5a3d20; }
 
 /* Zeitraum und Ebenen sind getrennte Klappen; nebeneinander linksbündig statt an die Ränder gespreizt */
 .card-h .controls { margin-left: 0; }
+
+/* Einrichtung der Desktop-App (einrichtung.html): Weltkarte als ruhiger Hintergrund, Inhalt davor.
+   Keine Inline-Styles: die Seite erlaubt style-src 'self'. */
+body.einrichtung { position: relative; min-height: 100vh; }
+body.einrichtung #hintergrund { position: fixed; inset: 0; z-index: 0; opacity: .55; pointer-events: none; }
+body.einrichtung #inhalt { position: relative; z-index: 1; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+body.einrichtung .card { background: color-mix(in oklab, var(--surface, var(--bg)) 92%, transparent); backdrop-filter: blur(2px); }
+body.einrichtung input[type="search"] { width: 100%; box-sizing: border-box; }
+body.einrichtung #treffer { list-style: none; padding: 0; }
+body.einrichtung #treffer .btn { display: block; width: 100%; text-align: left; margin: .25rem 0; }
+body.einrichtung #bar { height: .6rem; margin: 1rem 0 .5rem; background: color-mix(in oklab, currentColor 15%, transparent); border-radius: .3rem; overflow: hidden; }
+body.einrichtung #barfill { height: 100%; width: 0; background: var(--brand-teal-700); transition: width .6s ease; }
+body.einrichtung .klein { font-size: .8rem; }

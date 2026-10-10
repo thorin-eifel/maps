@@ -22,9 +22,10 @@ jobs:
         run: python tools/update_readme.py --check
       - name: Keine Daten, Kacheln oder Geheimnisse im Repository
         run: |
-          bad=$(git ls-files | grep -E '(^data/|\.sqlite|\.pmtiles$|(^|/)\.env$)' || true)
+          # Einzige Ausnahme: die mitgelieferte Weltkarte (Zoom 0 bis 5) als Hintergrund der Desktop-App, siehe web/basis/README.txt
+          bad=$(git ls-files | grep -v '^web/basis/welt\.pmtiles$' | grep -E '(^data/|\.sqlite|\.pmtiles$|(^|/)\.env$)' || true)
           [ -z "$bad" ] || { echo "Nicht ins Repository:"; echo "$bad"; exit 1; }
-          big=$(git ls-files -z | xargs -0 du -k | awk '$1>5120{print}' | grep -v 'web/vendor/' || true)
+          big=$(git ls-files -z | xargs -0 du -k | awk '$1>5120{print}' | grep -v -e 'web/vendor/' -e 'web/basis/welt\.pmtiles' || true)
           [ -z "$big" ] || { echo "Datei über 5 MB:"; echo "$big"; exit 1; }
   audit:
     runs-on: ubuntu-24.04
