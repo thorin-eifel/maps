@@ -90,7 +90,7 @@ export function applyNatureVisibility() {
   }
   // Kultur: je Art ein Schalter; her-t1 (Burgen, Ruinen, Fundstellen, Klöster) filtert nach den eingeschalteten Arten, her-t2 sind die historischen Gebäude
   const herKinds = [...(state.layers.herCastle ? ['castle', 'ruins'] : []), ...(state.layers.herArch ? ['archaeological'] : []), ...(state.layers.herMonastery ? ['monastery'] : [])];
-  if (map.getLayer('her-t1')) map.setFilter('her-t1', herKinds.length ? ['in', ['get', 'kind'], ['literal', herKinds]] : ['==', 1, 0]);
+  if (map.getLayer('her-t1')) map.setFilter('her-t1', herKinds.length ? ['in', ['get', 'kind'], ['literal', herKinds]] : ['==', ['get', 'kind'], '']);
   for (const id of HER_LAYERS) {
     if (!map.getLayer(id)) continue;
     map.setLayoutProperty(id, 'visibility', (id === 'her-t1' ? herKinds.length > 0 : state.layers.herBuilding) ? 'visible' : 'none');
