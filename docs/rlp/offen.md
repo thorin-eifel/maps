@@ -65,3 +65,9 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 - Kommunale Dienste (Stadt Trier, Verbandsgemeinden) sind nicht aufgenommen; Entscheidung: nur Landesstellen. Spätere Erweiterung wäre ein dritter Katalog, nicht eine Mischung.
 - Dienste nur mit WMS 1.1.1 (13 im Geoportal selbst, u. a. Forsten) fehlen; ein 1.1.1-Pfad wäre ein eigener Parser und eigene Kachelanfragen.
 - Der Katalog ist ein Stand; Pflege wie bei `lgb.json`: Neubau bei jedem Release.
+
+## Aus Vignette entlang der Landesgrenze (Okt. 2026)
+
+- Radar-Sweep zeichnet weiter um den Mittelpunkt Irrel (Kreis); die Vignette dahinter ist jetzt eine andere Form. Entscheidung offen, ob der Sweep der Landesform folgt oder bleibt.
+- Die Karte zieht nur so weit, wie Kacheln und Daten reichen: Die Kacheln auf dem Mac decken noch 120 km, die Vignette lässt Rheinland-Pfalz plus 80 km klar. Bis die großen Kacheln eingespielt sind, sieht man im Osten leere Fläche statt Schwarz.
+- Kleine Knicke im Verlauf an einspringenden Ecken der Grenze sind Eigenschaft des Abstandsfelds, kein Fehler.

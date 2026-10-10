@@ -19,6 +19,7 @@ import { debugHook } from './debug.js';
 import { applyLayerFilters } from './ebenen.js';
 import { palette, sevColor } from './farben.js';
 import { VIG_FADE_KM, VIG_ID, circle, vignette } from './geometrie.js';
+import { aussenDaten, ladeVignette, legeBildAn } from './vignette.js';
 import { pushMapData } from './messnetz.js';
 import { windroseUpdate } from './mittelalter.js';
 import { INFRA_LAYER_IDS } from './orte.js';
@@ -50,7 +51,8 @@ export async function initMap() {
   map.addLayer({ id: 'air-dim', type: 'background', layout: { visibility: 'none' }, paint: { 'background-color': '#000000', 'background-opacity': 0.8 * 0.5 } });
   // Kein sichtbarer Kreis mehr; 'radius-fill' bleibt als unsichtbarer Anker, vor dem alle anderen Ebenen einsortiert werden
   map.addLayer({ id: 'radius-fill', type: 'fill', source: 'radius', layout: { visibility: 'none' }, paint: { 'fill-color': SWEEP_GREEN, 'fill-opacity': 0 } });
-  map.addSource('vignette', { type: 'geojson', data: vignette(m.center.lat, m.center.lon, m.radius_km) });
+  const vig = await ladeVignette();   // Maske entlang der Landesgrenze; ohne sie bleibt der Kreis
+  map.addSource('vignette', { type: 'geojson', data: vig ? aussenDaten(vig) : vignette(m.center.lat, m.center.lon, m.radius_km) });
 
   map.addSource('events', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
   const isPoly = ['==', ['geometry-type'], 'Polygon'], isMulti = ['==', ['geometry-type'], 'MultiPolygon'];
@@ -168,10 +170,10 @@ export async function initMap() {
   map.on('move', windroseUpdate);
   initSearch();
   if (location.hash === '#debug') debugHook(map); // nur für Prüfungen im Browser
-  setRipples(createRipples(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM, onSizzle: sizzleSound }));
+  setRipples(createRipples(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM, vig: vig?.faktor, onSizzle: sizzleSound }));
   // Untere Schicht zuerst anlegen, damit die obere (reiner Modellwind) darüber liegt
-  setWindLow(createWind(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM, adjusted: true }));
-  setWind(createWind(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM }));
+  setWindLow(createWind(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM, vig: vig?.faktor, adjusted: true }));
+  setWind(createWind(map, { center: state.meta.center, radiusKm: state.meta.radius_km, fadeKm: VIG_FADE_KM, vig: vig?.faktor }));
   loadTerrain('data/terrain.json').then((t) => { state.terrain = t; windLow.setTerrain(t); applyWind(); });
   ripples.setWind((lon, lat, out) => wind.sample(lon, lat, out));   // Dampf des Lasers driftet mit dem Modellwind
   setFlow(createFlow(map, { sampleWind: (lon, lat, out) => wind.sample(lon, lat, out), reduce: reduceMotion, onWind: showFlowWind }));   // Wellen auf Stillgewässern ziehen mit dem Modellwind
@@ -195,6 +197,7 @@ export async function initMap() {
   applyBasemap();
   // Vignette zuletzt und ohne Zielebene: liegt damit über Karte, Daten und Sweep
   map.addLayer({ id: VIG_ID, type: 'fill', source: 'vignette', paint: { 'fill-color': '#000000', 'fill-opacity': ['get', 'a'], 'fill-antialias': false } });
+  if (vig) legeBildAn(map, vig);   // Verlauf entlang der Landesgrenze über der schwarzen Außenfläche
   wireElevation();
   $('#licht-hoehe')?.addEventListener('input', (e) => light?.setHeight(Number(e.target.value)));
   applyLayerFilters();

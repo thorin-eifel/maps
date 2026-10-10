@@ -53,7 +53,9 @@ function distKm(lat1, lon1, lat2, lon2) {
 
 // adjusted: true → zweite, untere Schicht: derselbe Modellwind, verändert durch die Geländefaktoren (terrain.js). Gezeichnet werden Partikel
 //             nur dort, wo das Gelände etwas ändert (Täler, Kämme); sonst läge sie als Doppelung auf der oberen Schicht.
-export function createWind(map, { center, radiusKm, fadeKm, adjusted = false }) {
+export function createWind(map, { center, radiusKm, fadeKm, vig = null, adjusted = false }) {
+  // Ausblendfaktor am Ort: entlang der Landesgrenze (vig) oder als Kreis um die Mitte
+  const vf = vig ?? ((lon, lat) => vignetteFactor(distKm(center.lat, center.lon, lat, lon), radiusKm, fadeKm));
   const host = map.getContainer();
   const canvas = document.createElement('canvas');
   canvas.className = adjusted ? 'windflow windflow-low' : 'windflow';
@@ -113,7 +115,7 @@ export function createWind(map, { center, radiusKm, fadeKm, adjusted = false }) 
       const lat = b.getSouth() + Math.random() * (b.getNorth() - b.getSouth());
       const smp = sample(lon, lat);
       if (!smp || (adjusted && smp.influence < MIN_INFLUENCE)) continue;
-      if (vignetteFactor(distKm(center.lat, center.lon, lat, lon), radiusKm, fadeKm) <= 0.02) continue;
+      if (vf(lon, lat) <= 0.02) continue;
       p.lon = lon; p.lat = lat; p.age = 0; p.life = MIN_LIFE + Math.random() * (MAX_LIFE - MIN_LIFE);
       return true;
     }
@@ -155,7 +157,7 @@ export function createWind(map, { center, radiusKm, fadeKm, adjusted = false }) 
       const a = map.project([p.lon, p.lat]);
       const dx = w.u * k, dy = -w.v * k;                               // Bildschirm: y nach unten
       const nlngLat = map.unproject([a.x + dx, a.y + dy]);
-      const f = vignetteFactor(distKm(center.lat, center.lon, nlngLat.lat, nlngLat.lng), radiusKm, fadeKm);
+      const f = vf(nlngLat.lng, nlngLat.lat);
       const edge = Math.min(p.age / 12, (p.life - p.age) / 12, 1);     // sanftes Ein- und Ausblenden der Lebensdauer
       const lvl = f > 0.66 ? 0 : f > 0.33 ? 1 : 2;
       if (f > 0.05 && edge > 0.15) bins[speedBin(w.speed) * ALPHA_LEVELS + lvl].push(a.x, a.y, a.x + dx, a.y + dy);
