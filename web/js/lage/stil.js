@@ -81,14 +81,31 @@ export const PROTECTED_KINDS_NR = ['protected_area', 'nature_reserve'];
 export const PROTECTED_KINDS_NP = ['national_park'];
 export const PARK_NAT = { light: '#0f7a73', dark: '#5fd1c4' };
 export const MILITARY = { light: '#b23b2a', dark: '#f08b78' };
-// Grenzen: id, Filter, Mindestzoom, Breite, Strichmuster
+// Grenzen: id, Filter, Mindestzoom. Alle Tilegrenzen sehen gleich aus (gepunktet, eine Farbe je Ansicht); nur die Landesgrenze von
+// Rheinland-Pfalz hebt sich ab (rot, 2 px, grauer Verlauf 5 px nach außen), sie kommt aus web/geo/rlp.geojson.
 export const BOUNDS = [
-  ['local', ['in', 'kind_detail', 7, 8], 10, 0.8, [1, 3]],
-  ['county', ['==', 'kind_detail', 6], 8, 1, [4, 2]],
-  ['region', ['==', 'kind_detail', 4], 5, 1.3, [6, 2, 1, 2]],
-  ['country', ['==', 'kind_detail', 2], 3, 1.8, null],
+  ['local', ['in', 'kind_detail', 7, 8], 10],
+  ['county', ['==', 'kind_detail', 6], 8],
+  ['region', ['==', 'kind_detail', 4], 5],
+  ['country', ['==', 'kind_detail', 2], 3],
 ];
-export const BOUND_COLOR = { light: { country: '#4b2e83', region: '#6a4aa5', county: '#8a74b8', local: '#9a8fb5' }, dark: { country: '#c3a8ff', region: '#a98cf0', county: '#9a86d0', local: '#7f76a0' } };
+export const BOUND_COLOR = { light: '#4b2e83', dark: '#c3a8ff' };
+export const RLP_SOURCE = 'rlp-grenze';
+export const RLP_RED = { light: '#d0021b', dark: '#ff4d5e' };
+export const RLP_GLOW = { light: '#3d3d3d', dark: '#c8c8c8' };
+// Verlauf: fünf Linien zu je 1 px Breite, Mitte bei 1,5 bis 5,5 px außerhalb der Linie (die rote Linie belegt ±1 px), Deckkraft nimmt ab.
+// Das Vorzeichen ist an der Karte geprüft: bei Außenring gegen den Uhrzeigersinn liegt die Außenseite bei negativem line-offset.
+export const RLP_GLOW_STEPS = [[-1.5, 0.5], [-2.5, 0.38], [-3.5, 0.27], [-4.5, 0.17], [-5.5, 0.08]];
+/** Rote Landesgrenze mit Verlauf. Quelle web/geo/rlp.geojson, Außenring gegen den Uhrzeigersinn. */
+export function rlpBorderLayers(dark) {
+  const k = dark ? 'dark' : 'light', keep = { layout: { 'line-join': 'round', 'line-cap': 'butt' } };
+  return [
+    ...RLP_GLOW_STEPS.map(([off, op], i) => ({ id: `land-bound-region-glow${i}`, type: 'line', source: RLP_SOURCE, minzoom: 4, ...keep,
+      paint: { 'line-color': RLP_GLOW[k], 'line-opacity': dark ? op * 0.6 : op, 'line-width': 1.2, 'line-offset': off } })),
+    { id: 'land-bound-region-rlp', type: 'line', source: RLP_SOURCE, minzoom: 4, ...keep,
+      paint: { 'line-color': RLP_RED[k], 'line-opacity': 1, 'line-width': 2 } },
+  ];
+}
 export const HOUSENO = { light: ['#6b0019', 'rgba(255,255,255,0.9)'], dark: ['#f0b3c4', 'rgba(20,20,20,0.9)'] };
 export function labelsAndBuildings(dark) {
   const k = dark ? 'dark' : 'light';
@@ -138,7 +155,7 @@ export function labelsAndBuildings(dark) {
 
 // Flächen nach Klasse (Wald, Wiese, Buschland, Acker, Feuchtgebiet, Fels), Klippenlinien und Steinbrüche aus der Basiskarte.
 // Die Kacheln führen Klippen als earth/cliff (Linien) und Steinbrüche als benannte Punkte in pois/quarry.
-export function landUseLayers(dark, ticks) {
+export function landUseLayers(dark, ticks, rlp = false) {
   const k = dark ? 'dark' : 'light';
   const fills = Object.entries(LAND_KINDS).flatMap(([cls, kinds]) => {
     // Weinberg und Obstanlage kommen aus der eigenen GeoJSON-Quelle (die Kacheln führen sie nicht)
@@ -174,9 +191,10 @@ export function landUseLayers(dark, ticks) {
       paint: { 'line-color': MILITARY[k], 'line-opacity': 0.85, 'line-dasharray': [6, 2, 1, 2],
         'line-width': ['interpolate', ['linear'], ['zoom'], 9, 0.8, 14, 1.8], 'line-offset': ['interpolate', ['linear'], ['zoom'], 9, 0.4, 14, 1] } },
     // Verwaltungsgrenzen aus den Kacheln (kind_detail = admin_level: 2 Staat, 4 Land, 6 Kreis, 7 und 8 Gemeinde)
-    ...BOUNDS.map(([id, filter, minzoom, width, dash]) => ({ id: `land-bound-${id}`, type: 'line', source: 'basemap', 'source-layer': 'boundaries', minzoom, filter,
-      layout: { 'line-join': 'round', 'line-cap': 'butt' },
-      paint: { 'line-color': BOUND_COLOR[k][id], 'line-opacity': 0.85, 'line-width': ['interpolate', ['linear'], ['zoom'], 5, width * 0.7, 14, width * 1.8], ...(dash ? { 'line-dasharray': dash } : {}) } })),
+    ...BOUNDS.map(([id, filter, minzoom]) => ({ id: `land-bound-${id}`, type: 'line', source: 'basemap', 'source-layer': 'boundaries', minzoom, filter,
+      layout: { 'line-join': 'round', 'line-cap': 'round' },
+      paint: { 'line-color': BOUND_COLOR[k], 'line-opacity': 0.9, 'line-width': ['interpolate', ['linear'], ['zoom'], 3, 1.2, 14, 2], 'line-dasharray': [0.01, 2.2] } })),
+    ...(rlp ? rlpBorderLayers(dark) : []),
     // Klippe in drei Lagen: weiches Geröllband auf der Abbruchseite (rechts der Linienrichtung), heller Saum für Lesbarkeit im Wald,
     // dünne Wandlinie mit Schraffen (lange und kurze Striche im Wechsel, Bild cliff-tick)
     { id: 'land-cliff-band', type: 'line', source: 'basemap', 'source-layer': 'earth', minzoom: 12, filter: ['==', 'kind', 'cliff'],
