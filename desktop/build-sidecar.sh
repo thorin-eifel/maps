@@ -23,7 +23,9 @@ rsync -a --exclude 'data/' --exclude 'tiles/' "${ROOT}/web/" "${WORK}/web/"
 SEP=":"; [[ "${TRIPLE}" == *windows* ]] && SEP=";"
 ( cd "${ROOT}" && "${PY}" -m PyInstaller --onefile --name osint-core --distpath "${WORK}/dist" --workpath "${WORK}/build" --specpath "${WORK}" \
     --paths "${ROOT}" --collect-submodules app --collect-data app --collect-data certifi \
-    --add-data "${WORK}/web${SEP}web" --add-data "${ROOT}/sources.yaml${SEP}." app/desktop.py )
+    --add-data "${WORK}/web${SEP}web" --add-data "${ROOT}/sources.yaml${SEP}." --add-data "${ROOT}/region.yaml${SEP}." app/desktop.py )
+# Rauchtest: das Paket muss Region und Quellenregister finden (fehlende Datendateien fielen sonst erst im Betrieb auf)
+( cd "${WORK}" && OSINT_NO_DOTENV=1 "${WORK}/dist/osint-core${EXT}" --run app.region >/dev/null ) || die "Rauchtest fehlgeschlagen: app.region lässt sich im Paket nicht laden"
 cp "${WORK}/dist/osint-core${EXT}" "${BIN}/osint-core-${TRIPLE}${EXT}"
 
 # pmtiles-CLI (go-pmtiles)
