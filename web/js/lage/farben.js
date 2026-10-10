@@ -11,5 +11,5 @@ export function palette() {
   };
 }
 // Verkehrsmeldungen tragen zusätzlich `lvl` (yellow/orange/red/black, siehe trafficLevel), alles andere die Stufe `severity`
-export const sevColor = (c) => ['match', ['coalesce', ['get', 'lvl'], ['get', 'severity']], 'critical', c.critical, 'warning', c.warning, 'notice', c.notice,
+export const sevColor = (c, key = null) => ['match', key ? ['get', key] : ['coalesce', ['get', 'lvl'], ['get', 'severity']], 'critical', c.critical, 'warning', c.warning, 'notice', c.notice,
   'yellow', c.yellow, 'orange', c.orange, 'red', c.red, 'black', c.black, c.info];

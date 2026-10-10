@@ -104,7 +104,8 @@ def _tag_geo(item: dict[str, Any]) -> None:
     else:
         tag = holder.get("region_tag")
         holder["ars"] = None
-        holder["land"] = tag if isinstance(tag, str) and tag else None
+        # Standardwert des Modells ist "DE-RLP", auch für Punkte außerhalb Deutschlands: ein deutsches Kürzel ohne Kreis heißt "unbekannt"
+        holder["land"] = tag if isinstance(tag, str) and tag and not tag.startswith("DE") else None
 
 
 def _strip(o: Any) -> Any:
@@ -242,7 +243,7 @@ def build_cell_files(flat: dict[str, dict[str, Any]], registry: Registry, now_is
     return files, info, state
 
 
-def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any], events_payload: dict[str, Any]) -> dict[str, Any]:
+def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any], events_payload: dict[str, Any], fuel_payload: dict[str, Any] | None = None) -> dict[str, Any]:
     """Startpaket: alles, was die Seite beim ersten Bild braucht. Klein halten, kein Verlauf, keine Listen von Messstellen."""
     st = payloads.statuses(storage, registry)
     sources = [{"id": s["id"], "name": s["name"], "short_name": s["short_name"], "status": s["status"], "last_success": s["last_success"],
@@ -279,7 +280,9 @@ def build_start(storage: Storage, registry: Registry, cell_info: dict[str, Any],
     return {
         "version": MANIFEST_VERSION, "generated_at": iso(utcnow()), "meta": payloads.meta_payload(storage),
         "overall": overall, "sources": sources, "warnband": warn[:300], "warnband_total": len(warn),
-        "counts": totals, "cells": cells, "kreise": kreise_table(), "disclaimer": payloads.DISCLAIMER,
+        "counts": totals, "cells": cells, "kreise": kreise_table(),
+        "kraftstoff": {"stats": (fuel_payload or {}).get("stats"), "lu": (fuel_payload or {}).get("lu")},   # landesweit, nicht an Zellen gebunden
+        "disclaimer": payloads.DISCLAIMER,
     }
 
 

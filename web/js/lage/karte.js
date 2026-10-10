@@ -10,6 +10,7 @@ import { ping as pingSound, silence as silenceSound, sizzle as sizzleSound, zap 
 import { RELIEF_ATTRIBUTION, demTile, glyphsUrl, setupRelief } from '../relief.js';
 import { createRipples } from '../ripples.js';
 import { SWEEP_GREEN, createSweep } from '../sweep.js';
+import { KIND_MIN_ZOOM } from '../zellen.js';
 import { loadTerrain } from '../terrain.js';
 import { $, getJSON, h, link } from '../util.js';
 import { createWind, fillWindLegend } from '../wind.js';
@@ -85,6 +86,14 @@ export async function initMap() {
   map.addLayer({ id: 'ev-dot-w', type: 'circle', source: 'events', maxzoom: 10,
     layout: { visibility: state.iconsOk ? 'visible' : 'none' },
     paint: { 'circle-radius': 3.5, 'circle-color': sevColor(c), 'circle-stroke-color': c.white, 'circle-stroke-width': 1 } });
+
+  // Dichte bei kleinen Zoomstufen (unter EVENTS_MIN_ZOOM): je Rasterzelle eine Zahl statt Tausender Einzelsymbole; Daten aus start.json
+  map.addSource('dichte', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  map.addLayer({ id: 'dichte-kreis', type: 'circle', source: 'dichte', maxzoom: KIND_MIN_ZOOM.events,
+    paint: { 'circle-radius': ['interpolate', ['linear'], ['sqrt', ['get', 'n']], 1, 9, 30, 26], 'circle-color': sevColor(c, 'sev'), 'circle-opacity': 0.85, 'circle-stroke-color': c.white, 'circle-stroke-width': 1.5 } });
+  map.addLayer({ id: 'dichte-zahl', type: 'symbol', source: 'dichte', maxzoom: KIND_MIN_ZOOM.events,
+    layout: { 'text-field': ['to-string', ['get', 'n']], 'text-font': ['Noto Sans Regular'], 'text-size': 12, 'text-allow-overlap': true },
+    paint: { 'text-color': c.white } });
 
   // Luftverkehr: eigene Quelle, weil sie sich jede Sekunde bewegt
   map.addSource('air', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
@@ -207,7 +216,7 @@ export async function setupBasemap() {
     map.addSource('basemap', { type: 'vector', url: `pmtiles://${url}` });
     // Weinberge und Obstanlagen fehlen in den Kacheln: eigene Flächen aus data/anbau.json (OpenStreetMap, wöchentlich), Schalter "Obst und Wein"
     map.addSource('anbau', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
-    getJSON('data/anbau.json').then((j) => { if (Array.isArray(j?.features)) map.getSource('anbau')?.setData(j); }).catch(() => {});
+    (state.zellen ? Promise.resolve(null) : getJSON('data/anbau.json')).then((j) => { if (Array.isArray(j?.features)) map.getSource('anbau')?.setData(j); }).catch(() => {});
     setBasemapOk(true);
     try {   // Kern mit Gebäudedetail; fehlt er, bleibt die Karte wie sie ist (Gebäude dann nur grob aus Zoom 13, keine Hausnummern)
       const coreUrl = new URL(CORE_URL, location.href).href;

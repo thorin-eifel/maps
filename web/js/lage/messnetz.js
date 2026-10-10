@@ -2,11 +2,13 @@ import { tempClass } from '../icons.js';
 import { stationRank } from '../pegel.js';
 import { iconFor, trafficLevel } from '../rules.js';
 import { pushAir } from './flugverkehr.js';
+import { ebenenBudget } from '../zellen.js';
 import { map, mapReady, state } from './zustand.js';
 
 export function pushMapData() {
   if (!mapReady) return;
-  const shown = state.events.filter((f) => f.properties.type !== 'aircraft').map((f) => ({ ...f, properties: { ...f.properties, icon: iconFor(f.properties), lvl: trafficLevel(f.properties) ?? undefined } }));
+  const nonAir = state.events.filter((f) => f.properties.type !== 'aircraft');
+  const shown = (state.zellen ? ebenenBudget(nonAir, map.getZoom()) : nonAir).map((f) => ({ ...f, properties: { ...f.properties, icon: iconFor(f.properties), lvl: trafficLevel(f.properties) ?? undefined } }));
   map.getSource('events').setData({ type: 'FeatureCollection', features: shown });
   pushAir();
   const feats = (state.gew?.stations ?? []).filter((s) => s.latest).map((s) => ({

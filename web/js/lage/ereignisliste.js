@@ -1,7 +1,9 @@
 import { SORTS, filterEvents, sortEvents } from '../eventlist.js';
 import { iconFor } from '../rules.js';
 import { $, TYPE_LABEL, ageEl, fmtDateTime, h, sevBadge } from '../util.js';
+import { GEBIET_LEER, gebietAktiv, kreisWaehlen, kreiseListe, laenderListe, landWaehlen } from '../gebiet.js';
 import { showPopup } from './popup.js';
+import { gebietGeaendert } from './zellenlauf.js';
 import { GROUPS, map, mapReady, state } from './zustand.js';
 
 // ------------------------------------------------------------------ Ereignisse
@@ -12,13 +14,28 @@ export const evActive = () => (evView.minSev ? 1 : 0) + (evView.type ? 1 : 0) + 
 
 export function syncEventTools(panel) {
   for (const b of panel.querySelectorAll('.ev-chip')) b.setAttribute('aria-pressed', String(Number(b.dataset.sev) === evView.minSev));
-  const n = (evView.type ? 1 : 0) + (evView.maxKm ? 1 : 0);
+  const n = (evView.type ? 1 : 0) + (evView.maxKm ? 1 : 0) + (gebietAktiv(state.gebiet) ? 1 : 0);
   const more = panel.querySelector('#ev-more-n');
   if (more) { more.textContent = n ? String(n) : ''; more.hidden = !n; }
   const rev = panel.querySelector('#ev-rev');
   if (rev) { rev.setAttribute('aria-pressed', String(evView.reverse)); rev.textContent = evView.reverse ? '↑' : '↓'; }
   const reset = panel.querySelector('#ev-reset');
-  if (reset) reset.hidden = !evActive() && evView.sort === 'prio' && !evView.reverse;
+  if (reset) reset.hidden = !evActive() && !gebietAktiv(state.gebiet) && evView.sort === 'prio' && !evView.reverse;
+}
+
+// Land und Landkreis (nur im Zellenbetrieb, dort liefert das Startpaket die Kreisliste). Der Filter gilt für Karte, Liste, Messstellen und Warnband.
+function gebietAuswahl(upd) {
+  const kreise = state.start?.kreise;
+  if (!state.zellen || !kreise?.length) return [];
+  const opts = (list, leer, cur) => [h('option', { value: '' }, leer), ...list.map(([v, t]) => h('option', { value: v, selected: v === cur ? '' : null }, t))];
+  const kreisSel = h('select', { id: 'ev-kreis', 'aria-label': 'Nach Landkreis filtern', onchange: (e) => { state.gebiet = kreisWaehlen(state.gebiet, e.target.value, kreise); landSel.value = state.gebiet.land; gebietGeaendert(); upd(); } },
+    opts(kreiseListe(kreise, state.gebiet.land), 'alle Landkreise', state.gebiet.ars));
+  const landSel = h('select', { id: 'ev-land', 'aria-label': 'Nach Land filtern', onchange: (e) => {
+    state.gebiet = landWaehlen(state.gebiet, e.target.value, kreise);
+    kreisSel.replaceChildren(...opts(kreiseListe(kreise, state.gebiet.land), 'alle Landkreise', state.gebiet.ars));
+    gebietGeaendert(); upd();
+  } }, opts(laenderListe(kreise), 'alle Länder', state.gebiet.land));
+  return [h('label', {}, h('span', {}, 'Land'), landSel), h('label', {}, h('span', {}, 'Landkreis'), kreisSel)];
 }
 
 export function buildEventTools(panel) {
@@ -32,6 +49,7 @@ export function buildEventTools(panel) {
   const more = h('div', { class: 'ev-more', id: 'ev-more', hidden: '' },
     h('label', {}, h('span', {}, 'Typ'), sel('ev-type', 'Nach Typ filtern', typeOpts, 'type')),
     h('label', {}, h('span', {}, 'Umkreis um Irrel'), sel('ev-km', 'Nach Entfernung filtern', [[0, 'gesamt'], [10, 'bis 10 km'], [25, 'bis 25 km'], [50, 'bis 50 km']], 'maxKm', true)),
+    ...gebietAuswahl(upd),
     h('label', { class: 'ev-wide' }, h('span', {}, 'Sortierung'),
       h('span', { class: 'ev-sortbox' }, sel('ev-sort', 'Sortierung', Object.entries(SORTS).map(([k, v]) => [k, v.label]), 'sort'),
         h('button', { type: 'button', id: 'ev-rev', class: 'ev-btn ev-icon', title: 'Reihenfolge umkehren', 'aria-label': 'Reihenfolge umkehren', 'aria-pressed': 'false', onclick: () => { evView.reverse = !evView.reverse; upd(); } }, '↓'))));
@@ -46,6 +64,7 @@ export function buildEventTools(panel) {
     h('div', { class: 'ev-row ev-row2' }, h('div', { class: 'ev-chips', role: 'group', 'aria-label': 'Mindeststufe' }, chips),
       h('button', { type: 'button', id: 'ev-reset', class: 'ev-link', hidden: '', onclick: () => {
         Object.assign(evView, EV_DEFAULT);
+        if (gebietAktiv(state.gebiet)) { state.gebiet = { ...GEBIET_LEER }; gebietGeaendert(); }
         panel.querySelector('#ev-tools')?.replaceWith(buildEventTools(panel)); syncEventTools(panel); renderEvents(state.statuses);
       } }, 'Zurücksetzen')),
     h('div', { class: 'sr-only', id: 'ev-count', 'aria-live': 'polite' }));

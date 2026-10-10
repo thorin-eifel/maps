@@ -6,6 +6,7 @@ import { wire } from './lage/ebenen.js';
 import { setupSideToggle } from './lage/panels.js';
 import { initMap } from './lage/karte.js';
 import { refresh } from './lage/laden.js';
+import { ladeIndex, wireView } from './lage/zellenlauf.js';
 
 if (location.hash === '#debug') {   // Prüfhilfe: Fehler der Seite in ein Attribut schreiben, weil die Konsole nicht überall lesbar ist
   const note = (m) => { document.documentElement.dataset.debugErr = `${document.documentElement.dataset.debugErr ?? ''}${m}\n`.slice(-1500); };
@@ -17,7 +18,9 @@ async function main() {
   wire();
   try { state.meta = await getJSON('data/meta.json'); } catch { $('#apidown').hidden = false; return; }
   setupSideToggle();
+  await ladeIndex();   // entscheidet, ob Zellen- oder Flachdateibetrieb läuft (vor der Karte, weil sie danach die Ebenen bestückt)
   await initMap();
   await refresh();
+  wireView();
 }
 main();

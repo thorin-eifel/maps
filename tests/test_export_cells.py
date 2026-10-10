@@ -147,3 +147,17 @@ def test_events_and_warnband_carry_kreis_and_land(storage, registry, tmp_path):
     assert wb["autobahn:irrel"]["ars"] == "07232"
     assert wb["autobahn:lux"]["ars"] is None
     assert any(k["ars"] == "07232" and k["name"] and k["land"] for k in start["kreise"]) and len(start["kreise"]) > 100
+
+
+def test_start_carries_fuel_stats_and_lu_outside_the_cells(storage, registry, tmp_path):
+    storage.replace_snapshot("autobahn", [mk("a", [6.45, 49.85])])
+    export.run_export(storage, registry, tmp_path)
+    start = load(tmp_path, "start.json")
+    assert set(start["kraftstoff"]) == {"stats", "lu"}
+
+
+def test_point_outside_germany_with_default_tag_has_no_land(storage, registry, tmp_path):
+    storage.replace_snapshot("autobahn", [mk("lux", [6.13, 49.61])])
+    export.run_export(storage, registry, tmp_path)
+    p = load(tmp_path, "z/12_99/events.json")["features"][0]["properties"]
+    assert p["ars"] is None and p["land"] is None

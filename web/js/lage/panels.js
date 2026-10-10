@@ -4,6 +4,7 @@ import { exportStale } from '../rules.js';
 import { $, SEV, ageEl, fmtDateTime, fmtHour, fmtTime, h, sevBadge, sparkline } from '../util.js';
 import { envLevel, envText } from './messnetz.js';
 import { sourceLine, trendText } from './popup.js';
+import { gebietAktiv } from '../gebiet.js';
 import { state } from './zustand.js';
 
 // ------------------------------------------------------------------ Detailfeld ein-/ausklappen
@@ -38,7 +39,7 @@ export function renderWarnband(warn, statuses) {
       h('span', {}, 'Die Sammelstelle liefert gerade nichts Neues. Gezeigt wird der letzte bekannte Stand, aktuelle Warnungen können fehlen.'));
   }
   if (warn.length) {
-    box.append(h('strong', {}, `${warn.length} aktive Warnung${warn.length > 1 ? 'en' : ''} im Radius`));
+    box.append(h('strong', {}, `${warn.length} aktive Warnung${warn.length > 1 ? 'en' : ''} ${state.zellen ? (gebietAktiv(state.gebiet) ? 'im gewählten Gebiet' : 'im Gebiet') : 'im Radius'}`));
     const ul = h('ul');
     for (const f of warn.slice(0, 4)) {
       const p = f.properties;
@@ -47,7 +48,7 @@ export function renderWarnband(warn, statuses) {
     if (warn.length > 4) ul.append(h('li', {}, `… und ${warn.length - 4} weitere in der Tabelle`));
     box.append(ul);
   } else if (!uncertain) {
-    box.append(h('strong', {}, 'Keine aktiven Warnungen im Radius'), h('span', { class: 'muted' }, 'NINA und DWD melden nichts für die Region.'));
+    box.append(h('strong', {}, `Keine aktiven Warnungen ${state.zellen ? (gebietAktiv(state.gebiet) ? 'im gewählten Gebiet' : 'im Gebiet') : 'im Radius'}`), h('span', { class: 'muted' }, 'NINA und DWD melden nichts für die Region.'));
   }
   const badText = (s) => `${s.name}: ${s.status === 'down' ? `nicht erreichbar seit ${fmtDateTime(s.failing_since ?? s.last_attempt)}` : s.status === 'pending' ? 'noch kein Abruf' : 'Daten veraltet'}`;
   if (bad.length === 1) {

@@ -1,7 +1,7 @@
 // Tests für web/js/zellen.js: Zellenwahl, Laden, Verwerfen, Fehler je Zelle, Prüfsummen, Zusammenführen, Anreichern.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cellId, cellsInBounds, kindsForZoom, ZellenSpeicher, anreichern } from '../../web/js/zellen.js';
+import { cellId, cellsInBounds, kindsForZoom, ZellenSpeicher, anreichern, ebenenBudget, warnbandAlsEreignisse, dichtePunkte } from '../../web/js/zellen.js';
 
 const manifest = (files) => ({ cells: [...new Set(Object.keys(files).map((r) => r.split('/')[1]))], files: Object.fromEntries(Object.entries(files).map(([r, sha]) => [r, { sha256: sha }])) });
 const feat = (id, cell) => ({ type: 'Feature', id, geometry: { type: 'Point', coordinates: [0, 0] }, properties: { id, source_id: 'nina' } });
@@ -17,8 +17,9 @@ test('cellsInBounds liefert Ausschnitt plus Rand', () => {
   assert.equal(cellsInBounds({ w: 6.1, s: 49.6, e: 6.4, n: 49.9 }, 1).length, 9);
 });
 
-test('Ebenenbudget: bei Landeszoom keine Messstellen, bei Ortszoom alles', () => {
-  assert.deepEqual(kindsForZoom(6), ['events']);
+test('Ebenenbudget: unter Zoom 8 nichts, bei Ortszoom alles', () => {
+  assert.deepEqual(kindsForZoom(7.5), []);
+  assert.deepEqual(kindsForZoom(8), ['events', 'gewaesser', 'umwelt']);
   assert.ok(!kindsForZoom(8).includes('haltestellen'));
   assert.equal(kindsForZoom(15).length, 10);
 });
@@ -78,6 +79,14 @@ test('evict verwirft entfernte Zellen und behält die gewünschten', async () =>
   assert.equal(z.merged('events').features.length, 1);
 });
 
+test('evict mit Arten wirft nicht mehr gebrauchte Arten derselben Zelle weg', async () => {
+  const z = new ZellenSpeicher({ fetchJSON: async () => ({ sources: [], features: [feat('x')], stations: [] }) });
+  z.setManifest(manifest({ 'z/1_1/events.json': 'a', 'z/1_1/gewaesser.json': 'b' }));
+  await z.ensure(['1_1'], ['events', 'gewaesser']);
+  assert.equal(z.evict(['1_1'], ['events']), 1);
+  assert.equal(z.status().ok, 1);
+});
+
 test('anreichern setzt Abruf, Status und Alter aus dem Startpaket und lässt das Original unverändert', () => {
   const p = { sources: [{ id: 'nina' }], features: [{ properties: { source_id: 'nina' } }, { properties: { source_id: 'fremd' } }] };
   const src = new Map([['nina', { last_success: '2026-10-10T10:00:00Z', status: 'ok' }]]);
@@ -87,4 +96,34 @@ test('anreichern setzt Abruf, Status und Alter aus dem Startpaket und lässt das
   assert.equal(out.features[1].properties.source_status, 'unknown');
   assert.equal(out.features[1].properties.fetched_at, null);
   assert.equal(p.features[0].properties.age_s, undefined);
+});
+
+test('Ebenenbudget: unter Zoom 9 ohne info, über der Grenze nach Stufe gekappt, Eingabe unverändert', () => {
+  const mk = (rank) => ({ properties: { severity_rank: rank } });
+  const fs = [mk(0), mk(1), mk(3), mk(2)];
+  assert.deepEqual(ebenenBudget(fs, 8).map((f) => f.properties.severity_rank), [1, 3, 2]);
+  assert.equal(ebenenBudget(fs, 12).length, 4);
+  const viele = Array.from({ length: 1600 }, (_, i) => mk(i < 100 ? 3 : 1));
+  const out = ebenenBudget(viele, 8);
+  assert.equal(out.length, 1500);
+  assert.equal(out.filter((f) => f.properties.severity_rank === 3).length, 100);
+  assert.equal(fs.length, 4);
+});
+
+test('Warnband-Einträge werden zu Punkt-Ereignissen mit Entfernung, Alter und Markierung stub', () => {
+  const wb = [{ id: 'n:1', title: 'T', severity: 'critical', type: 'flood', source_id: 'nina', source_short: 'NINA', valid_from: 'a', valid_to: null, lat: 49.85, lon: 6.45, region_tag: 'DE-RLP', ars: '07232', land: 'DE-RP' },
+    { id: 'x', lat: null, lon: null }];
+  const src = new Map([['nina', { name: 'NINA', last_success: '2026-10-10T10:00:00Z', status: 'ok', attribution: 'BBK' }]]);
+  const out = warnbandAlsEreignisse(wb, src, Date.parse('2026-10-10T10:01:00Z'), { lat: 49.85, lon: 6.45 });
+  assert.equal(out.length, 1);
+  const p = out[0].properties;
+  assert.equal(p.severity_rank, 3); assert.equal(p.distance_km, 0); assert.equal(p.age_s, 60); assert.equal(p.stub, true); assert.equal(p.ars, '07232');
+});
+
+test('Dichtepunkte: Zellmitte, Anzahl, höchste Stufe; leere Zellen entfallen', () => {
+  const cells = { '12_99': { counts: { events: 5 }, bbox: [6, 49.5, 6.5, 50], max_severity: 'warning' }, '1_1': { counts: { events: 0 }, bbox: [0, 0, 0.5, 0.5] } };
+  const out = dichtePunkte(cells);
+  assert.equal(out.length, 1);
+  assert.deepEqual(out[0].geometry.coordinates, [6.25, 49.75]);
+  assert.equal(out[0].properties.n, 5); assert.equal(out[0].properties.sev, 'warning');
 });

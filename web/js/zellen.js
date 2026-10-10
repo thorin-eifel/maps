@@ -18,7 +18,7 @@ export const KIND_KEY = {
 
 // Welche Arten ab welcher Zoomstufe geladen werden (Ebenenbudget). Darunter zeigt die Karte nur Zählwerte aus dem Startpaket.
 export const KIND_MIN_ZOOM = {
-  events: 6, gewaesser: 8, umwelt: 8, kraftstoff: 9, haltestellen: 10, landmarks: 10, infrastruktur: 11, routen: 10, anbau: 11, sakral: 11,
+  events: 8, gewaesser: 8, umwelt: 8, kraftstoff: 9, haltestellen: 10, landmarks: 10, infrastruktur: 11, routen: 10, anbau: 11, sakral: 11,
 };
 
 export const cellId = (lon, lat) => `${Math.floor(lon * 2)}_${Math.floor(lat * 2)}`;
@@ -112,13 +112,14 @@ export class ZellenSpeicher {
     while (this._active < this.parallel && this._queue.length) this._queue.shift()();
   }
 
-  /** Wirft Dateien weg, deren Zelle nicht in `keep` liegt; ab `maxCells` gehaltenen Zellen werden die entferntesten zuerst verworfen. */
-  evict(keep) {
+  /** Wirft Dateien weg, deren Zelle nicht in `keep` liegt oder (wenn `kinds` gegeben) deren Art bei dieser Zoomstufe nicht gebraucht wird. */
+  evict(keep, kinds = null) {
     const keepSet = new Set(keep);
     let dropped = 0;
     for (const [rel, h] of this.held) {
-      const cell = rel.split('/')[1];
-      if (!keepSet.has(cell) && h.state !== 'loading') { this.held.delete(rel); dropped++; }
+      const [, cell, file] = rel.split('/');
+      const kind = file.replace('.json', '');
+      if ((!keepSet.has(cell) || (kinds && !kinds.includes(kind))) && h.state !== 'loading') { this.held.delete(rel); dropped++; }
     }
     if (dropped) this.version++;
     return dropped;
@@ -177,4 +178,48 @@ export function anreichern(kind, payload, sourcesById, nowMs) {
     out.fetched_at = srcs.map((s) => s.fetched_at).filter(Boolean).sort().at(-1) ?? null;
   }
   return out;
+}
+
+/**
+ * Ebenenbudget für die Karte: wie viele Ereignisse bei welcher Zoomstufe gezeichnet werden.
+ * Unter Zoom 9 nur ab Stufe "Hinweis" (info-Meldungen sind dort Rauschen), höchste Stufe zuerst; harte Obergrenze je Band.
+ * Rein: gibt eine neue Liste zurück, die Eingabe bleibt unverändert.
+ */
+export function ebenenBudget(features, zoom) {
+  const rank = (f) => f.properties.severity_rank ?? 0;
+  const [min, cap] = zoom < 9 ? [1, 1500] : [0, 5000];
+  const keep = features.filter((f) => rank(f) >= min);
+  if (keep.length <= cap) return keep;
+  return keep.slice().sort((a, b) => rank(b) - rank(a)).slice(0, cap);
+}
+
+/** Warnband-Einträge des Startpakets als Ereignis-Punkte (für Karte bei kleinen Zoomstufen und für das Warnband). */
+export function warnbandAlsEreignisse(warnband, sourcesById, nowMs, bezug) {
+  const hav = (lat, lon) => {
+    const r = Math.PI / 180, dLat = (lat - bezug.lat) * r, dLon = (lon - bezug.lon) * r;
+    const a = Math.sin(dLat / 2) ** 2 + Math.cos(bezug.lat * r) * Math.cos(lat * r) * Math.sin(dLon / 2) ** 2;
+    return Math.round(2 * 6371.0088 * Math.asin(Math.sqrt(a)) * 10) / 10;
+  };
+  const RANK = { info: 0, notice: 1, warning: 2, critical: 3 };
+  return (warnband ?? []).filter((w) => Number.isFinite(w.lat) && Number.isFinite(w.lon)).map((w) => {
+    const src = sourcesById.get(w.source_id);
+    const ok = src?.last_success ?? null;
+    return {
+      type: 'Feature', id: w.id, geometry: { type: 'Point', coordinates: [w.lon, w.lat] },
+      properties: {
+        id: w.id, source_id: w.source_id, source_short: w.source_short, source_name: src?.name ?? w.source_short, attribution: src?.attribution ?? null,
+        type: w.type, title: w.title, summary: '', severity: w.severity, severity_rank: RANK[w.severity] ?? 0, lat: w.lat, lon: w.lon,
+        distance_km: hav(w.lat, w.lon), region_tag: w.region_tag, ars: w.ars ?? null, land: w.land ?? null, valid_from: w.valid_from, valid_to: w.valid_to,
+        fetched_at: ok, source_status: src?.status ?? 'unknown', age_s: ok ? Math.max(0, Math.round((nowMs - Date.parse(ok)) / 1000)) : null, stub: true,
+      },
+    };
+  });
+}
+
+/** Zellen des Startpakets als Punkte für die Dichte-Ebene (Anzahl Ereignisse je Zelle, höchste Stufe). */
+export function dichtePunkte(cells, art = 'events') {
+  return Object.entries(cells ?? {}).filter(([, c]) => (c.counts?.[art] ?? 0) > 0).map(([id, c]) => ({
+    type: 'Feature', geometry: { type: 'Point', coordinates: [(c.bbox[0] + c.bbox[2]) / 2, (c.bbox[1] + c.bbox[3]) / 2] },
+    properties: { id, n: c.counts[art], sev: c.max_severity ?? 'info', bbox: JSON.stringify(c.bbox) },
+  }));
 }

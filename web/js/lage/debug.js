@@ -1,5 +1,6 @@
 import { applyLight } from './basiskarte.js';
 import { light, map, ripples, state } from './zustand.js';
+import { zellenWarten } from './zellenlauf.js';
 
 // Prüfzugang (nur mit #debug in der Adresse): Ereignis 'osint-debug', Auftrag als JSON in <html data-debug-in>: {jump:[lng,lat,zoom], layer:'id'} setzt die Ansicht und
 // schreibt Zählwerte der gezeichneten Objekte nach <html data-debug-out>. Kein eval, keine Daten nach außen.
@@ -7,7 +8,11 @@ export function debugHook(m) {
   document.addEventListener('osint-debug', async (e) => {
     const cmd = JSON.parse(document.documentElement.dataset.debugIn || '{}');
     if (cmd.jump) { m.jumpTo({ center: [cmd.jump[0], cmd.jump[1]], zoom: cmd.jump[2] }); await new Promise((r) => { m.once('idle', r); setTimeout(r, 6000); }); }
+    if (cmd.zellen && state.zellen) await zellenWarten();
     const out = { zoom: m.getZoom() };
+    if (cmd.zellen) { // Zellenbetrieb: gehaltene Zellen, Fehler, Anzahl gezeichneter Ereignisse und Dichtepunkte
+      out.zellen = state.zellen ? { ...state.zellen.status(), version: state.zellen.version, events: state.events.length, base: state.base.length, band: state.base.some((f) => f.properties.stub) ? 'stubs' : 'zellen' } : 'aus';
+    }
     for (const id of cmd.layers ?? []) out[id] = m.getLayer(id) ? m.queryRenderedFeatures({ layers: [id] }).length : 'fehlt';
     for (const im of cmd.images ?? []) out[`img:${im}`] = m.hasImage(im);
     for (const id of cmd.vis ?? []) out[`vis:${id}`] = m.getLayer(id) ? m.getLayoutProperty(id, 'visibility') : 'fehlt';

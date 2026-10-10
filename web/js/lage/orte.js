@@ -1,6 +1,7 @@
 import { INFRA_MEDIEVAL, SACRAL_KINDS, infraFeatures } from '../infra.js';
 import { getJSON } from '../util.js';
 import { MED } from './mittelalter.js';
+import { loadView } from './zellenlauf.js';
 import { map, mapReady, state } from './zustand.js';
 
 // Bahnhöfe und Haltestellen der Schiene (GTFS Luxemburg und Deutschland, haltestellen.json): kleine Punkte mit Namen ab Zoom 10
@@ -16,6 +17,7 @@ export function paintStops() {
 // Infrastruktur aus OpenStreetMap (Windräder, Ladesäulen, Notfallpunkte). Eine Quelle, eine Zeichen- und eine Namensebene; welche Arten stehen, regelt der Filter.
 export let infraKey = '';
 export function ensureSakral() {   // Kirchen, Kapellen, Wegkreuze gibt es nur auf der Karte um 1450: Datei erst dann laden
+  if (state.zellen) { if (state.layers.medieval) loadView(); return; }   // Zellenbetrieb: Art 'sakral' kommt mit den Zellen
   if (!state.layers.medieval || state.sakral || state.sakralLoading) return;
   state.sakralLoading = true;
   getJSON('data/sakral.json').then((j) => { state.sakral = j; applyInfra(); }).catch(() => {}).finally(() => { state.sakralLoading = false; });

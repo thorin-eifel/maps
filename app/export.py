@@ -90,7 +90,7 @@ def run_export(storage: Storage, registry: Registry, out: Path, cells: bool = Tr
     now_iso = payloads.iso(payloads.utcnow())
     flat = export_cells.flat_payloads(storage, registry)
     cell_files, info, state = export_cells.build_cell_files(flat, registry, now_iso, prev, out)
-    start_raw = serialize({"start.json": export_cells.build_start(storage, registry, info, flat["events"])})["start.json"]
+    start_raw = serialize({"start.json": export_cells.build_start(storage, registry, info, flat["events"], flat.get("kraftstoff"))})["start.json"]
     manifest = export_cells.build_manifest(info, raw_files, start_raw, now_iso, storage.data_version(), LEGACY_NAMES if legacy else set())
     for rel, raw in cell_files.items():
         old = prev.get("files", {}).get(rel)
