@@ -54,9 +54,11 @@ def test_klartext():
 
 def test_katalogdatei_stimmt_mit_gruppen_ueberein():
     doc = json.loads((ROOT / "web" / "geo" / "lgb.json").read_text(encoding="utf-8"))
-    assert [g["id"] for g in doc["groups"]] == [g[0] for g in lgb.GRUPPEN]
-    for g, (_, _, dienste) in zip(doc["groups"], lgb.GRUPPEN):
-        assert [s["id"] for s in g["services"]] == dienste
+    # Der Katalog enthält nur die redaktionelle Auswahl (tools/katalog_auswahl.json), in der Reihenfolge von GRUPPEN.
+    gewaehlt = {e["dienst"] for e in json.loads((ROOT / "tools" / "katalog_auswahl.json").read_text(encoding="utf-8"))["lgb"]}
+    erwartet = [(gid, [d for d in dienste if d in gewaehlt]) for gid, _, dienste in lgb.GRUPPEN]
+    erwartet = [(gid, d) for gid, d in erwartet if d]
+    assert [(g["id"], [s["id"] for s in g["services"]]) for g in doc["groups"]] == erwartet
     assert doc["lizenz"] == "dl-de/by-2-0" and "{jahr}" in doc["vermerk"]
     assert set(doc["ausgeblendet"]) == lgb.AUSGEBLENDET
 

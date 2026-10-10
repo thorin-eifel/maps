@@ -33,6 +33,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_lgb_katalog as lgb  # noqa: E402  (gleicher Parser für Capabilities)
+import katalog_auswahl as auswahl  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 UA = "Landblick/1.0 (+https://github.com/thorin-eifel/maps; Katalogabruf, einmalig)"
@@ -119,9 +120,12 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=ROOT / "web/geo/landesdaten.json")
     ap.add_argument("--from-dir", type=Path)
     ap.add_argument("--save-dir", type=Path)
+    ap.add_argument("--alle", action="store_true", help="vollen Katalog schreiben statt der redaktionellen Auswahl")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     meta = json.loads(args.meta.read_text(encoding="utf-8"))
+    eintraege = [] if args.alle else auswahl.lade("landesdaten")
+    gewollt = {e["dienst"] for e in eintraege}
     gruppen: dict[str, dict] = {pre: {"id": pre, "title": titel, "services": []} for pre, titel, _ in ANBIETER}
     ausgelassen: list[dict] = []
     hosts: set[str] = set()
@@ -131,6 +135,8 @@ def main() -> int:
         if not a:
             continue
         pre, titel, name = a
+        if eintraege and f"gp{sid}" not in gewollt:
+            continue   # nicht in der Auswahl: weder laden noch listen
         basis = basis_url(s["getMapUrl"])
         host = up.urlsplit(basis).hostname if basis else ""
         if host in OHNE_CORS:
@@ -171,7 +177,32 @@ def main() -> int:
         gruppen[pre]["services"].append(dienst)
         hosts.add(host)
         log.info("%-6s %3d Ebenen  %s", sid, lgb.count(dienst["layers"]), s["title"])
-    out_gr = [g for g in gruppen.values() if g["services"]]
+    if eintraege:   # Auswahl: Gruppen nach der Redaktion, nicht nach Betreiber
+        dienste = {s["id"]: s for g in gruppen.values() for s in g["services"]}
+        vorhanden = {i: auswahl.namen_im_baum(s["layers"]) for i, s in dienste.items()}
+        fehlt = [(e["dienst"], e["ebene"]) for e in eintraege if e["ebene"] not in vorhanden.get(f"gp{e['dienst'][2:]}", set())]
+        if fehlt:
+            for d, e in fehlt:
+                log.error("Auswahl: %s/%s nicht im Dienst oder Dienst nicht geladen", d, e)
+            return 1
+        reihe: dict[str, dict] = {}
+        for e in eintraege:
+            g = reihe.setdefault(e["gruppe"], {"id": e["gruppe"], "title": e["gruppe"], "services": {}})
+            s0 = dienste[e["dienst"]]
+            s = g["services"].setdefault(s0["id"], {**s0, "layers": []})
+            s["_namen"] = s.get("_namen", set()) | {e["ebene"]}
+        out_gr = []
+        for g in reihe.values():
+            svcs = []
+            for s in g["services"].values():
+                namen = s.pop("_namen")
+                s["layers"] = auswahl.kuerze(dienste[s["id"]]["layers"], namen)
+                s["title"] = auswahl.repariere_titel(s["title"])
+                svcs.append(s)
+            out_gr.append({"id": g["id"], "title": g["title"], "services": svcs})
+        hosts = {up.urlsplit(s["url"]).hostname for g in out_gr for s in g["services"]}
+    else:
+        out_gr = [g for g in gruppen.values() if g["services"]]
     doc = {
         "quelle": "Landesstellen Rheinland-Pfalz über das Geoportal RLP (offene Daten)",
         "seite": "https://www.geoportal.rlp.de/search/",
