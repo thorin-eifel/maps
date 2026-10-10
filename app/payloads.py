@@ -69,7 +69,7 @@ def source_status(entry: SourceEntry, state: dict[str, Any], n_active: int, now:
 
 
 def statuses(storage: Storage, registry: Registry) -> dict[str, dict[str, Any]]:
-    return {e.id: source_status(e, storage.get_state(e.id), storage.count_active(e.id)) for e in registry.entries}
+    return {e.id: source_status(e, storage.get_state(e.id), storage.count_active(e.id)) for e in registry.entries if e.art == "collector"}
 
 
 def meta_payload(storage: Storage) -> dict[str, Any]:

@@ -7,6 +7,7 @@ import { setupSideToggle } from './lage/panels.js';
 import { initMap } from './lage/karte.js';
 import { refresh } from './lage/laden.js';
 import { ladeIndex, wireView } from './lage/zellenlauf.js';
+import { initLgb } from './lage/lgb.js';
 
 if (location.hash === '#debug') {   // Prüfhilfe: Fehler der Seite in ein Attribut schreiben, weil die Konsole nicht überall lesbar ist
   const note = (m) => { document.documentElement.dataset.debugErr = `${document.documentElement.dataset.debugErr ?? ''}${m}\n`.slice(-1500); };
@@ -20,6 +21,7 @@ async function main() {
   setupSideToggle();
   await ladeIndex();   // entscheidet, ob Zellen- oder Flachdateibetrieb läuft (vor der Karte, weil sie danach die Ebenen bestückt)
   await initMap();
+  initLgb().catch((e) => console.warn('LGB Daten:', e));   // Menü ohne Wirkung auf den Rest: fehlt der Katalog, bleibt die Gruppe verborgen
   await refresh();
   wireView();
 }

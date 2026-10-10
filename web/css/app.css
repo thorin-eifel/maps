@@ -705,3 +705,22 @@ body.einrichtung .klein { font-size: .8rem; }
 .klein { font-size: .8rem; }
 .zellen-status { margin-left: var(--space-2); font-size: var(--fs-xs); }
 .zellen-status[data-state="error"] { color: var(--brand-red-600); font-weight: 600; }
+
+/* LGB Daten: Kartendienste des Landesamts für Geologie und Bergbau (js/lage/lgb.js) */
+.lgb-gruppe > summary { cursor: pointer; font-weight: 600; color: var(--fg-muted); padding: 2px 0; letter-spacing: var(--tracking-snug); }
+.lgb-gruppe[open] > summary { color: var(--fg); }
+.lgb-hinweis { border: 1px solid var(--border-strong); border-left: 4px solid var(--warn-text); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); margin: var(--space-2) 0; background: var(--bg-elevated); }
+.lgb-hinweis[hidden] { display: none; }
+.lgb-hinweis p { margin: var(--space-1) 0 var(--space-2); }
+.lgb-knoepfe { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.lgb-steuerung { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); margin: var(--space-2) 0; }
+.lgb-steuerung [data-state="error"] { color: var(--warn-text); font-weight: 600; }
+.lgb-thema { margin-left: var(--space-2); }
+.lgb-thema > summary { cursor: pointer; padding: 1px 0; }
+.lgb-dienst { margin: var(--space-1) 0 var(--space-2); }
+.lgb-dienst-titel { font-size: 0.85em; color: var(--fg-muted); padding-left: var(--space-3); }
+.lgb-dienst details > summary { cursor: pointer; font-size: 0.9em; padding-left: var(--space-3); }
+.lgb-lizenz { margin-top: var(--space-2); }
+.lgb-vermerk { position: absolute; left: var(--space-2); bottom: var(--space-2); z-index: 2; margin: 0; padding: 2px 6px; background: color-mix(in srgb, var(--bg-elevated) 85%, transparent); color: var(--fg); border-radius: 4px; max-width: calc(100% - 2 * var(--space-2)); }
+.lgb-vermerk[hidden] { display: none; }
+.lgb-vermerk a { color: inherit; }

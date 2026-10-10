@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 import yaml
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 
 class ZugangField(BaseModel):
@@ -42,8 +42,16 @@ class SourceEntry(BaseModel):
     zuletzt_geprüft: str
     erstlauf: Literal["sofort", "spaeter"] = Field(
         default="sofort", description="spaeter: braucht lange (große Abfragen). Die Desktop-App holt sie erst nach dem ersten Export im Hintergrund")
-    collector: str
+    art: Literal["collector", "client"] = Field(
+        default="collector", description="client: kein Collector; die Seite des Besuchers ruft die Quelle selbst ab (z. B. LGB-Kartendienste). Steht auf der Quellenseite, läuft nicht im Sammler")
+    collector: str = ""
     params: dict[str, Any] = Field(default_factory=dict)
+
+    @model_validator(mode="after")
+    def _collector_noetig(self) -> "SourceEntry":
+        if self.art == "collector" and not self.collector:
+            raise ValueError(f"{self.id}: collector fehlt (art=collector)")
+        return self
 
     def public(self) -> dict[str, Any]:
         """Felder für die öffentliche Quellenseite (ohne interne Parameter)."""
@@ -79,4 +87,4 @@ class Registry:
         return self._by_id[source_id]
 
     def active(self) -> list[SourceEntry]:
-        return [e for e in self.entries if e.aktiv]
+        return [e for e in self.entries if e.aktiv and e.art == "collector"]
