@@ -22,7 +22,7 @@ def test_meta_and_sources(storage, registry):
     m = payloads.meta_payload(storage)
     assert m["radius_km"] == 120 and m["center"]["name"] == "Irrel" and "Kein amtliches" in m["disclaimer"]
     s = payloads.sources_payload(registry)["sources"]
-    assert len(s) == 42 and all("params" not in x and x["namensnennung"] for x in s)
+    assert len(s) == 43 and all("params" not in x and x["namensnennung"] for x in s)
 
 
 def test_events_validation(storage, registry):

@@ -70,9 +70,9 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 
 ### Zahlen
 
-- Quellen im Register: 42, davon aktiv: 40
+- Quellen im Register: 43, davon aktiv: 40
 - Sammler (Module in `app/collectors/`): 43
-- Tests: 398 Python, 60 JavaScript
+- Tests: 404 Python, 66 JavaScript
 
 ### Quellen und Lizenzen
 
@@ -120,6 +120,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 | `dwd_stationen` | DWD-Stationen | DWD GeoNutzV; Bright Sky Software MIT | 30 min | ja |
 | `irceline` | IRCEL-CELINE | CC BY 4.0 (nach Kenntnisstand) | 30 min | ja |
 | `kmi_stationen` | KMI-Stationen | CC BY 4.0 (nach Kenntnisstand) | 30 min | ja |
+| `lgb_wms` | LGB Daten | Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0) | 1 h | ja |
 
 Vollständig mit Namensnennung: `sources.yaml` und die Seite „Quellen und Lizenzen“ der Anwendung.
 

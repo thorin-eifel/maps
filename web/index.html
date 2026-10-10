@@ -6,7 +6,7 @@
 <title>Was ist los bei uns?</title>
 <meta name="description" content="Was ist los bei uns? Die aktuelle Lage rund um unsere Heimat: Privates Open-Source-Projekt, gebaut aus offenen Daten für die Südeifel und ihre Nachbarregionen (120 km Umkreis). Kein amtliches Warnsystem.">
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://mapserver.lgb-rlp.de; connect-src 'self' https://mapserver.lgb-rlp.de; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 16 16%27%3E%3Ccircle cx=%278%27 cy=%278%27 r=%275%27 fill=%27none%27 stroke=%27%23227a8a%27 stroke-width=%272%27/%3E%3Ccircle cx=%278%27 cy=%278%27 r=%271.6%27 fill=%27%23227a8a%27/%3E%3C/svg%3E">
 <link rel="stylesheet" href="css/tokens.css">
 <link rel="stylesheet" href="css/app.css">
@@ -171,6 +171,21 @@
               <label><input type="checkbox" data-layer="medieval"> <span class="ico ico-relief" aria-hidden="true"></span>Karte im Stil des 15. Jahrhunderts</label>
             </div>
           </details>
+          <details class="lgb-gruppe" id="lgb-gruppe" hidden><summary>LGB Daten</summary>
+            <p class="group-hint small muted">Geologie, Boden, Wasser, Bergbau und Erdbeben, Kartendienste des Landesamts für Geologie und Bergbau Rheinland-Pfalz</p>
+            <div class="lgb-hinweis" id="lgb-hinweis" role="group" aria-labelledby="lgb-hinweis-titel" hidden>
+              <strong id="lgb-hinweis-titel">Karten vom Server des LGB</strong>
+              <p class="small">Diese Ebenen lädt Ihr Browser direkt von <code>mapserver.lgb-rlp.de</code>. Der Server sieht dabei Ihre IP-Adresse und den Kartenausschnitt. Alles andere auf dieser Seite kommt von uns und geht nicht an Dritte. Die Bestätigung gilt nur bis zum Neuladen der Seite.</p>
+              <div class="lgb-knoepfe"><button type="button" id="lgb-ok">Verstanden, Karte laden</button> <button type="button" id="lgb-nein">Abbrechen</button></div>
+            </div>
+            <div class="lgb-steuerung">
+              <label class="small">Deckkraft <input type="range" id="lgb-deckkraft" min="20" max="100" step="5" value="70" aria-label="Deckkraft der LGB-Ebenen"></label>
+              <button type="button" id="lgb-aus" class="small">Alle LGB-Ebenen aus</button>
+              <span id="lgb-status" class="small muted" role="status" aria-live="polite"></span>
+            </div>
+            <div id="lgb-menu" class="lgb-menu"></div>
+            <p class="small muted lgb-lizenz">Daten: Landesamt für Geologie und Bergbau Rheinland-Pfalz, <a href="https://www.govdata.de/dl-de/by-2-0" target="_blank" rel="noopener noreferrer">dl-de/by-2-0</a>. Höchstens sechs Ebenen gleichzeitig; außerhalb des Maßstabsbereichs einer Ebene bleibt die Karte leer.</p>
+          </details>
           </div>
           <label class="sound-opt"><input type="checkbox" id="pingsound"> <span class="ico ico-ton" aria-hidden="true"></span>Ton (Ping, Laser)</label>
         </details>
@@ -178,6 +193,7 @@
       <div class="map-wrap">
         <div id="map" role="application" aria-label="Lagekarte. Dieselben Daten stehen rechts als Tabelle; Land und Landkreis lassen sich dort unter Filter wählen." aria-describedby="dichte-hinweis"></div>
         <p class="sr-only" id="dichte-hinweis" aria-live="polite"></p>
+        <p class="lgb-vermerk small" id="lgb-vermerk" hidden></p>
         <details class="relief-legend map-legend" id="map-legend" hidden>
           <summary>Zeichenerklärung</summary>
           <section data-legend="medieval" hidden><h3 class="legend-h">Karte um 1450</h3></section>

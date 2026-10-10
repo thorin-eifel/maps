@@ -968,3 +968,25 @@ sources:
     zuletzt_geprüft: "2026-10-07"
     collector: kmi_stationen
 
+  - id: lgb_wms
+    name: "LGB Daten: Online-Karten des Landesamts für Geologie und Bergbau Rheinland-Pfalz (WMS)"
+    kurzname: LGB Daten
+    betreiber: Landesamt für Geologie und Bergbau Rheinland-Pfalz (LGB)
+    url: https://www.lgb-rlp.de/karten-und-produkte/ogc-dienste
+    lizenz: Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0)
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Nutzungsbedingungen am 10.10.2026 gelesen (lgb-rlp.de, Nutzungsbedingungen für Online-Karten): dl-de/by-2-0, kommerzielle und nichtkommerzielle
+      Nutzung, Einbindung in eigene Anwendungen ausdrücklich erlaubt, Vermerk "©LGB-RLP <Jahr des Datenbezugs>, dl-de/by-2-0, www.lgb-rlp.de
+      [Daten bearbeitet]". Rechtliche Endabnahme steht aus. Datenschutz: Die Kartenbilder lädt der Browser der Besucherin direkt vom Server
+      des LGB (IP-Adresse geht an den Betreiber), deshalb erst nach ausdrücklicher Bestätigung; Hinweis steht im Menü und in der Datenschutzerklärung.
+      Der Katalog (web/geo/lgb.json) kommt aus den GetCapabilities der Dienste (tools/build_lgb_katalog.py), die Seite fragt sie nie ab.
+    namensnennung: "©LGB-RLP 2026, dl-de/by-2-0, www.lgb-rlp.de [Daten bearbeitet]"
+    intervall: 3600
+    ratenlimit: nicht veröffentlicht; Besucherseite lädt nur GetMap-Kacheln, höchstens sechs Ebenen gleichzeitig, nur für eingeschaltete Ebenen
+    auth: keine
+    geo_bezug: Rheinland-Pfalz (Dienste liefern auch außerhalb Bilder, meist leer)
+    datenschutz_risiko: mittel
+    aktiv: true
+    zuletzt_geprüft: "2026-10-10"
+    art: client

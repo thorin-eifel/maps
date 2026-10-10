@@ -8,6 +8,7 @@ import { baseAnchor } from './geometrie.js';
 import { MED, MED_COLORS, MED_ICON_STYLE, medFlavor, medievalize } from './mittelalter.js';
 import { HER_LAYERS, NAT_LAYERS, applyNatureVisibility, paintNature, peakLayers } from './natur.js';
 import { INFRA_LAYER_IDS, paintStops } from './orte.js';
+import { placeLgb } from './lgb.js';
 import { LABEL_SKIP, labelsAndBuildings, landUseLayers, mainRoad, signLayers, waterEdges } from './stil.js';
 import { applyFlow, fillTempLegend, placeRadar } from './wetterkarte.js';
 import { basemapOk, coreOk, flow, light, map, mapReady, reliefOk, ringOk, state } from './zustand.js';
@@ -55,6 +56,7 @@ export function applyBasemap() {
   flow?.refresh();
   applyRelief();
   placeRadar();
+  placeLgb();   // LGB-Ebenen bleiben über der neu gebauten Basis, unter Straßen und Beschriftung
 }
 
 // Gewässer blau, damit Mosel, Sauer und Seen auch auf der grauen Basiskarte und über dem Relief sofort lesbar sind

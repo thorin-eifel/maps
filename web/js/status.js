@@ -45,7 +45,7 @@ async function quellen() {
       h('dt', {}, 'Lizenz'), h('dd', {}, s.lizenz, ' ', s.lizenz_geprueft ? h('span', { class: 'badge st-ok' }, 'geprüft') : h('span', { class: 'badge st-stale' }, 'noch zu bestätigen')),
       s.lizenz_hinweis ? [h('dt', {}, 'Hinweis'), h('dd', {}, s.lizenz_hinweis)] : null,
       h('dt', {}, 'Endpunkt'), h('dd', {}, link(s.url, s.url)),
-      h('dt', {}, 'Abrufintervall'), h('dd', {}, `${Math.round(s.intervall / 60)} Minuten`),
+      h('dt', {}, s.art === 'client' ? 'Abruf' : 'Abrufintervall'), h('dd', {}, s.art === 'client' ? 'durch den Browser der Besucherin, nur nach Bestätigung und nur für eingeschaltete Ebenen' : `${Math.round(s.intervall / 60)} Minuten`),
       h('dt', {}, 'Ratenlimit'), h('dd', {}, s.ratenlimit),
       h('dt', {}, 'Zugang'), h('dd', {}, s.auth),
       h('dt', {}, 'Räumlicher Bezug'), h('dd', {}, s.geo_bezug),

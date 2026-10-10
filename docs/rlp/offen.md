@@ -49,3 +49,12 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 - **Flachdateien** werden weiter exportiert (Rückfall ohne Manifest). Entscheidung des Betreibers: in R6 abschaffen, sobald alle Stellen auf Zellen laufen.
 - **Suchindex** für ganz RLP: Rechenzeit gemessen (bis 300 000 Einträge unter 100 ms), Dateigröße mit echten Namen ungemessen.
 - **Abruf je Ereignis:** Im Zellenbetrieb ist `fetched_at` die letzte erfolgreiche Abrufzeit der Quelle, nicht die der einzelnen Meldung.
+
+## Aus LGB Daten (Okt. 2026)
+
+- Rechtliche Endabnahme der Einbindung (Nutzungsbedingungen gelesen, dl-de/by-2-0, Einbindung erlaubt; `lizenz_geprueft` bleibt auf false).
+- Datenschutzerklärung nennt den Dritt-Abruf; Wortlaut vor dem öffentlichen Start vom Datenschutzbeauftragten prüfen lassen.
+- Katalog (`web/geo/lgb.json`) ist ein Stand; wer pflegt ihn, wenn das LGB Dienste ändert? Vorschlag: Neubau bei jedem Release, Test schlägt bei Abweichung der Gruppen an.
+- GetFeatureInfo (Objektabfrage per Klick) und Legenden fehlen bewusst; beides wären weitere Abrufe beim Dritten.
+- "Cross Compliance Erosion" ist auf der Onlinekarten-Seite des LGB gelistet, hat aber keinen WMS in der OGC-Liste; Rückfrage beim LGB, ob es einen gibt.
+
