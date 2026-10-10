@@ -84,7 +84,7 @@ elif [[ "${mode}" == "data" ]]; then
   [[ -f "${ROOT}/web/data/events.json" ]] || die "web/data/events.json fehlt (erst python -m app.export)."
   cmd="mirror -R --no-perms --include-glob '*.json' --include-glob 'radar.png' --exclude-glob '.*' web/data ${remote%/}/data"
 else
-  cmd="mirror -R --no-perms -x '^data/' --exclude-glob '.*' web ${remote%/}"
+  cmd="mirror -R --no-perms -x '^data/' -x '^basis/' --exclude-glob '.*' web ${remote%/}"
   # .htaccess ist versteckt und würde vom Ausschluss '.*' erfasst; gezielt nachreichen
   cmd="${cmd}
 put -O ${remote} web/.htaccess"

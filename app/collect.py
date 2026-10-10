@@ -6,6 +6,8 @@ Parameter:  --once            jeder Collector genau einmal, dann Ende
                               (für Cron im Fünf-Minuten-Takt; bleibt höflich gegenüber den Quellen)
             --skip-live       Quellen mit params.live überspringen (die holt die Live-Schleife, app/live.py)
             --only ID [ID..]  nur diese Quellen
+            --skip-later      Quellen mit erstlauf: spaeter überspringen (große Abfragen, z. B. OSM)
+            --only-later      nur Quellen mit erstlauf: spaeter
             --healthcheck     Exit 0, wenn in den letzten 20 Minuten ein Lauf protokolliert wurde
             --log-level       DEBUG|INFO|WARNING (Standard INFO)
 Beispiele:  python -m app.collect --once
@@ -13,17 +15,23 @@ Beispiele:  python -m app.collect --once
             python -m app.collect --due                # Cron-Betrieb
             python -m app.collect                      # Dauerlauf (Container-Standard)
 
+Fortschritt: Ist OSINT_PROGRESS_FILE gesetzt, schreibt der Lauf dorthin (JSON: total, done, running, failed), damit die Desktop-App
+            "n von m, läuft noch: <Name>" anzeigen kann. Die Datei enthält nur Quellennamen, keine Daten.
+
 Least Privilege: Dieser Prozess liest aus dem Netz und schreibt in die Datenbank, sonst nichts.
 """
 from __future__ import annotations
 
 import argparse
 import asyncio
+import json
 import logging
+import os
 import random
 import signal
 import sys
 from datetime import timedelta
+from pathlib import Path
 
 import httpx
 
@@ -51,6 +59,15 @@ def build_collectors(settings: Settings, storage: Storage, client: httpx.AsyncCl
     return out
 
 
+def select_collectors(collectors, skip_later: bool = False, only_later: bool = False):
+    """Filter nach erstlauf: spaeter (große, langsame Abfragen). Beide Schalter zusammen ergeben nichts."""
+    if skip_later:
+        collectors = [c for c in collectors if c.entry.erstlauf != "spaeter"]
+    if only_later:
+        collectors = [c for c in collectors if c.entry.erstlauf == "spaeter"]
+    return collectors
+
+
 def is_due(entry, state: dict, now=None, slack: float = 0.9) -> bool:
     """Fällig, wenn nie versucht oder seit dem letzten Versuch mindestens 90 % des Intervalls vergangen sind.
 
@@ -64,8 +81,55 @@ def is_due(entry, state: dict, now=None, slack: float = 0.9) -> bool:
     return (now - datetime.fromisoformat(last.replace("Z", "+00:00"))).total_seconds() >= entry.intervall * slack
 
 
-async def run_once(collectors) -> int:
-    results = await asyncio.gather(*(c.run_once() for c in collectors))
+class Progress:
+    """Schreibt den Stand eines Laufs atomar in eine JSON-Datei. Ohne Pfad passiert nichts."""
+
+    def __init__(self, path: str | Path | None, total: int) -> None:
+        self.path = Path(path) if path else None
+        self.total, self.done, self.failed = total, 0, []
+        self.running: list[str] = []
+        self.write()
+
+    def start(self, name: str) -> None:
+        self.running.append(name)
+        self.write()
+
+    def finish(self, name: str, ok: bool) -> None:
+        if name in self.running:
+            self.running.remove(name)
+        self.done += 1
+        if not ok:
+            self.failed.append(name)
+        self.write()
+
+    def write(self) -> None:
+        if not self.path:
+            return
+        try:
+            tmp = self.path.with_suffix(".tmp")
+            tmp.write_text(json.dumps({"total": self.total, "done": self.done, "running": self.running, "failed": self.failed}, ensure_ascii=False), encoding="utf-8")
+            tmp.replace(self.path)
+        except OSError as exc:   # Fortschritt ist Beiwerk, er darf den Lauf nie stoppen
+            log.warning("Fortschrittsdatei nicht schreibbar: %s", exc)
+
+
+def label(c) -> str:
+    return c.entry.kurzname or c.entry.name
+
+
+async def run_once(collectors, progress_path: str | Path | None = None) -> int:
+    prog = Progress(progress_path, len(collectors))
+
+    async def one(c) -> bool:
+        prog.start(label(c))
+        ok = False
+        try:
+            ok = await c.run_once()
+            return ok
+        finally:
+            prog.finish(label(c), ok)
+
+    results = await asyncio.gather(*(one(c) for c in collectors))
     failed = [c.entry.id for c, ok in zip(collectors, results) if not ok]
     if failed:
         log.error("Fehlgeschlagen: %s", ", ".join(failed))
@@ -126,6 +190,8 @@ def main(argv: list[str] | None = None) -> int:
     ap.add_argument("--due", action="store_true")
     ap.add_argument("--skip-live", action="store_true")
     ap.add_argument("--only", nargs="+", metavar="ID")
+    ap.add_argument("--skip-later", action="store_true")
+    ap.add_argument("--only-later", action="store_true")
     ap.add_argument("--healthcheck", action="store_true")
     ap.add_argument("--log-level", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
     args = ap.parse_args(argv)
@@ -141,14 +207,16 @@ def main(argv: list[str] | None = None) -> int:
             collectors = build_collectors(settings, storage, client, args.only)
             if args.skip_live:
                 collectors = [c for c in collectors if not c.entry.params.get("live")]
+            collectors = select_collectors(collectors, args.skip_later, args.only_later)
+            progress = os.environ.get("OSINT_PROGRESS_FILE")
             if args.due:
                 due = [c for c in collectors if is_due(c.entry, storage.get_state(c.entry.id))]
                 log.info("Fällig: %s", ", ".join(c.entry.id for c in due) or "nichts")
                 if not due:
                     return 0
-                return await run_once(due)
+                return await run_once(due, progress)
             if args.once:
-                return await run_once(collectors)
+                return await run_once(collectors, progress)
             await run_forever(settings, storage, collectors)
             return 0
 

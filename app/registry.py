@@ -32,6 +32,8 @@ class SourceEntry(BaseModel):
     nutzung: Literal["offen", "privat"] = Field(
         default="offen", description="privat: Lizenz oder Bedingungen erlauben nur private, nicht-kommerzielle Nutzung; läuft nur mit OSINT_MODE=privat")
     zuletzt_geprüft: str
+    erstlauf: Literal["sofort", "spaeter"] = Field(
+        default="sofort", description="spaeter: braucht lange (große Abfragen). Die Desktop-App holt sie erst nach dem ersten Export im Hintergrund")
     collector: str
     params: dict[str, Any] = Field(default_factory=dict)
 

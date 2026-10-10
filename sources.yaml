@@ -419,6 +419,7 @@ sources:
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-09-30"
+    erstlauf: spaeter
     collector: osm_natur
 
   - id: osm_infra
@@ -443,6 +444,7 @@ sources:
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-08"
+    erstlauf: spaeter
     collector: osm_infra
 
   - id: osm_anbau
@@ -465,6 +467,7 @@ sources:
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-09"
+    erstlauf: spaeter
     collector: osm_anbau
 
   - id: osm_routen
@@ -488,6 +491,7 @@ sources:
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-08"
+    erstlauf: spaeter
     collector: osm_routen
 
   - id: meteolux
@@ -890,6 +894,7 @@ sources:
     datenschutz_risiko: niedrig
     aktiv: true
     zuletzt_geprüft: "2026-10-07"
+    erstlauf: spaeter
     collector: osm_tankstellen_lu
 
   - id: dwd_stationen

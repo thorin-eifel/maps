@@ -73,7 +73,7 @@ Die Sammelstelle liest aus dem Netz und schreibt in ihre Datenbank und den Expor
 
 ## Das Quellenregister (`sources.yaml`)
 
-Pflichtfelder je Quelle: `id, name, betreiber, url, lizenz, namensnennung, intervall, ratenlimit, auth, geo_bezug, datenschutz_risiko, aktiv, zuletzt_geprüft, collector`. Dazu `params` und `lizenz_geprueft`. Steht dort `false`, wurde der Endpunkt live getestet, der Lizenztext aber noch nicht an der Primärquelle bestätigt. Die Seite „Quellen und Lizenzen“ zeigt das offen an. **Vor dem öffentlichen Start muss jede Zeile auf `true`.**
+Pflichtfelder je Quelle: `id, name, betreiber, url, lizenz, namensnennung, intervall, ratenlimit, auth, geo_bezug, datenschutz_risiko, aktiv, zuletzt_geprüft, collector`. Dazu `params`, `lizenz_geprueft` und optional `erstlauf` (`spaeter` für große, langsame Abfragen: die Desktop-App holt sie erst nach dem ersten Export im Hintergrund; derzeit die fünf OSM-Quellen). Steht dort `false`, wurde der Endpunkt live getestet, der Lizenztext aber noch nicht an der Primärquelle bestätigt. Die Seite „Quellen und Lizenzen“ zeigt das offen an. **Vor dem öffentlichen Start muss jede Zeile auf `true`.**
 
 Neue Quelle: erst Nutzungsbedingungen, Lizenz und Ratenlimit klären, dann Registereintrag, dann Collector (Vorlage: `pegelonline.py`), Fixture mit echter Antwort, Test.
 
@@ -315,6 +315,8 @@ Tauri-Hülle (Rust) ──startet──▶ osint-core (Python, Sidecar) ──�
 ```
 
 Beim ersten Start fragt `einrichtung.html` nach dem Mittelpunkt (Ortsname über Nominatim, nur der Suchtext geht hinaus, oder Koordinaten von Hand). Danach lädt die App die Karte für 120 km (ca. 550 MB, einmalig, wiederaufnehmbar) und beginnt zu sammeln. Der Mittelpunkt ist danach festgelegt; ändern heißt Datenordner zurücksetzen.
+
+Ablauf in der App: Als Hintergrund der Einrichtungsseite dient die mitgelieferte Weltkarte `web/basis/welt.pmtiles` (Zoom 0 bis 5, rund 15 MB, Herkunft in `web/basis/README.txt`). Der Balken zeigt beim Kartenabruf die geladenen MB, beim Sammeln „n von m abgerufen, läuft noch: <Name>" (`.collect-progress.json` im Datenordner, nur Quellennamen). Der erste Lauf überspringt die Quellen mit `erstlauf: spaeter`; sobald der erste Export steht, zeigt die App „Bereit", die langsamen Quellen laufen im Hintergrund (`--due`) und erscheinen mit dem nächsten Export (alle 5 Minuten). Spätere Zyklen holen nur noch fällige Quellen (`--due`), nicht mehr jede Quelle bei jedem Zyklus.
 
 ```bash
 # Dienst allein ausprobieren (ohne Hülle)

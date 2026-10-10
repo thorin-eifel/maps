@@ -5,22 +5,24 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Einrichtung – Was ist los bei uns?</title>
 <meta name="referrer" content="no-referrer">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="vendor/maplibre-gl/maplibre-gl.css">
 <link rel="stylesheet" href="css/app.css">
 </head>
-<body>
-<main id="inhalt" style="max-width:40rem;margin:2rem auto;padding:0 1rem">
+<body class="einrichtung">
+<div id="hintergrund" aria-hidden="true"></div>
+<main id="inhalt">
   <h1>Wo soll das Lagebild liegen?</h1>
   <p>Das Lagebild zeigt alles im Umkreis von 120 km um einen Mittelpunkt. Wähle einen Ort, zum Beispiel deinen Wohnort. Es werden nur Orte gesucht, keine Adressen.</p>
   <section class="card card-b" id="schritt1">
     <form id="suche" autocomplete="off">
       <label for="q">Ortsname</label>
-      <input id="q" type="search" minlength="2" maxlength="80" required style="width:100%">
+      <input id="q" type="search" minlength="2" maxlength="80" required>
       <p class="muted">Beim Suchen geht der eingetippte Ortsname an Nominatim (OpenStreetMap). Sonst nichts.</p>
       <button class="btn" type="submit">Suchen</button>
     </form>
-    <ul id="treffer" aria-live="polite" style="list-style:none;padding:0"></ul>
+    <ul id="treffer" aria-live="polite"></ul>
     <details>
       <summary>Oder Koordinaten selbst eingeben</summary>
       <label for="lat">Breite (z. B. 49.846)</label> <input id="lat" inputmode="decimal" size="10">
@@ -34,10 +36,11 @@
     <p>Die App lädt die Karte für 120 km um diesen Punkt (etwa 550 MB, einmalig) und holt danach die Daten der Quellen. Das dauert je nach Leitung einige Minuten bis eine Stunde. Danach läuft alles lokal.</p>
     <p class="muted">Quellen für Pegel, Warnungen und Verkehr gibt es nicht überall gleich dicht. Außerhalb von Rheinland-Pfalz, Luxemburg und der Nachbarschaft bleiben manche Kacheln leer.</p>
     <button class="btn" id="los" type="button">Einrichten</button>
-    <div role="progressbar" id="bar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><div id="barfill" style="height:.5rem;background:currentColor;width:0"></div></div>
+    <div role="progressbar" id="bar" aria-label="Fortschritt der Einrichtung" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" hidden><div id="barfill"></div></div>
     <p id="status" role="status"></p>
   </section>
   <p id="fehler" role="alert" class="muted"></p>
+  <p class="muted klein">Hintergrundkarte: © OpenStreetMap-Mitwirkende (ODbL), Protomaps</p>
 </main>
 <script type="module" src="js/einrichtung.js"></script>
 </body>

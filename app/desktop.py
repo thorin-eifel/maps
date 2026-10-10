@@ -73,7 +73,10 @@ class App:
         self.data_dir, self.web_dir, self.pmtiles, self.repo_dir = data_dir, web_dir.resolve(), pmtiles, repo_dir
         self.job = Job()
         self.settings_path = data_dir / "settings.json"
+        self.progress_path = data_dir / ".collect-progress.json"      # Fortschritt des Sammellaufs (app/collect.py), nur Quellennamen
+        self.later_progress_path = data_dir / ".collect-later.json"   # Nachlauf der langsamen Quellen im Hintergrund
         self.worker: threading.Thread | None = None
+        self.later: threading.Thread | None = None
         data_dir.mkdir(parents=True, exist_ok=True)
         (data_dir / "data").mkdir(exist_ok=True)
         (data_dir / "tiles").mkdir(exist_ok=True)
@@ -85,16 +88,32 @@ class App:
         except (OSError, ValueError):
             return None
 
-    def env(self, s: dict) -> dict:
+    def env(self, s: dict, progress: Path | None = None) -> dict:
         e = dict(os.environ)
         e.update(OSINT_CENTER_LAT=str(s["lat"]), OSINT_CENTER_LON=str(s["lon"]), OSINT_DB_PATH=str(self.data_dir / "osint.sqlite"),
                  OSINT_WEB_DIR=str(self.web_dir), OSINT_NO_DOTENV="1")
+        if progress:
+            e["OSINT_PROGRESS_FILE"] = str(progress)
         return e
 
-    def _run(self, args: list[str], s: dict) -> int:
+    def _run(self, args: list[str], s: dict, progress: Path | None = None, timeout: int = 1800) -> int:
         """Sammler und Export als Kindprozess. Im gebündelten Programm (PyInstaller) ruft es sich selbst mit --run auf."""
         cmd = [sys.executable, "--run", *args] if getattr(sys, "frozen", False) else [sys.executable, "-m", *args]
-        return subprocess.run(cmd, cwd=self.repo_dir, env=self.env(s), timeout=1800).returncode
+        return subprocess.run(cmd, cwd=self.repo_dir, env=self.env(s, progress), timeout=timeout).returncode
+
+    def job_snapshot(self) -> dict:
+        """Zustand der Einrichtung. Im Sammellauf kommt "n von m, läuft noch: <Namen>" aus der Fortschrittsdatei des Sammlers."""
+        j = self.job.snapshot()
+        if j["phase"] == "collect":
+            try:
+                p = json.loads(self.progress_path.read_text(encoding="utf-8"))
+                total, done = int(p["total"]), int(p["done"])
+                names = [str(x)[:40] for x in p.get("running", [])][:4]
+                j["msg"] = f"Quellen: {done} von {total} abgerufen" + (f", läuft noch: {', '.join(names)}" if names else "")
+                j["pct"] = 70 + int(20 * done / total) if total > 0 else j["pct"]
+            except (OSError, ValueError, KeyError, TypeError):
+                pass   # Datei fehlt noch oder wird gerade ersetzt: die letzte Meldung bleibt stehen
+        return j
 
     def start(self, s: dict) -> bool:
         if self.worker and self.worker.is_alive():
@@ -113,18 +132,37 @@ class App:
                     bid = tilebuild.latest_build(lambda _u: r.read())
                 tilebuild.build(s["lat"], s["lon"], self.data_dir / "tiles", self.pmtiles, bid,
                                 progress=lambda i, n, m, frac=0.0: self.job.set("tiles", m, 5 + int(60 * frac)))
+            first = True
             while True:
                 self.job.set("collect", "Daten werden abgerufen", 70)
-                if self._run(["app.collect", "--once"], s) != 0:
+                # Erster Lauf: alle Quellen außer den langsamen (erstlauf: spaeter), danach nur, was fällig ist
+                if self._run(["app.collect", "--once" if first else "--due", "--skip-later"], s, self.progress_path) != 0:
                     log.warning("Sammelzyklus mit Fehlern beendet")
                 self.job.set("export", "Daten werden aufbereitet", 90)
                 if self._run(["app.export", "--out", str(self.data_dir / "data")], s) != 0:
                     raise RuntimeError("Export fehlgeschlagen")
                 self.job.set("ready", "Bereit", 100)
+                self.start_later(s)
+                first = False
                 time.sleep(CYCLE_S)
         except Exception as err:   # sichtbar machen, nicht verschlucken
             log.exception("Einrichtung abgebrochen")
             self.job.set("error", "Abbruch", error=str(err)[:300])
+
+    def start_later(self, s: dict) -> None:
+        """Langsame Quellen (erstlauf: spaeter, z. B. OSM-Abfragen) im Hintergrund; ihre Daten kommen mit dem nächsten Export dazu.
+        --due holt sie beim ersten Mal (nie versucht = fällig) und danach nur im Intervall, auch nach einem Neustart der App."""
+        if self.later and self.later.is_alive():
+            return
+
+        def run() -> None:
+            try:
+                self._run(["app.collect", "--due", "--only-later"], s, self.later_progress_path, timeout=3 * 3600)
+            except (subprocess.SubprocessError, OSError) as err:
+                log.warning("Nachlauf der langsamen Quellen abgebrochen: %s", err)
+
+        self.later = threading.Thread(target=run, daemon=True, name="osint-later")
+        self.later.start()
 
 
 def ua() -> str:
@@ -187,7 +225,7 @@ def make_handler(app: App, port_box: list[int]):
             u = urllib.parse.urlsplit(self.path)
             if u.path == "/api/state":
                 s = app.settings()
-                return self.json({"configured": s is not None, "center": s, "job": app.job.snapshot()})
+                return self.json({"configured": s is not None, "center": s, "job": app.job_snapshot()})
             if u.path == "/api/geocode":
                 try:
                     q = urllib.parse.parse_qs(u.query).get("q", [""])[0]
