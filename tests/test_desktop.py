@@ -65,3 +65,11 @@ def test_data_comes_only_from_data_dir_and_range_works(srv):
 def test_no_path_traversal(srv):
     _, port, _ = srv
     assert call(port, "/tiles/..%2f..%2fetc%2fpasswd")[0] == 404
+
+
+def test_use_certifi_sets_bundle_and_respects_user_value(monkeypatch):
+    monkeypatch.delenv("SSL_CERT_FILE", raising=False)
+    path = desktop.use_certifi()
+    assert path and path.endswith("cacert.pem") and desktop.os.environ["SSL_CERT_FILE"] == path
+    monkeypatch.setenv("SSL_CERT_FILE", "/etc/eigenes.pem")
+    assert desktop.use_certifi() == "/etc/eigenes.pem"

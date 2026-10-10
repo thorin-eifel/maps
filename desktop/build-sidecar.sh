@@ -22,7 +22,7 @@ mkdir -p "${WORK}/web"
 rsync -a --exclude 'data/' --exclude 'tiles/' "${ROOT}/web/" "${WORK}/web/"
 SEP=":"; [[ "${TRIPLE}" == *windows* ]] && SEP=";"
 ( cd "${ROOT}" && "${PY}" -m PyInstaller --onefile --name osint-core --distpath "${WORK}/dist" --workpath "${WORK}/build" --specpath "${WORK}" \
-    --paths "${ROOT}" --collect-submodules app --collect-data app \
+    --paths "${ROOT}" --collect-submodules app --collect-data app --collect-data certifi \
     --add-data "${WORK}/web${SEP}web" --add-data "${ROOT}/sources.yaml${SEP}." app/desktop.py )
 cp "${WORK}/dist/osint-core${EXT}" "${BIN}/osint-core-${TRIPLE}${EXT}"
 
