@@ -165,8 +165,12 @@ class App:
         self.later.start()
 
 
+PROJECT_URL = "https://github.com/thorin-eifel/maps"
+
+
 def ua() -> str:
-    return f"WasIstLosBeiUns/1.0 (+{os.environ.get('OSINT_CONTACT', 'kontakt@example.invalid')})"
+    """User-Agent mit Kontakt. Ohne OSINT_CONTACT der Projektlink: Nominatim weist Platzhalteradressen (example.invalid) mit 403 ab."""
+    return f"WasIstLosBeiUns/1.0 (+{os.environ.get('OSINT_CONTACT') or PROJECT_URL})"
 
 
 def geocode(q: str) -> list[dict]:
