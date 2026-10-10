@@ -27,7 +27,7 @@ export function applyBasemap() {
     .map((x) => (coreOk && (x.id === 'buildings' || x.id === 'address_label') ? { ...x, source: 'basemap-core' } : x));   // Gebäude und Hausnummern aus dem Zoom-15-Kern
   // eigene Flächen- und Geländeebenen gleich hinter dem Landnutzungs-Layer des Stils (unter Wasser, Straßen und Relief-Linien)
   const at = styled.findIndex((x) => x.id === 'landuse_park');
-  styled.splice(at >= 0 ? at + 1 : 0, 0, ...landUseLayers(dark, map.hasImage('cliff-tick')));
+  styled.splice(at >= 0 ? at + 1 : 0, 0, ...landUseLayers(dark, map.hasImage('cliff-tick'), !!map.getSource('rlp-grenze')));
   waterEdges(styled, dark);
   styled.push(...peakLayers(dark, map.hasImage('peak-tri')));   // Gipfel oben auf den Beschriftungen des Stils
   if (med) styled = medievalize(styled);
@@ -162,7 +162,7 @@ export function applyBaseToggles() {
     else if (/^bm-land-protected-nr-/.test(l.id)) key = 'protNature';
     else if (/^bm-land-protected-np-/.test(l.id)) key = 'protPark';
     else if (/^bm-land-military-/.test(l.id)) key = 'protMil';
-    else if (/^bm-land-bound-/.test(l.id)) key = BOUND_KEY[l.id.slice('bm-land-bound-'.length)];
+    else if (/^bm-land-bound-/.test(l.id)) key = BOUND_KEY[l.id.slice('bm-land-bound-'.length).replace(/-(rlp|glow\d)$/, '')];
     else if (l.id.startsWith('bm-land-')) key = LAND_KEY[l.id.slice('bm-land-'.length).replace(/-pat$/, '')];
     else if (/^bm-buildings(-line)?(-ring)?$/.test(l.id)) key = 'buildings';
     else if (l.id.startsWith('bm-sign-')) key = 'signs';

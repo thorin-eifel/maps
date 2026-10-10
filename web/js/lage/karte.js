@@ -214,6 +214,7 @@ export async function setupBasemap() {
     protocol.add(archive);
     addProtocol('pmtiles', protocol.tile);
     map.addSource('basemap', { type: 'vector', url: `pmtiles://${url}` });
+    map.addSource('rlp-grenze', { type: 'geojson', data: new URL('geo/rlp.geojson', location.href).href });   // Landesgrenze Rheinland-Pfalz (tools/build_landesgrenze.py)
     // Weinberge und Obstanlagen fehlen in den Kacheln: eigene Flächen aus data/anbau.json (OpenStreetMap, wöchentlich), Schalter "Obst und Wein"
     map.addSource('anbau', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
     (state.zellen ? Promise.resolve(null) : getJSON('data/anbau.json')).then((j) => { if (Array.isArray(j?.features)) map.getSource('anbau')?.setData(j); }).catch(() => {});
