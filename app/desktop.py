@@ -112,7 +112,7 @@ class App:
                 with urllib.request.urlopen(urllib.request.Request("https://build-metadata.protomaps.dev/builds.json", headers={"User-Agent": ua()}), timeout=30) as r:
                     bid = tilebuild.latest_build(lambda _u: r.read())
                 tilebuild.build(s["lat"], s["lon"], self.data_dir / "tiles", self.pmtiles, bid,
-                                progress=lambda i, n, m: self.job.set("tiles", m, 5 + int(60 * i / n)))
+                                progress=lambda i, n, m, frac=0.0: self.job.set("tiles", m, 5 + int(60 * frac)))
             while True:
                 self.job.set("collect", "Daten werden abgerufen", 70)
                 if self._run(["app.collect", "--once"], s) != 0:
