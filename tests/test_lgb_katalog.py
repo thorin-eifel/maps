@@ -59,3 +59,47 @@ def test_katalogdatei_stimmt_mit_gruppen_ueberein():
         assert [s["id"] for s in g["services"]] == dienste
     assert doc["lizenz"] == "dl-de/by-2-0" and "{jahr}" in doc["vermerk"]
     assert set(doc["ausgeblendet"]) == lgb.AUSGEBLENDET
+
+
+# ---- tools/build_landesdaten_katalog.py ----
+spec2 = importlib.util.spec_from_file_location("landesdaten_katalog", ROOT / "tools" / "build_landesdaten_katalog.py")
+lad = importlib.util.module_from_spec(spec2)
+spec2.loader.exec_module(lad)
+
+
+def test_basis_url_erzwingt_https_und_entfernt_wms_parameter():
+    assert lad.basis_url("http://geo5.service24.rlp.de/wms/x.fcgi?") == "https://geo5.service24.rlp.de/wms/x.fcgi"
+    assert lad.basis_url("https://h.de:443/cgi-bin/mapserv?map=/data/a.map&SERVICE=WMS&REQUEST=GetCapabilities") == "https://h.de/cgi-bin/mapserv?map=/data/a.map"
+    assert lad.basis_url("ftp://h.de/x") is None
+
+
+def test_mit_params_trennzeichen():
+    assert lad.mit_params("https://h/x", "A=1") == "https://h/x?A=1"
+    assert lad.mit_params("https://h/x?map=a", "A=1") == "https://h/x?map=a&A=1"
+    assert lad.mit_params("https://h/x?", "A=1") == "https://h/x?A=1"
+
+
+def test_anbieter_nur_landesstellen():
+    assert lad.anbieter_von("Landesamt für Vermessung und Geobasisinformationen")[0] == "Landesamt für Vermessung"
+    assert lad.anbieter_von("Verbandsgemeinde Südeifel") is None
+    assert lad.anbieter_von("Stadt Trier") is None
+    assert lad.anbieter_von("Ortsgemeinde Glees") is None
+
+
+def test_nacktes_und_wird_maskiert_und_fertiges_bleibt():
+    kaputt = b'<a href="x?a=1&b=2&amp;c=3&#38;d=4"/>'
+    assert lad.repariere(kaputt) == b'<a href="x?a=1&amp;b=2&amp;c=3&#38;d=4"/>'
+
+
+def test_crs_kleinschreibung_wird_akzeptiert():
+    xml = FIX.read_text(encoding="utf-8").replace("<CRS>EPSG:3857</CRS>", "<CRS>epsg:3857</CRS>")
+    assert lgb.parse_capabilities(xml.encode("utf-8"), "mc_x")["layers"]
+
+
+def test_katalogdatei_ist_stimmig():
+    d = json.loads((ROOT / "web/geo/landesdaten.json").read_text(encoding="utf-8"))
+    assert d["lizenz_geprueft"] is False and d["groups"]
+    assert not set(d["hosts"]) & lad.OHNE_CORS and "mapserver.lgb-rlp.de" not in d["hosts"]
+    for g in d["groups"]:
+        for s in g["services"]:
+            assert s["url"].startswith("https://") and s["lizenz"] and s["vermerk"]

@@ -58,3 +58,10 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 - GetFeatureInfo (Objektabfrage per Klick) und Legenden fehlen bewusst; beides wären weitere Abrufe beim Dritten.
 - "Cross Compliance Erosion" ist auf der Onlinekarten-Seite des LGB gelistet, hat aber keinen WMS in der OGC-Liste; Rückfrage beim LGB, ob es einen gibt.
 
+## Aus Landesdaten (Okt. 2026)
+
+- Lizenzen und Betreiber je Dienst stammen aus dem Geoportal und sind nicht einzeln gelesen; `lizenz_geprueft` bleibt false, Endabnahme steht aus.
+- Statistisches Landesamt (64 Dienste), SGD Nord ROK und LANIS fehlen, weil die Zertifikatsprüfung in der Bauumgebung scheiterte. Erneut bauen von einem Rechner mit vollständigem Zertifikatsspeicher; falls die Ketten wirklich unvollständig sind, beim Betreiber melden.
+- Kommunale Dienste (Stadt Trier, Verbandsgemeinden) sind nicht aufgenommen; Entscheidung: nur Landesstellen. Spätere Erweiterung wäre ein dritter Katalog, nicht eine Mischung.
+- Dienste nur mit WMS 1.1.1 (13 im Geoportal selbst, u. a. Forsten) fehlen; ein 1.1.1-Pfad wäre ein eigener Parser und eigene Kachelanfragen.
+- Der Katalog ist ein Stand; Pflege wie bei `lgb.json`: Neubau bei jedem Release.

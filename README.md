@@ -70,9 +70,9 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 
 ### Zahlen
 
-- Quellen im Register: 43, davon aktiv: 40
+- Quellen im Register: 44, davon aktiv: 40
 - Sammler (Module in `app/collectors/`): 43
-- Tests: 404 Python, 66 JavaScript
+- Tests: 410 Python, 71 JavaScript
 
 ### Quellen und Lizenzen
 
@@ -121,6 +121,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 | `irceline` | IRCEL-CELINE | CC BY 4.0 (nach Kenntnisstand) | 30 min | ja |
 | `kmi_stationen` | KMI-Stationen | CC BY 4.0 (nach Kenntnisstand) | 30 min | ja |
 | `lgb_wms` | LGB Daten | Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0) | 1 h | ja |
+| `landesdaten_wms` | Landesdaten | je Dienst, überwiegend Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0); daneben dl-de/zero-2-0, CC BY 3.0/4.0, ODbL 1.0 | 1 h | ja |
 
 Vollständig mit Namensnennung: `sources.yaml` und die Seite „Quellen und Lizenzen“ der Anwendung.
 

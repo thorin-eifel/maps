@@ -107,7 +107,7 @@ def parse_capabilities(xml: bytes, dienst: str) -> dict:
     top = root.find("w:Capability/w:Layer", NS)
     if top is None:
         raise ValueError(f"{dienst}: keine Ebenen im Dokument")
-    crs = {c.text for c in top.findall("w:CRS", NS)}
+    crs = {(c.text or "").strip().upper() for c in top.findall("w:CRS", NS)}   # manche Dienste schreiben "epsg:3857"
     if "EPSG:3857" not in crs:
         raise ValueError(f"{dienst}: EPSG:3857 nicht angeboten ({sorted(crs)[:6]})")
     smin, smax = _scale(top, "MinScaleDenominator", None), _scale(top, "MaxScaleDenominator", None)
