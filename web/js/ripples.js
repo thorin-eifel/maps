@@ -54,7 +54,10 @@ export function vignetteFactor(distKm, radiusKm, fadeKm) {
   return 1 - t * t * (3 - 2 * t);
 }
 
-export function createRipples(map, { center, radiusKm, fadeKm, onSizzle = null }) {
+export function createRipples(map, { center, radiusKm, fadeKm, vig = null, onSizzle = null }) {
+  // Ausblendfaktor am Ort: entlang der Landesgrenze (vig) oder als Kreis um die Mitte (Aufruf mit lon/lat)
+  const cosC = Math.cos((center.lat * Math.PI) / 180);
+  const vf = vig ?? ((lon, lat) => vignetteFactor(Math.hypot((lon - center.lon) * cosC * 111.32, (lat - center.lat) * 110.57), radiusKm, fadeKm));
   const host = map.getContainer();
   const canvas = document.createElement('canvas');
   canvas.className = 'ripples';
@@ -222,14 +225,12 @@ export function createRipples(map, { center, radiusKm, fadeKm, onSizzle = null }
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     ctx.clearRect(0, 0, w, h);
     const dark = document.documentElement.dataset.ansicht === 'dunkel';
-    const cosLat = Math.cos((center.lat * Math.PI) / 180);
     let burned = 0;                                          // Treffer des Lasers in diesem Bild (für das Zischen)
     for (let i = drops.length - 1; i >= 0; i--) {
       const d = drops[i], age = now - d.born, t = age / d.life;
       if (t >= 1) { drops.splice(i, 1); continue; }
-      const dx = (d.lon - center.lon) * cosLat * 111.32, dy = (d.lat - center.lat) * 110.57;
-      const vf = vignetteFactor(Math.hypot(dx, dy), radiusKm, fadeKm);
-      if (vf < 0.02) continue;
+      const vfd = vf(d.lon, d.lat);
+      if (vfd < 0.02) continue;
       const p = map.project([d.lon, d.lat]);
       if (crossed && age >= 0 && crossed(bearing(p))) {      // vom Laser getroffen: Ring weg, Dampf steigt auf
         drops.splice(i, 1); burned++;
@@ -242,7 +243,7 @@ export function createRipples(map, { center, radiusKm, fadeKm, onSizzle = null }
       if (age < 0) {                                          // zurückkehrender Regen: erst ein Fallstrich von oben
         const s0 = Math.min(1, -age / (d.fallMs || FALL_MS)), hy = p.y - 30 * zoomScale * s0;
         const sx = 30 * zoomScale * (d.slant || 0) * s0;       // Regen kommt mit dem Wind schräg herab: Fallweg liegt luvseitig
-        ctx.globalAlpha = Math.min(1, vf * 0.85); ctx.lineWidth = 1.4 + d.inten;
+        ctx.globalAlpha = Math.min(1, vfd * 0.85); ctx.lineWidth = 1.4 + d.inten;
         ctx.beginPath(); ctx.moveTo(p.x - sx - (d.slant || 0) * 9, hy - 9); ctx.lineTo(p.x - sx, hy); ctx.stroke();
         continue;
       }
@@ -250,7 +251,7 @@ export function createRipples(map, { center, radiusKm, fadeKm, onSizzle = null }
         const tt = t - ring * 0.22;
         if (tt <= 0 || tt >= 1) continue;
         const rx = 1 + d.rmax * (1 - (1 - tt) ** 2);   // schnell auf, dann ruhig aus
-        ctx.globalAlpha = Math.min(1, vf * (1 - tt) ** 1.3 * (0.5 + 0.5 * d.inten));
+        ctx.globalAlpha = Math.min(1, vfd * (1 - tt) ** 1.3 * (0.5 + 0.5 * d.inten));
         ctx.lineWidth = 1.1 + d.inten * 1.3;
         ctx.beginPath();
         ctx.ellipse(p.x, p.y, rx, rx * 0.55, 0, 0, Math.PI * 2);
@@ -283,8 +284,7 @@ export function createRipples(map, { center, radiusKm, fadeKm, onSizzle = null }
         wpx = (wv.u * eff) / mpp; wpy = -(wv.v * eff) / mpp;                   // Bildschirmrichtung der Drift (Pixel je Sekunde)
         sp.slant = Math.max(-0.7, Math.min(0.7, wv.u * 0.06));
       }
-      const dxs = (sp.lon - center.lon) * cosLat * 111.32, dys = (sp.lat - center.lat) * 110.57;
-      const vfs = vignetteFactor(Math.hypot(dxs, dys), radiusKm, fadeKm);
+      const vfs = vf(sp.lon, sp.lat);
       if (vfs < 0.02) continue;
       const p = map.project([sp.lon, sp.lat]);
       const rise = 44 * zoomScale * (1 - (1 - t) ** 2), size = sp.size * (0.7 + 1.1 * t);
