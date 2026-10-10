@@ -131,3 +131,19 @@ def test_export_time_budget_with_realistic_volume(storage, registry, tmp_path):
     t = time.monotonic()
     export.run_export(storage, registry, tmp_path)
     assert time.monotonic() - t < 60
+
+
+def test_events_and_warnband_carry_kreis_and_land(storage, registry, tmp_path):
+    storage.replace_snapshot("autobahn", [
+        mk("irrel", [6.45, 49.85], sev="warning"),      # Eifelkreis Bitburg-Prüm
+        mk("lux", [6.13, 49.61], sev="warning"),        # Stadt Luxemburg, kein deutscher Kreis
+    ])
+    export.run_export(storage, registry, tmp_path)
+    feats = {f["id"]: f["properties"] for c in ("12_99",) for f in load(tmp_path, f"z/{c}/events.json")["features"]}
+    assert feats["autobahn:irrel"]["ars"] == "07232" and feats["autobahn:irrel"]["land"] == "DE-RP"
+    assert feats["autobahn:lux"]["ars"] is None
+    start = load(tmp_path, "start.json")
+    wb = {w["id"]: w for w in start["warnband"]}
+    assert wb["autobahn:irrel"]["ars"] == "07232"
+    assert wb["autobahn:lux"]["ars"] is None
+    assert any(k["ars"] == "07232" and k["name"] and k["land"] for k in start["kreise"]) and len(start["kreise"]) > 100
