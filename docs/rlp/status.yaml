@@ -7,6 +7,6 @@ phasen:
   - { id: R2, name: Kartenbasis,                    stand: fertig,        pr: 3 }
   - { id: R3, name: Datenpipeline,                  stand: fertig,        pr: 4 }
   - { id: R4, name: Export und Auslieferung,        stand: fertig,        pr: 5 }
-  - { id: R5, name: Frontend,                       stand: in Arbeit }
+  - { id: R5, name: Frontend,                       stand: wartet auf Freigabe, pr: 11 }
   - { id: R6, name: Betrieb und Härtung,            stand: offen }
   - { id: R7, name: Abnahme,                        stand: offen }

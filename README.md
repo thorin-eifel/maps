@@ -62,7 +62,7 @@ Die ursprüngliche Projektanweisung steht in `docs/projektanweisung.md` (CTW-Bez
 | R2 | Kartenbasis | fertig | [#3](https://github.com/thorin-eifel/maps/pull/3) |
 | R3 | Datenpipeline | fertig | [#4](https://github.com/thorin-eifel/maps/pull/4) |
 | R4 | Export und Auslieferung | fertig | [#5](https://github.com/thorin-eifel/maps/pull/5) |
-| R5 | Frontend | in Arbeit |  |
+| R5 | Frontend | wartet auf Freigabe | [#11](https://github.com/thorin-eifel/maps/pull/11) |
 | R6 | Betrieb und Härtung | offen |  |
 | R7 | Abnahme | offen |  |
 
