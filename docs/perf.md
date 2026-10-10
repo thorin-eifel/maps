@@ -33,6 +33,24 @@ Was diese Messung nicht abdeckt:
 - Die Tauri-Hülle wurde nicht gemessen (Chrome, nicht die App).
 - Der Bildtakt begrenzt nach oben: wie viel Luft unter 16,7 ms bleibt, zeigt diese Messung nicht.
 
+### Dieselbe Messung mit den RLP-Archiven und dem RLP-Datenbestand (Mac, M4, Chrome mit GPU)
+
+Kartenarchive für Rheinland-Pfalz plus 80 km aus dem R2-Bau (`region` 413 MB, `ring` 368 MB, `core` 130 MB, Höhenmodell 676 MB), dazu der synthetische RLP-Bestand
+(`tools/synth_rlp.py`, 75 Zellen, rund 4,4 MB Ereignisse). Zoom 8 / 12 / 15 je Messpunkt, `--gpu --frames 60`.
+
+| Ort | Bildintervall Mittel ms (Zoom 8 / 12 / 15) | P95 ms | geladene MB |
+|---|---|---|---|
+| Mainz | 16,7 / 16,7 / 16,7 | 17,6 / 17,3 / 17,6 | 4,3 / 3,2 / 3,2 |
+| Trier | 16,7 / 16,7 / 16,7 | 17,6 / 17,6 / 17,7 | 3,9 / 1,8 / 1,8 |
+| Kaiserslautern | 16,7 / 16,7 / 16,7 | 17,7 / 17,7 / 17,7 | 4,3 / 2,0 / 2,0 |
+| Saarbrücken | 16,7 / 16,7 / 16,7 | 17,6 / 17,7 / 17,7 | 3,0 / 2,1 / 2,1 |
+| Frankfurt | 16,7 / 16,7 / 16,7 | 17,7 / 17,7 / 17,7 | 3,1 / 1,9 / 1,9 |
+| Luxemburg | 16,7 / 16,7 / 16,6 | 17,6 / 17,6 / 17,7 | 3,2 / 1,5 / 1,5 |
+| Gesamtansicht (Zoom 7,6) | 16,7 | 17,4 | 0 |
+
+Auch hier liegt alles auf dem Bildschirmtakt: **60 fps an allen sechs Messpunkten, bei allen drei Zoomstufen und in der Gesamtansicht**, bei vollem RLP-Archiv und RLP-großem Datenbestand.
+Offen bleiben die Tauri-Hülle, ein Gestentest mit echtem Schwenken und der Abstand unter dem Bildtakt. Die Daten sind synthetisch; mit echten Sammlerdaten für ganz RLP (erst ab R3-Betrieb) ist erneut zu messen.
+
 ## Ladelast (belastbar)
 
 Fenster 1400 × 900. „Dateien“ sind gehaltene Zellendateien nach dem Sprung, „MB“ deren Größe laut Manifest (unkomprimiert; der Webspace liefert gzip aus).
@@ -84,7 +102,7 @@ nicht der Engpass ist. Es ersetzt keine Messung mit GPU.
 
 ## Offen
 
-- 60 fps mit den Archiven und dem Datenbestand für ganz RLP sowie in der Tauri-Hülle.
+- 60 fps in der Tauri-Hülle, mit echten Sammlerdaten für ganz RLP und im Gestentest.
 - Größe des Suchindex mit echten RLP-Namen (Rechenzeit gemessen, siehe unten).
 
 ## Suche über die ganze Fläche (Rechenzeit)
