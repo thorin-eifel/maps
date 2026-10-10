@@ -1,0 +1,39 @@
+{
+  "_hinweis": "Redaktionelle Auswahl der Kartenebenen für die Menüs \"LGB Daten\" und \"Landesdaten\" (je 16). Maßstab der Auswahl: Information, die die Karte noch nicht aus anderen Quellen hat (Basiskarte, OSM-Ebenen, Hochwasser-Pegel, EMSC-Beben, ODL, Wetter …), keine Dubletten in der Sache, kein Personenbezug. Verworfenes und Gründe: docs/betrieb.md. Anwendung: build_lgb_katalog.py / build_landesdaten_katalog.py (--alle schreibt den vollen Katalog).",
+  "lgb": [
+    {"dienst": "mc_guek300", "ebene": "geologische_uebersichtskarte300"},
+    {"dienst": "mc_guek300", "ebene": "stoerungen300"},
+    {"dienst": "mc_gk25", "ebene": "Amtliche_Geologische_Karten"},
+    {"dienst": "mc_bfd50", "ebene": "bodenkarte"},
+    {"dienst": "mc_bfd50", "ebene": "ertragspotential"},
+    {"dienst": "mc_abag", "ebene": "fruchtfolge"},
+    {"dienst": "mc_bfd5w", "ebene": "weinlagen"},
+    {"dienst": "mc_rutschung", "ebene": "Alle_Massenbewegungen"},
+    {"dienst": "mc_hangstabilitaet", "ebene": "Hangstabilitaet"},
+    {"dienst": "mc_erdbeben", "ebene": "Erdbebenzonen"},
+    {"dienst": "mc_aak", "ebene": "aak_gemarkungen"},
+    {"dienst": "mc_huek200", "ebene": "durchlaessigkeit"},
+    {"dienst": "mc_huek200", "ebene": "grundwasserkoerpergrenzen"},
+    {"dienst": "mc_gwo", "ebene": "GwFlurabstand"},
+    {"dienst": "mc_minwa", "ebene": "Mineralwasserquellen"},
+    {"dienst": "mc_ewa_pruef", "ebene": "EWA-Karte"}
+  ],
+  "landesdaten": [
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp3812", "ebene": "Ueberflutungsflaechen_HQ_100"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp3812", "ebene": "Ueberflutungsflaechen_HQ_extrem"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp2857", "ebene": "uesg_gesetzlich"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp3815", "ebene": "Gewaesserstrukturguete"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp1627", "ebene": "BADEGEW_GEOMETRIE"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp4561", "ebene": "twsg_abgegrenzt"},
+    {"gruppe": "Hochwasser und Wasser", "dienst": "gp4561", "ebene": "hqsg_abgegrenzt"},
+    {"gruppe": "Luftbild und Satellit", "dienst": "gp3398", "ebene": "rp_dop20"},
+    {"gruppe": "Luftbild und Satellit", "dienst": "gp4315", "ebene": "rp_dop20_rgb_1994"},
+    {"gruppe": "Luftbild und Satellit", "dienst": "gp4672", "ebene": "sentinel2_202507_cloudless"},
+    {"gruppe": "Historische Karten", "dienst": "gp2915", "ebene": "rp_hktm"},
+    {"gruppe": "Historische Karten", "dienst": "gp2914", "ebene": "rp_hkpk"},
+    {"gruppe": "Höhe und Boden", "dienst": "gp1940", "ebene": "rp_hoeli"},
+    {"gruppe": "Höhe und Boden", "dienst": "gp2919", "ebene": "Wohnbauflaechen"},
+    {"gruppe": "Verkehr", "dienst": "gp3147", "ebene": "Langzeitzaehlstellen_2016"},
+    {"gruppe": "Verkehr", "dienst": "gp2799", "ebene": "Mitfahrerparkplaetze_Standort"}
+  ]
+}

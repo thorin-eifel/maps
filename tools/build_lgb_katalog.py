@@ -12,6 +12,7 @@ Höflichkeit: ein Abruf je Dienst, eine Sekunde Pause, ehrlicher User-Agent. Auf
 Aufruf:     python tools/build_lgb_katalog.py                  schreibt web/geo/lgb.json
             python tools/build_lgb_katalog.py --from-dir DIR   liest DIR/<dienst>.xml statt zu laden (Tests, offline)
             python tools/build_lgb_katalog.py --save-dir DIR   legt die geladenen XML zusätzlich in DIR ab
+            python tools/build_lgb_katalog.py --alle           schreibt den vollen Katalog statt der Auswahl (tools/katalog_auswahl.json)
 Exit:       0 = geschrieben, 1 = Dienst fehlt oder ohne Ebenen
 """
 from __future__ import annotations
@@ -27,6 +28,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import katalog_auswahl as auswahl  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://mapserver.lgb-rlp.de/cgi-bin/"
@@ -128,6 +132,27 @@ def fetch(dienst: str) -> bytes:
         return r.read()
 
 
+def waehle(gruppen: list[dict], eintraege: list[dict]) -> tuple[list[dict], list[tuple[str, str]]]:
+    """Gruppen auf die gewählten Ebenen kürzen; zurück: neue Gruppen und Einträge, die es im Dienst nicht gibt."""
+    gewollt: dict[str, set[str]] = {}
+    for e in eintraege:
+        gewollt.setdefault(e["dienst"], set()).add(e["ebene"])
+    fehlt, out = [], []
+    vorhanden = {s["id"]: auswahl.namen_im_baum(s["layers"]) for g in gruppen for s in g["services"]}
+    for d, namen in gewollt.items():
+        for n in sorted(namen - vorhanden.get(d, set())):
+            fehlt.append((d, n))
+    for g in gruppen:
+        svcs = []
+        for s in g["services"]:
+            if s["id"] in gewollt:
+                s = {**s, "layers": auswahl.kuerze(s["layers"], gewollt[s["id"]])}
+                svcs.append(s)
+        if svcs:
+            out.append({**g, "services": svcs})
+    return out, fehlt
+
+
 def count(layers: list[dict]) -> int:
     return sum((1 if "name" in n else 0) + count(n.get("children", [])) for n in layers)
 
@@ -137,6 +162,7 @@ def main() -> int:
     ap.add_argument("--out", type=Path, default=ROOT / "web/geo/lgb.json")
     ap.add_argument("--from-dir", type=Path)
     ap.add_argument("--save-dir", type=Path)
+    ap.add_argument("--alle", action="store_true", help="vollen Katalog schreiben statt der redaktionellen Auswahl")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     gruppen, fehler = [], 0
@@ -161,6 +187,12 @@ def main() -> int:
         gruppen.append({"id": gid, "title": gname, "services": svcs})
     if fehler:
         return 1
+    if not args.alle:
+        gruppen, fehlt = waehle(gruppen, auswahl.lade("lgb"))
+        if fehlt:
+            for d, e in fehlt:
+                log.error("Auswahl: %s/%s nicht im Dienst", d, e)
+            return 1
     doc = {
         "quelle": "Landesamt für Geologie und Bergbau Rheinland-Pfalz (LGB)",
         "seite": "https://www.lgb-rlp.de/karten-und-produkte/online-karten",

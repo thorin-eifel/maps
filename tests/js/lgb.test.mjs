@@ -38,18 +38,18 @@ const mod = await import('../../web/js/lgb-katalog.js');
     assert.equal(vermerk({ vermerk: '©LGB-RLP {jahr}, dl-de/by-2-0, www.lgb-rlp.de [Daten bearbeitet]' }, 2026), '©LGB-RLP 2026, dl-de/by-2-0, www.lgb-rlp.de [Daten bearbeitet]');
     assert.equal(MAX_AKTIV, 6);
   });
-  test('Katalog: neun Themen wie auf der LGB-Seite, jeder Dienst auf mapserver.lgb-rlp.de, Ebenennamen eindeutig je Dienst', () => {
-    assert.deepEqual(kat.groups.map((g) => g.title), ['Bergbau', 'Boden', 'Erdbeben', 'Geologiedatengesetz', 'Geologie', 'Geothermie', 'Hydrogeologie', 'Ingenieurgeologie', 'Rohstoffgeologie']);
+  test('Katalog: 16 ausgewählte Ebenen in Themen wie auf der LGB-Seite, jeder Dienst auf mapserver.lgb-rlp.de, Ebenennamen eindeutig je Dienst', () => {
+    assert.deepEqual(kat.groups.map((g) => g.title), ['Bergbau', 'Boden', 'Erdbeben', 'Geologie', 'Geothermie', 'Hydrogeologie', 'Ingenieurgeologie']);
     assert.equal(kat.lizenz, 'dl-de/by-2-0');
     for (const g of kat.groups) for (const s of g.services) {
       const ebenen = flacheEbenen(s.layers);
       assert.ok(ebenen.length > 0, s.id);
       assert.equal(new Set(ebenen.map((e) => e.name)).size, ebenen.length, `Namen doppelt in ${s.id}`);
       for (const e of ebenen) assert.doesNotThrow(() => kachelUrl(s, e.name));
-      if (s.id === 'mc_erdbeben') assert.equal(ebenen.length, 6);
+      if (s.id === 'mc_erdbeben') assert.equal(ebenen.length, 1);
     }
     const alle = kat.groups.flatMap((g) => g.services.flatMap((s) => flacheEbenen(s.layers)));
-    assert.equal(alle.length, 222);
+    assert.equal(alle.length, 16);
   });
 }
 
@@ -73,6 +73,10 @@ const mod = await import('../../web/js/lgb-katalog.js');
     const v = vermerke([{ vermerk: '©A {jahr}, x' }, { vermerk: '©A {jahr}, x' }, { vermerk: '©B {jahr}, y' }], { vermerk: '©K {jahr}' }, 2026);
     assert.deepEqual(v, ['©A 2026, x', '©B 2026, y']);
     assert.deepEqual(vermerke([{}], { vermerk: '©K {jahr}' }, 2026), ['©K 2026']);
+  });
+  test('Landesdaten: genau 16 Ebenen, Gruppen nach Redaktion', () => {
+    assert.equal(lad.groups.flatMap((g) => g.services.flatMap((s) => flacheEbenen(s.layers))).length, 16);
+    assert.deepEqual(lad.groups.map((g) => g.title), ['Hochwasser und Wasser', 'Luftbild und Satellit', 'Historische Karten', 'Höhe und Boden', 'Verkehr']);
   });
   test('Landesdaten: jeder Dienst auf einem Server aus `hosts`, mit Lizenz und Vermerk, Ebenennamen eindeutig, IDs eindeutig', () => {
     assert.equal(lad.lizenz_geprueft, false);

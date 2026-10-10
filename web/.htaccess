@@ -11,7 +11,7 @@ Options -Indexes
 </IfModule>
 
 <IfModule mod_headers.c>
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://mapserver.lgb-rlp.de https://dlrservice.service24.rlp.de https://geo4.service24.rlp.de https://geo5.service24.rlp.de https://geodienste-wasser.rlp-umwelt.de https://lbm-geo.rlp.de https://www.geoportal.rlp.de; connect-src 'self' https://mapserver.lgb-rlp.de https://dlrservice.service24.rlp.de https://geo4.service24.rlp.de https://geo5.service24.rlp.de https://geodienste-wasser.rlp-umwelt.de https://lbm-geo.rlp.de https://www.geoportal.rlp.de; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data: blob: https://mapserver.lgb-rlp.de https://geo4.service24.rlp.de https://geo5.service24.rlp.de https://geodienste-wasser.rlp-umwelt.de https://lbm-geo.rlp.de; connect-src 'self' https://mapserver.lgb-rlp.de https://geo4.service24.rlp.de https://geo5.service24.rlp.de https://geodienste-wasser.rlp-umwelt.de https://lbm-geo.rlp.de; worker-src 'self' blob:; child-src blob:; font-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"
   Header always set X-Content-Type-Options "nosniff"
   Header always set Referrer-Policy "no-referrer"
   Header always set Permissions-Policy "geolocation=(), camera=(), microphone=()"
