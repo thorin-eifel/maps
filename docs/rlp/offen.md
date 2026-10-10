@@ -41,7 +41,7 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 
 ## Aus R5 (Frontend)
 
-- **60 fps:** auf dem Mac (M4, Chrome) mit dem Bestand der alten 120-km-Region gemessen und erreicht (`docs/perf.md`). Offen: Messung mit den Archiven und Daten für ganz RLP und in der Tauri-Hülle.
+- **60 fps:** auf dem Mac (M4, Chrome) erreicht, auch mit den RLP-Archiven und dem synthetischen RLP-Bestand (`docs/perf.md`). Offen: Tauri-Hülle, echte Sammlerdaten für ganz RLP, Gestentest.
 - **Verdichtung** ist eine Zähl-Ebene je Rasterzelle unter Zoom 8 plus Mengenbegrenzung der Einzelmeldungen (`ebenenBudget`), kein MapLibre-Clustering. Pegel und Umweltstationen werden nicht verdichtet, sondern erst ab Zoom 8 geladen; darunter sind die Reiter Gewässer und Umwelt leer.
 - **Dichte-Ebene per Tastatur:** Die Zahlen lassen sich nur mit der Maus anklicken. Ersatz für Tastaturnutzer sind Zoomtasten, der Landkreisfilter und die Tabelle (Warnungen sind auch unter Zoom 8 in der Tabelle).
 - **Länderkennung** außerhalb Deutschlands bleibt `region_tag` des Sammlers; `EU` und ein deutsches Kürzel ohne Kreis ergeben „unbekannt“ und fallen bei gesetztem Filter heraus. Landesgrenzen (Natural Earth) wären die saubere Lösung.
