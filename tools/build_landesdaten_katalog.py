@@ -14,7 +14,7 @@ Auswahl:    Nur Landesstellen (Liste ANBIETER), nur https, nur Dienste, die EPSG
 Höflichkeit: ein Abruf je Dienst, eine Sekunde Pause, ehrlicher User-Agent. Aufruf selten (bei Änderungen am Angebot).
 Aufruf:     python tools/crawl_geoportal.py --out /tmp/open_wms.json         Suche im Geoportal (einmalig, ca. 3 Minuten)
             python tools/build_landesdaten_katalog.py --meta /tmp/open_wms.json
-            python tools/build_landesdaten_katalog.py --meta M.json --from-dir DIR   liest DIR/<id>.xml statt zu laden (Tests, offline)
+            python tools/build_landesdaten_katalog.py --meta M.json --from-dir DIR   liest DIR/<id>.xml, wo vorhanden (Tests, Wiederholung)
             python tools/build_landesdaten_katalog.py --meta M.json --save-dir DIR   legt die geladenen XML zusätzlich in DIR ab
 Exit:       0 = geschrieben
 """
@@ -57,6 +57,8 @@ ANBIETER: list[tuple[str, str, str]] = [
 ]
 # Eigene Menüs oder fremde Länder: nicht hier.
 AUSGESCHLOSSEN_HOSTS = {"mapserver.lgb-rlp.de", "www.wms.nrw.de", "sg.geodatenzentrum.de", "sgx.geodatenzentrum.de"}
+# Server ohne Access-Control-Allow-Origin auf GetMap (am 11.10.2026 geprüft): der Browser darf deren Kacheln nicht in die Karte laden.
+OHNE_CORS = {"map-umgebungslaerm.rlp-umwelt.de", "map.umgebungslaerm.rlp.de", "map-final.rlp-umwelt.de"}
 # Geoportal-Lizenzkennung → (Kurzname, Adresse)
 LIZENZEN = {
     "dl-de-by-2.0": ("dl-de/by-2-0", "https://www.govdata.de/dl-de/by-2-0"),
@@ -131,6 +133,9 @@ def main() -> int:
         pre, titel, name = a
         basis = basis_url(s["getMapUrl"])
         host = up.urlsplit(basis).hostname if basis else ""
+        if host in OHNE_CORS:
+            ausgelassen.append({"geoportal_id": sid, "titel": s["title"], "host": host, "grund": "Server sendet kein CORS (Kacheln im Browser nicht ladbar)"})
+            continue
         if not basis or host in AUSGESCHLOSSEN_HOSTS or s.get("license_id") not in LIZENZEN or str(s.get("isopen")) != "1":
             ausgelassen.append({"geoportal_id": sid, "titel": s["title"], "grund": "Host/Lizenz/Adresse nicht zugelassen"})
             continue
@@ -138,7 +143,7 @@ def main() -> int:
             continue
         gesehen.add(basis)
         try:
-            if args.from_dir:
+            if args.from_dir and (args.from_dir / f"{sid}.xml").exists():   # Zwischenablage: nur Fehlendes wird nachgeladen
                 xml = (args.from_dir / f"{sid}.xml").read_bytes()
             else:
                 xml = fetch(basis)

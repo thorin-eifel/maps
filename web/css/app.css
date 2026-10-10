@@ -721,6 +721,7 @@ body.einrichtung .klein { font-size: .8rem; }
 .lgb-dienst-titel { font-size: 0.85em; color: var(--fg-muted); padding-left: var(--space-3); }
 .lgb-dienst details > summary { cursor: pointer; font-size: 0.9em; padding-left: var(--space-3); }
 .lgb-lizenz { margin-top: var(--space-2); }
-.lgb-vermerk { position: absolute; left: var(--space-2); bottom: var(--space-2); z-index: 2; margin: 0; padding: 2px 6px; background: color-mix(in srgb, var(--bg-elevated) 85%, transparent); color: var(--fg); border-radius: 4px; max-width: calc(100% - 2 * var(--space-2)); }
+.lgb-vermerke { position: absolute; left: var(--space-2); bottom: var(--space-2); z-index: 2; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; max-width: calc(100% - 2 * var(--space-2)); }
+.lgb-vermerk { margin: 0; padding: 2px 6px; background: color-mix(in srgb, var(--bg-elevated) 85%, transparent); color: var(--fg); border-radius: 4px; }
 .lgb-vermerk[hidden] { display: none; }
 .lgb-vermerk a { color: inherit; }

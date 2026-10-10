@@ -52,3 +52,50 @@ const mod = await import('../../web/js/lgb-katalog.js');
     assert.equal(alle.length, 222);
   });
 }
+
+// ---- Katalog "Landesdaten" (web/geo/landesdaten.json) und mehrere erlaubte Server ----
+{
+  const { kachelUrl, flacheEbenen, layerId, vermerke } = mod;
+  const lad = JSON.parse(readFileSync(new URL('../../web/geo/landesdaten.json', import.meta.url)));
+  const html = readFileSync(new URL('../../web/index.html', import.meta.url), 'utf8');
+  const htaccess = readFileSync(new URL('../../web/.htaccess', import.meta.url), 'utf8');
+
+  test('Kachel-URL mit erlaubter Serverliste: fremde Server und http werden abgelehnt, vorhandene Parameter bleiben', () => {
+    const hosts = ['geo4.service24.rlp.de'];
+    const u = kachelUrl({ url: 'https://geo4.service24.rlp.de/wms/x.fcgi?map=/data/a.map' }, 'e', hosts);
+    assert.match(u, /^https:\/\/geo4\.service24\.rlp\.de\/wms\/x\.fcgi\?map=\/data\/a\.map&SERVICE=WMS/);
+    assert.throws(() => kachelUrl({ url: 'https://geo5.service24.rlp.de/wms/x' }, 'e', hosts));
+    assert.throws(() => kachelUrl({ url: 'http://geo4.service24.rlp.de/wms/x' }, 'e', hosts));
+    assert.throws(() => kachelUrl({ url: 'https://mapserver.lgb-rlp.de/cgi-bin/x' }, 'e', hosts));
+  });
+  test('Ebenen-ID mit Vorsatz, Vermerke ohne Dubletten', () => {
+    assert.match(layerId({ id: 'gp12' }, 'a b', 'lad'), /^lad-gp12-a_b$/);
+    const v = vermerke([{ vermerk: '©A {jahr}, x' }, { vermerk: '©A {jahr}, x' }, { vermerk: '©B {jahr}, y' }], { vermerk: '©K {jahr}' }, 2026);
+    assert.deepEqual(v, ['©A 2026, x', '©B 2026, y']);
+    assert.deepEqual(vermerke([{}], { vermerk: '©K {jahr}' }, 2026), ['©K 2026']);
+  });
+  test('Landesdaten: jeder Dienst auf einem Server aus `hosts`, mit Lizenz und Vermerk, Ebenennamen eindeutig, IDs eindeutig', () => {
+    assert.equal(lad.lizenz_geprueft, false);
+    assert.ok(lad.hosts.length > 0 && lad.groups.length > 0);
+    const ids = new Set();
+    for (const g of lad.groups) for (const s of g.services) {
+      assert.ok(!ids.has(s.id), `Dienst doppelt: ${s.id}`); ids.add(s.id);
+      assert.ok(s.lizenz && s.betreiber && s.vermerk.includes('{jahr}'), s.id);
+      const e = flacheEbenen(s.layers);
+      assert.ok(e.length > 0, s.id);
+      assert.equal(new Set(e.map((x) => x.name)).size, e.length, `Namen doppelt in ${s.id}`);
+      for (const x of e) assert.doesNotThrow(() => kachelUrl(s, x.name, lad.hosts), s.id);
+    }
+  });
+  test('Jeder Server des Katalogs steht in der CSP von index.html und .htaccess (img-src und connect-src)', () => {
+    for (const quelle of [html, htaccess]) {
+      for (const dir of ['img-src', 'connect-src']) {
+        const teil = quelle.match(new RegExp(`${dir}[^;]*`))[0];
+        for (const h of lad.hosts) assert.ok(teil.includes(`https://${h}`), `${h} fehlt in ${dir}`);
+      }
+    }
+  });
+  test('Seite hat beide Menüs mit allen Elementen', () => {
+    for (const v of ['lgb', 'lad']) for (const id of ['gruppe', 'hinweis', 'ok', 'nein', 'deckkraft', 'aus', 'status', 'menu', 'vermerk']) assert.ok(html.includes(`id="${v}-${id}"`), `${v}-${id}`);
+  });
+}

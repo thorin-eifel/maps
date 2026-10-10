@@ -990,3 +990,27 @@ sources:
     aktiv: true
     zuletzt_geprüft: "2026-10-10"
     art: client
+
+  - id: landesdaten_wms
+    name: "Landesdaten: offene Kartendienste der Landesstellen Rheinland-Pfalz aus dem Geoportal RLP (WMS)"
+    kurzname: Landesdaten
+    betreiber: Landesstellen Rheinland-Pfalz (Landesamt für Vermessung und Geobasisinformationen, Landesamt für Umwelt, Ministerium, LBM, DLR u. a.)
+    url: https://www.geoportal.rlp.de/search/
+    lizenz: je Dienst, überwiegend Datenlizenz Deutschland – Namensnennung – Version 2.0 (dl-de/by-2-0); daneben dl-de/zero-2-0, CC BY 3.0/4.0, ODbL 1.0
+    lizenz_geprueft: false
+    lizenz_hinweis: >-
+      Lizenzkennung und Betreiber je Dienst stammen aus der Geoportal-Suche (restrictToOpenData=true), Stand 11.10.2026; die Nutzungsbedingungen der
+      einzelnen Betreiber sind nicht einzeln gelesen. Rechtliche Endabnahme steht aus. Datenschutz: Die Kartenbilder lädt der Browser der Besucherin
+      direkt von den Servern der Landesstellen (IP-Adresse geht an den jeweiligen Betreiber), deshalb erst nach ausdrücklicher Bestätigung. Der Katalog
+      (web/geo/landesdaten.json) kommt aus der Geoportal-Suche (tools/crawl_geoportal.py) und den GetCapabilities der Dienste
+      (tools/build_landesdaten_katalog.py); die Seite fragt beides nie ab. Nicht enthalten: Kommunen, Dienste ohne WMS 1.3.0 oder EPSG:3857, Server ohne CORS,
+      Server mit unvollständiger Zertifikatskette (u. a. Statistisches Landesamt), Liste mit Grund im Katalog (`ausgelassen`).
+    namensnennung: "© <Betreiber> <Jahr>, <Lizenz> [Daten bearbeitet] (je Dienst im Katalog)"
+    intervall: 3600
+    ratenlimit: nicht veröffentlicht; Besucherseite lädt nur GetMap-Kacheln, höchstens sechs Ebenen gleichzeitig je Menü, nur für eingeschaltete Ebenen
+    auth: keine
+    geo_bezug: Rheinland-Pfalz (Dienste liefern auch außerhalb Bilder, meist leer)
+    datenschutz_risiko: mittel
+    aktiv: true
+    zuletzt_geprüft: "2026-10-11"
+    art: client
