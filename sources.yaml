@@ -347,6 +347,8 @@ sources:
     intervall: 1800
     ratenlimit: 5000 Transaktionen je 10 Minuten laut Dokumentation; drei Abrufe alle 30 Minuten
     auth: MAP_KEY (kostenlos, in .env als FIRMS_MAP_KEY)
+    zugang:
+      - {env: FIRMS_MAP_KEY, art: schluessel, bezeichnung: MAP_KEY}
     geo_bezug: Bounding-Box-Abfrage der letzten 2 Tage, Feinfilter auf die Region am Rand
     datenschutz_risiko: niedrig
     aktiv: true
@@ -711,6 +713,8 @@ sources:
     intervall: 120
     ratenlimit: Betreiber begrenzt auf einen Request je Minute (Stand 2026-10-09); der Collector fragt je Lauf einen Punkt, alle 2 Minuten, reihum
     auth: API-Schlüssel (kostenlos, in .env als TANKERKOENIG_API_KEY)
+    zugang:
+      - {env: TANKERKOENIG_API_KEY, art: schluessel, bezeichnung: API-Schlüssel}
     geo_bezug: Umkreise von 25 km (Gitter über die deutsche Fläche, bei Irrel-Region fünf Punkte), Feinfilter auf die Region
     datenschutz_risiko: niedrig
     aktiv: true

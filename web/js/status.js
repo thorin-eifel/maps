@@ -1,6 +1,7 @@
 // Status- und Quellenseiten.
 import { $, h, getJSON, fmtDateTime, ageEl, tickAges, statusBadge, initTheme, link } from './util.js';
 import { deriveStatus, overall, exportStale } from './rules.js';
+import { ladeZugang, zugangBox } from './zugang.js';
 
 async function status() {
   const box = $('#status-body');
@@ -35,6 +36,7 @@ async function quellen() {
   const box = $('#quellen-body');
   let d;
   try { d = await getJSON('data/sources.json'); } catch { box.replaceChildren(h('div', { class: 'empty' }, 'API nicht erreichbar.')); return; }
+  const zg = await ladeZugang();   // nur in der Desktop-App; sonst null und keine Eingabefelder
   box.replaceChildren(...d.sources.map((s) => h('section', { class: 'src' },
     h('h2', {}, s.name),
     h('div', { class: 'muted' }, s.betreiber),
@@ -48,7 +50,8 @@ async function quellen() {
       h('dt', {}, 'Zugang'), h('dd', {}, s.auth),
       h('dt', {}, 'Räumlicher Bezug'), h('dd', {}, s.geo_bezug),
       h('dt', {}, 'Datenschutzrisiko'), h('dd', {}, s.datenschutz_risiko),
-      h('dt', {}, 'Zuletzt geprüft'), h('dd', {}, s.zuletzt_geprüft)))));
+      h('dt', {}, 'Zuletzt geprüft'), h('dd', {}, s.zuletzt_geprüft)),
+    zg?.get(s.id) ? zugangBox(zg.get(s.id)) : null)));
   $('#disclaimer').textContent = d.disclaimer;
 }
 

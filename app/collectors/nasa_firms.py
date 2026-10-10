@@ -57,7 +57,7 @@ class NasaFirmsCollector(Collector):
     async def collect(self) -> CollectResult:
         key = os.environ.get(KEY_ENV, "").strip()
         if not key:
-            raise SourceError(f"{KEY_ENV} fehlt (.env, siehe .env.example)")
+            raise SourceError(f"{KEY_ENV} fehlt (.env, siehe .env.example; in der Desktop-App: Quellenübersicht → Zugangsdaten)")
         now = utcnow()
         rows: list[tuple[str, dict]] = []
         failed: list[str] = []

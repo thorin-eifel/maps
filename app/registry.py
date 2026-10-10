@@ -13,6 +13,13 @@ import yaml
 from pydantic import BaseModel, Field
 
 
+class ZugangField(BaseModel):
+    """Ein Zugangsdatum einer Quelle (Schlüssel, Benutzername, Passwort). `env` ist der Name der Umgebungsvariable, die der Collector liest."""
+    env: str = Field(pattern=r"^[A-Z][A-Z0-9_]{2,63}$")
+    art: Literal["schluessel", "benutzername", "passwort"] = "schluessel"
+    bezeichnung: str
+
+
 class SourceEntry(BaseModel):
     id: str
     name: str
@@ -26,6 +33,7 @@ class SourceEntry(BaseModel):
     intervall: int = Field(gt=0, description="Sekunden zwischen zwei Abrufen")
     ratenlimit: str
     auth: str = "keine"
+    zugang: list[ZugangField] = Field(default_factory=list, description="Zugangsdaten, die die Quelle braucht; die Desktop-App legt sie je Quelle lokal ab")
     geo_bezug: str
     datenschutz_risiko: Literal["niedrig", "mittel", "hoch"]
     aktiv: bool = True
@@ -39,7 +47,7 @@ class SourceEntry(BaseModel):
 
     def public(self) -> dict[str, Any]:
         """Felder für die öffentliche Quellenseite (ohne interne Parameter)."""
-        d = self.model_dump(exclude={"params"})
+        d = self.model_dump(exclude={"params", "zugang"})
         return d
 
 
@@ -59,6 +67,10 @@ class Registry:
         if not isinstance(raw, dict) or "sources" not in raw:
             raise ValueError(f"{path}: Schlüssel 'sources' fehlt")
         entries = [SourceEntry(**item) for item in raw["sources"]]
+        envs = [f.env for e in entries for f in e.zugang]
+        dupes = {x for x in envs if envs.count(x) > 1}
+        if dupes:
+            raise ValueError(f"Zugangsvariable bei mehreren Quellen: {sorted(dupes)}")
         if os.environ.get("OSINT_MODE", "oeffentlich").strip().lower() != "privat":
             entries = [e for e in entries if e.nutzung != "privat"]   # im öffentlichen Betrieb gibt es diese Quellen weder als Collector noch auf der Quellenseite
         return cls(entries)

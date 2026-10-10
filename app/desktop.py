@@ -69,7 +69,7 @@ class Job:
 
 
 class App:
-    def __init__(self, data_dir: Path, web_dir: Path, pmtiles: Path, repo_dir: Path) -> None:
+    def __init__(self, data_dir: Path, web_dir: Path, pmtiles: Path, repo_dir: Path, sources_path: Path | None = None) -> None:
         self.data_dir, self.web_dir, self.pmtiles, self.repo_dir = data_dir, web_dir.resolve(), pmtiles, repo_dir
         self.job = Job()
         self.settings_path = data_dir / "settings.json"
@@ -77,6 +77,14 @@ class App:
         self.later_progress_path = data_dir / ".collect-later.json"   # Nachlauf der langsamen Quellen im Hintergrund
         self.worker: threading.Thread | None = None
         self.later: threading.Thread | None = None
+        try:
+            from app.registry import Registry
+            entries = Registry.load(sources_path or repo_dir / "sources.yaml").entries
+        except (OSError, ValueError) as err:   # ohne Register keine Zugangsfelder, der Rest der App läuft
+            log.warning("Quellenregister nicht lesbar, keine Zugangsfelder: %s", err)
+            entries = []
+        from app.zugang import ZugangStore
+        self.zugang = ZugangStore(data_dir / "zugang.json", entries)
         data_dir.mkdir(parents=True, exist_ok=True)
         (data_dir / "data").mkdir(exist_ok=True)
         (data_dir / "tiles").mkdir(exist_ok=True)
@@ -92,6 +100,7 @@ class App:
         e = dict(os.environ)
         e.update(OSINT_CENTER_LAT=str(s["lat"]), OSINT_CENTER_LON=str(s["lon"]), OSINT_DB_PATH=str(self.data_dir / "osint.sqlite"),
                  OSINT_WEB_DIR=str(self.web_dir), OSINT_NO_DOTENV="1")
+        e.update(self.zugang.env())   # Zugangsdaten aus der Quellenübersicht, nur freigegebene Namen
         if progress:
             e["OSINT_PROGRESS_FILE"] = str(progress)
         return e
@@ -237,6 +246,8 @@ def make_handler(app: App, port_box: list[int]):
                 except (OSError, ValueError) as err:
                     log.warning("Ortssuche: %s", err)
                     return self.json({"results": [], "error": "Ortssuche nicht erreichbar"}, 502)
+            if u.path == "/api/zugang":
+                return self.json({"quellen": app.zugang.status()})   # nur gesetzt/nicht gesetzt, nie Werte
             if u.path.startswith("/api/"):
                 return self.json({"error": "unbekannt"}, 404)
             return self.serve_range()
@@ -247,6 +258,8 @@ def make_handler(app: App, port_box: list[int]):
             origin = self.headers.get("Origin")
             if origin and origin not in {f"http://127.0.0.1:{port_box[0]}", f"http://localhost:{port_box[0]}"}:
                 return self.json({"error": "herkunft"}, 403)
+            if self.path == "/api/zugang":
+                return self.post_zugang()
             if self.path != "/api/setup":
                 return self.json({"error": "unbekannt"}, 404)
             try:
@@ -266,6 +279,28 @@ def make_handler(app: App, port_box: list[int]):
             tmp.replace(app.settings_path)
             app.start(s)
             self.json({"ok": True})
+
+        def post_zugang(self) -> None:
+            """{"env": "NAME", "wert": "…"} setzt, {"env": "NAME", "loeschen": true} entfernt. Antworten enthalten nie den Wert."""
+            from app.zugang import ZugangError
+            try:
+                n = int(self.headers.get("Content-Length") or 0)
+                body = json.loads(self.rfile.read(min(n, 4096)) or b"{}")
+                env = body["env"]
+                if not isinstance(env, str):
+                    raise ZugangError("Unbekannte Zugangsvariable")
+                if body.get("loeschen") is True:
+                    app.zugang.delete(env)
+                else:
+                    app.zugang.set(env, body.get("wert"))
+            except ZugangError as err:
+                return self.json({"error": str(err)}, 400)
+            except (ValueError, KeyError, TypeError):
+                return self.json({"error": "Eingabe ungültig"}, 400)
+            except OSError:
+                log.exception("Zugangsdatei nicht schreibbar")
+                return self.json({"error": "Datei im Datenordner nicht schreibbar"}, 500)
+            self.json({"ok": True, "quellen": app.zugang.status()})
 
         def serve_range(self) -> None:
             header, path = self.headers.get("Range"), self.translate_path(self.path)
