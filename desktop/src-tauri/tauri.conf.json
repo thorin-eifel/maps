@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Was ist los bei uns",
+  "productName": "Landblick - RLP",
   "version": "0.1.0",
   "identifier": "de.ctw.osint",
   "build": { "frontendDist": "../dist" },

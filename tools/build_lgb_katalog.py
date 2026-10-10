@@ -31,7 +31,7 @@ from xml.etree import ElementTree as ET
 ROOT = Path(__file__).resolve().parent.parent
 BASE = "https://mapserver.lgb-rlp.de/cgi-bin/"
 NS = {"w": "http://www.opengis.net/wms", "x": "http://www.w3.org/1999/xlink"}
-UA = "WasIstLosBeiUns/1.0 (+https://github.com/thorin-eifel/maps; Katalogabruf, einmalig)"
+UA = "Landblick/1.0 (+https://github.com/thorin-eifel/maps; Katalogabruf, einmalig)"
 log = logging.getLogger("lgb_katalog")
 
 # Gruppen wie auf der LGB-Seite (Reihenfolge der OGC-Dienste-Seite), je Gruppe die Dienstkennungen (cgi-bin/<id>)

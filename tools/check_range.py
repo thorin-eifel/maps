@@ -18,7 +18,7 @@ import sys
 import httpx
 
 log = logging.getLogger("osint.check_range")
-UA = "WasIstLosBeiUns/1.0 (range-check)"
+UA = "Landblick/1.0 (range-check)"
 
 
 def check(url: str, n: int = 16, client: httpx.Client | None = None) -> list[str]:

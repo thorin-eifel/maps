@@ -25,7 +25,7 @@ from pathlib import Path
 
 LOG = logging.getLogger("gewaessernetz")
 ENDPOINT = "https://query.wikidata.org/sparql"
-UA = "WasIstLosBeiUns/1.0 (Gewaessernetz-Tool; kontakt siehe Impressum)"
+UA = "Landblick/1.0 (Gewaessernetz-Tool; kontakt siehe Impressum)"
 MAX_KM = 45.0
 MAX_KM_UNIQUE = 400.0
 TOPS = {"Q584", "Q41986"}   # Rhein, Maas — sonst endet die Kette, wo Wikidata kein "mündet in" mehr kennt

@@ -74,7 +74,7 @@ def statuses(storage: Storage, registry: Registry) -> dict[str, dict[str, Any]]:
 
 def meta_payload(storage: Storage) -> dict[str, Any]:
     return {
-        "name": "Was ist los bei uns?", "version": __version__,
+        "name": "Landblick - RLP", "version": __version__,
         "center": {"lat": config.CENTER_LAT, "lon": config.CENTER_LON, "name": REGION.ref_name},
         "radius_km": REGION.radius_km if REGION.radius_km is not None else REGION.query_radius_km,  # Polygon: umschließender Kreis
         "region": REGION.meta(),
