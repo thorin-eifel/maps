@@ -42,7 +42,7 @@ async function poll() {
     const s = await api('api/state');
     const j = s.job;
     $('bar').hidden = false; $('bar').setAttribute('aria-valuenow', j.pct); $('barfill').style.width = `${j.pct}%`;
-    $('status').textContent = j.msg || '';
+    $('status').textContent = j.msg ? `${j.msg} (${j.pct} %)` : '';
     if (j.phase === 'error') return fehler(`Abbruch: ${j.error}. Beim nächsten Start geht es dort weiter, wo es stand.`);
     if (j.phase === 'ready') { location.href = './'; return; }
   } catch (err) { fehler(err.message); }

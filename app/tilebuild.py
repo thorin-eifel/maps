@@ -13,6 +13,7 @@ import logging
 import math
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Callable
 
@@ -25,6 +26,8 @@ CORE_HALF_LON = 0.56
 RING_KM = 121.0
 LAT_KM = 110.57
 LON_KM = 111.32
+# Erwartete Größe der drei Dateien bei 120 km (Messwerte, MB). Dient nur der Fortschrittsanzeige; wird die Datei größer, wächst die Schätzung mit.
+EXPECTED_MB = {"region.pmtiles": 360, "core.pmtiles": 130, "ring.pmtiles": 210}
 
 
 def region_bbox(lat: float, lon: float, km: float = RADIUS_KM) -> tuple[float, float, float, float]:
@@ -68,19 +71,52 @@ def latest_build(fetch: Callable[[str], bytes]) -> str:
     return sorted(x["key"] for x in data)[-1].split(".")[0]
 
 
-def build(lat: float, lon: float, out: Path, pmtiles: Path, build_id: str, progress: Callable[[int, int, str], None] = lambda *_: None,
+def step_fraction(done_mb: float, current_mb: float, expected_mb: float, total_mb: float) -> float:
+    """Gesamtfortschritt 0..1 aus fertigen MB und der wachsenden Datei. Die Datei zählt höchstens zu 99 %, bis sie wirklich fertig ist."""
+    cur = min(current_mb, expected_mb * 0.99)
+    return max(0.0, min(1.0, (done_mb + cur) / total_mb)) if total_mb > 0 else 0.0
+
+
+def run_watched(cmd: list[str], tmp: Path, on_size: Callable[[float], None], timeout: float, interval: float = 1.0) -> None:
+    """Führt `cmd` aus und meldet jede Sekunde die Größe der entstehenden Datei (MB). Bei Zeitüberschreitung wird abgebrochen."""
+    start = time.monotonic()
+    proc = subprocess.Popen(cmd)
+    try:
+        while True:
+            try:
+                rc = proc.wait(timeout=interval)
+                break
+            except subprocess.TimeoutExpired:
+                on_size((tmp.stat().st_size if tmp.exists() else 0) / 1e6)
+                if time.monotonic() - start > timeout:
+                    raise subprocess.TimeoutExpired(cmd, timeout)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+            proc.wait()
+    if rc != 0:
+        raise subprocess.CalledProcessError(rc, cmd)
+
+
+def build(lat: float, lon: float, out: Path, pmtiles: Path, build_id: str, progress: Callable[..., None] = lambda *_: None,
           threads: int = 2, dry_run: bool = False) -> list[Path]:
-    """Lädt die drei Dateien nach `out`. Fertige Dateien werden übersprungen (wiederaufnehmbar), Teilergebnisse nie stehen gelassen."""
+    """Lädt die drei Dateien nach `out`. Fertige Dateien werden übersprungen (wiederaufnehmbar), Teilergebnisse nie stehen gelassen.
+
+    progress(i, n, text, frac): frac ist der Gesamtfortschritt 0..1 nach geschätzter Größe, text nennt die geladenen MB."""
     if not (build_id.isdigit() and len(build_id) == 8):
         raise ValueError("Build-Datum muss JJJJMMTT sein")
     out.mkdir(parents=True, exist_ok=True)
     steps = plan(lat, lon)
     done: list[Path] = []
+    exp = {name: float(EXPECTED_MB.get(name, 200)) for name, _ in steps}
+    total = sum(exp.values())
+    finished_mb = 0.0
     for i, (name, args) in enumerate(steps):
         target = out / name
         if target.exists():
             done.append(target)
-            progress(i + 1, len(steps), f"{name} vorhanden")
+            finished_mb += exp[name]
+            progress(i + 1, len(steps), f"{name} vorhanden", finished_mb / total)
             continue
         tmp = out / f".{name}.tmp"
         ring = out / ".ring.geojson"
@@ -88,20 +124,25 @@ def build(lat: float, lon: float, out: Path, pmtiles: Path, build_id: str, progr
             ring.write_text(json.dumps(ring_geojson(lat, lon)), encoding="utf-8")
             args = [a.replace("@RING@", str(ring)) for a in args]
         cmd = [str(pmtiles), "extract", f"https://build.protomaps.com/{build_id}.pmtiles", str(tmp), *args, f"--download-threads={threads}"]
-        progress(i, len(steps), f"{name} wird geladen")
+        progress(i, len(steps), f"Karte {i + 1} von {len(steps)} wird geladen", finished_mb / total)
         log.info("%s", " ".join(cmd))
         if dry_run:
             continue
         tmp.unlink(missing_ok=True)
         try:
-            subprocess.run(cmd, check=True, timeout=3 * 3600)
+            def on_size(mb: float, i=i, name=name) -> None:
+                exp[name] = max(exp[name], mb * 1.02)   # Schätzung wächst mit, der Balken läuft nie rückwärts über 99 %
+                progress(i, len(steps), f"Karte {i + 1} von {len(steps)}: {mb:,.0f} MB von etwa {exp[name]:,.0f} MB geladen".replace(",", "."),
+                         step_fraction(finished_mb, mb, exp[name], sum(exp.values())))
+            run_watched(cmd, tmp, on_size, 3 * 3600)
             subprocess.run([str(pmtiles), "show", str(tmp)], check=True, stdout=subprocess.DEVNULL, timeout=120)
             tmp.replace(target)
         finally:
             tmp.unlink(missing_ok=True)
             ring.unlink(missing_ok=True)
         done.append(target)
-        progress(i + 1, len(steps), f"{name} fertig")
+        finished_mb += exp[name]
+        progress(i + 1, len(steps), f"Karte {i + 1} von {len(steps)} fertig", finished_mb / sum(exp.values()))
     return done
 
 
