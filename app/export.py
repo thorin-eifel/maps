@@ -6,6 +6,7 @@ Zweck:      Der Webspace (IONOS) führt kein Python aus. Der Collector läuft au
 Parameter:  --out PFAD   Zielordner (Standard web/data)
             --db PFAD    Datenbank (Standard $OSINT_DB_PATH oder data/osint.sqlite)
 Beispiel:   python -m app.export --out web/data
+Zellen:     standardmäßig zusätzlich manifest.json, start.json und z/<x>_<y>/<art>.json (app/export_cells.py); --no-cells schaltet das ab
 Dateien:    meta.json events.json aircraft.json gewaesser.json wetter.json umwelt.json indizes.json kraftstoff.json themen.json radar.json radar.png blitz.json blitz.png wind.json haltestellen.json landmarks.json infrastruktur.json routen.json anbau.json sakral.json suche.json status.json sources.json
 Schreiben:  je Datei erst *.tmp, dann Umbenennen — kein halbes JSON im Zielordner.
 Datenschutz: Die Dateien enthalten nur Ereignisse, Messwerte und Quellenstatus.
@@ -20,7 +21,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from . import payloads
+from . import export_cells, payloads
 from .config import Settings
 from .db import Storage
 from .registry import Registry
@@ -69,6 +70,42 @@ def build_live(storage: Storage, registry: Registry) -> dict[str, Any]:
     }
 
 
+LEGACY_NAMES = {f"{k}.json" for k in export_cells.KINDS}   # Flachdateien, die die Zellen ersetzen; bleiben bis R5 für das heutige Frontend
+
+
+def serialize(files: dict[str, Any]) -> dict[str, bytes]:
+    return {n: d if isinstance(d, bytes) else json.dumps(d, ensure_ascii=False, separators=(",", ":")).encode("utf-8") for n, d in files.items()}
+
+
+def run_export(storage: Storage, registry: Registry, out: Path, cells: bool = True, legacy: bool = True) -> dict[str, Any]:
+    """Alles schreiben: Zellen, Startpaket, Flachdateien, zuletzt das Manifest. Rückgabe: das Manifest (oder {} ohne Zellen)."""
+    raw_files = serialize(build_all(storage, registry))
+    if not legacy:
+        raw_files = {n: b for n, b in raw_files.items() if n not in LEGACY_NAMES}
+    out.mkdir(parents=True, exist_ok=True)
+    if not cells:
+        write_all(raw_files, out)
+        return {}
+    prev = export_cells.load_state(out)
+    now_iso = payloads.iso(payloads.utcnow())
+    flat = export_cells.flat_payloads(storage, registry)
+    cell_files, info, state = export_cells.build_cell_files(flat, registry, now_iso, prev, out)
+    start_raw = serialize({"start.json": export_cells.build_start(storage, registry, info, flat["events"])})["start.json"]
+    manifest = export_cells.build_manifest(info, raw_files, start_raw, now_iso, storage.data_version(), LEGACY_NAMES if legacy else set())
+    for rel, raw in cell_files.items():
+        old = prev.get("files", {}).get(rel)
+        if not (old and old.get("sha256") == info[rel]["sha256"] and (out / rel).exists()):
+            export_cells.write_atomic(out, rel, raw)
+    write_all(raw_files, out)
+    export_cells.write_atomic(out, "start.json", start_raw)
+    export_cells.remove_stale(out, set(cell_files))
+    export_cells.write_atomic(out, export_cells.STATE_NAME, serialize({"s": {"files": state}})["s"])
+    export_cells.write_atomic(out, "manifest.json", serialize({"m": manifest})["m"])
+    for w in manifest["warnings"]:
+        log.warning("Größenbudget: %s", w)
+    return manifest
+
+
 def write_all(files: dict[str, Any], out: Path) -> dict[str, int]:
     out.mkdir(parents=True, exist_ok=True)
     sizes: dict[str, int] = {}
@@ -87,6 +124,8 @@ def main(argv: list[str] | None = None) -> int:
     settings = Settings.from_env()
     ap.add_argument("--out", default=str(settings.web_dir / "data"))
     ap.add_argument("--db", default=str(settings.db_path))
+    ap.add_argument("--no-cells", action="store_true", help="nur Flachdateien (altes Verhalten)")
+    ap.add_argument("--no-legacy", action="store_true", help="Flachdateien, die die Zellen ersetzen, nicht schreiben (ab R5)")
     args = ap.parse_args(argv)
     logging.basicConfig(level="INFO", format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     db = Path(args.db)
@@ -95,10 +134,17 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     storage = Storage(db, readonly=True)
     try:
-        sizes = write_all(build_all(storage, Registry.load(settings.sources_path)), Path(args.out))
+        manifest = run_export(storage, Registry.load(settings.sources_path), Path(args.out), cells=not args.no_cells, legacy=not args.no_legacy)
     finally:
         storage.close()
-    log.info("Export nach %s: %s", args.out, ", ".join(f"{k} {v // 1024 or 1} KB" for k, v in sizes.items()))
+    if manifest:
+        by_kind: dict[str, int] = {}
+        for i in manifest["files"].values():
+            by_kind[i["kind"]] = by_kind.get(i["kind"], 0) + i["bytes"]
+        log.info("Export nach %s: %d Zellen, %d Dateien; KB je Art: %s", args.out, len(manifest["cells"]), len(manifest["files"]),
+                 ", ".join(f"{k} {v // 1024}" for k, v in sorted(by_kind.items())))
+    else:
+        log.info("Export nach %s (nur Flachdateien)", args.out)
     return 0
 
 

@@ -8,7 +8,7 @@
 # Live:      Quellen mit params.live (Flüge) holt app/live.py in kurzem Takt; OSINT_LIVE=0 legt sie zurück in diesen Zyklus.
 # Ablauf:    1. python -m app.collect --due     ein Fehler einer Quelle stoppt den Rest nicht
 #            2. python -m app.export            immer, damit der Status („nicht erreichbar seit …“) sichtbar wird
-#            3. deploy/publish.sh --data        nur wenn PUBLISH_ENABLED=1
+#            3. deploy/publish.sh --delta       nur geänderte Dateien, nur wenn PUBLISH_ENABLED=1
 # Sperre:    Läuft schon ein Durchlauf, endet dieser sofort (Exit 0). Portabel per mkdir, läuft auf Linux und macOS.
 # Exit:      0 = Export erzeugt (und, falls aktiv, hochgeladen), 1 = Export oder Upload fehlgeschlagen
 # =============================================================================
@@ -47,7 +47,7 @@ if [[ "${OSINT_LIVE:-1}" == "1" ]]; then LIVE_FLAG="--skip-live"; else LIVE_FLAG
 "${PY}" -m app.export || { log "FEHLER: Export fehlgeschlagen"; exit 1; }
 
 if [[ "${PUBLISH_ENABLED:-0}" == "1" ]]; then
-  "${ROOT}/deploy/publish.sh" --data || { log "FEHLER: Upload fehlgeschlagen, nächster Durchlauf versucht es erneut"; exit 1; }
+  "${ROOT}/deploy/publish.sh" --delta || { log "FEHLER: Upload fehlgeschlagen, nächster Durchlauf versucht es erneut"; exit 1; }
 else
   log "Upload aus (PUBLISH_ENABLED != 1)"
 fi

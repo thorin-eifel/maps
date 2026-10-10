@@ -85,7 +85,7 @@ def meta_payload(storage: Storage) -> dict[str, Any]:
 
 def events_payload(
     storage: Storage, registry: Registry, types: list[str] | None = None,
-    within: str = "7d", min_severity: str | None = None, exclude_types: tuple[str, ...] = (),
+    within: str = "7d", min_severity: str | None = None, exclude_types: tuple[str, ...] = (), limit: int = 2000,
 ) -> dict[str, Any]:
     if within not in WINDOWS:
         raise ValueError(f"Unbekanntes Zeitfenster: {within}")
@@ -95,7 +95,7 @@ def events_payload(
         bad = [t for t in types if t not in ALLOWED_TYPES]
         if bad:
             raise ValueError(f"Unbekannter Typ: {', '.join(bad)}")
-    rows = storage.active_events(types=types, min_severity=min_severity, within_hours=WINDOWS[within])
+    rows = storage.active_events(types=types, min_severity=min_severity, within_hours=WINDOWS[within], limit=limit)
     st = statuses(storage, registry)
     now = utcnow()
     feats = []

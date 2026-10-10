@@ -34,7 +34,8 @@ cp .env.example .env && chmod 600 .env                         # OSINT_CONTACT e
 
 # Lokal ansehen, ohne Upload
 python -m app.collect --once          # alle Quellen einmal
-python -m app.export                  # schreibt web/data/*.json
+python -m app.export                  # schreibt web/data/*.json, manifest.json, start.json und z/<x>_<y>/ (Zellen, siehe docs/rlp/r4-export.md)
+deploy/publish.sh --delta            # lädt nur geänderte Dateien hoch, Manifest zuletzt
 python -m http.server 8000 -d web     # → http://localhost:8000
 
 # Seite auf den Webspace (einmalig und bei Änderungen an HTML/JS/CSS)

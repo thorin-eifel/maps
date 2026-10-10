@@ -60,8 +60,8 @@ Die ursprüngliche Projektanweisung steht in `docs/projektanweisung.md` (CTW-Bez
 | R0 | Repository und Baseline | fertig | [#1](https://github.com/thorin-eifel/maps/pull/1) |
 | R1 | Raumabstraktion | fertig | [#2](https://github.com/thorin-eifel/maps/pull/2) |
 | R2 | Kartenbasis | fertig | [#3](https://github.com/thorin-eifel/maps/pull/3) |
-| R3 | Datenpipeline | wartet auf Freigabe | [#4](https://github.com/thorin-eifel/maps/pull/4) |
-| R4 | Export und Auslieferung | offen |  |
+| R3 | Datenpipeline | fertig | [#4](https://github.com/thorin-eifel/maps/pull/4) |
+| R4 | Export und Auslieferung | wartet auf Freigabe | [#5](https://github.com/thorin-eifel/maps/pull/5) |
 | R5 | Frontend | offen |  |
 | R6 | Betrieb und Härtung | offen |  |
 | R7 | Abnahme | offen |  |
@@ -72,7 +72,7 @@ Plan und Begründung: `docs/rlp/plan.md`. Entscheidung: `docs/adr/0001-region-rl
 
 - Quellen im Register: 42, davon aktiv: 40
 - Sammler (Module in `app/collectors/`): 43
-- Tests: 334 Python, 41 JavaScript
+- Tests: 365 Python, 41 JavaScript
 
 ### Quellen und Lizenzen
 
