@@ -6,8 +6,32 @@ Stand: R5, Branch `feat/r5-frontend`. Werkzeug: `tools/perf_messung.py` (Prüfzu
 
 Gemessen wurde in der Entwicklungsumgebung (Chromium mit Software-Rendering, SwiftShader, keine GPU), mit dem **synthetischen** RLP-Bestand
 (`tools/synth_rlp.py`, 75 Zellen, rund 4,4 MB Ereignisse) und der alten Basiskarte nur um Irrel. **Bildraten sind damit nicht die der Referenzmaschine.**
-60 fps ist hier nicht erreichbar und nicht prüfbar; die Abnahme „60 fps beim Schwenken“ ist **offen** bis zur Messung auf dem Mac
-(`python tools/perf_messung.py --url … --out perf.json`, mit den echten Kachelarchiven). Belastbar sind die Ladezahlen und der Vergleich der Ebenen.
+60 fps ist hier nicht erreichbar und nicht prüfbar. Die Bildrate auf der Referenzmaschine steht im nächsten Abschnitt (dort 60 fps, mit den genannten Einschränkungen). Belastbar sind in dieser Umgebung die Ladezahlen und der Vergleich der Ebenen.
+
+## Messung auf der Referenzmaschine (Mac, M4, macOS 27.2, Chrome mit GPU)
+
+`python tools/perf_messung.py --gpu --frames 60`, Fenster sichtbar, Seite aus dem lokalen Server, **echte Daten** aus dem Datenordner der App
+(rund 1 400 Ereignisse, Region 120 km um Irrel) und die **vorhandenen Kachelarchive** (Basiskarte 4,6–8,3° Ost, 48,6–51,1° Nord; Kern bis Zoom 15 um Irrel).
+Startzeit bis zum ersten Zählerstand: 2,6 s.
+
+| Ort | Zoom | Bildintervall Mittel ms | P95 ms | geladene MB |
+|---|---|---|---|---|
+| Mainz | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,5 / 17,5 / 17,6 | 3,4 / 0,9 / 0,9 |
+| Trier | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,6 / 17,6 / 17,6 | 2,9 / 1,9 / 1,9 |
+| Kaiserslautern | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,6 / 17,6 / 17,6 | 3,0 / 0,8 / 0,8 |
+| Saarbrücken | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,6 / 17,6 / 17,6 | 1,8 / 1,6 / 1,6 |
+| Frankfurt | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,5 / 17,6 / 17,6 | 3,4 / 0,7 / 0,06 |
+| Luxemburg | 8 / 12 / 15 | 16,7 / 16,7 / 16,7 | 17,6 / 17,6 / 17,5 | 3,0 / 1,4 / 1,4 |
+| Gesamtansicht | 7,6 | 16,7 | 17,3 | 0 |
+
+Alle Werte liegen auf dem Takt des Bildschirms (16,7 ms = 60 Hz); die Bildrate ist an jedem Messpunkt und in jeder Stufe **60 fps**, das P95 liegt höchstens eine Millisekunde darüber.
+Die Messung zeichnet 60 Bilder dauernd neu (die Karte wird dazu je Bild minimal gedreht), sie ist also kein Gestentest mit echtem Schwenken.
+
+Was diese Messung nicht abdeckt:
+- Die Daten sind der Bestand der alten 120-km-Region. Mainz, Frankfurt und Kaiserslautern liegen am Rand oder außerhalb; dort gibt es wenig Ereignisse und (Frankfurt, Zoom 15) keine Basiskarte. Der volle RLP-Datenbestand (synthetisch rund 4,4 MB Ereignisse) wurde nur ohne GPU gemessen.
+- Die Kachelarchive und das Höhenmodell für ganz RLP plus 80 km liegen auf dem Mac nicht im Datenordner der App; die Messung mit ihnen steht aus.
+- Die Tauri-Hülle wurde nicht gemessen (Chrome, nicht die App).
+- Der Bildtakt begrenzt nach oben: wie viel Luft unter 16,7 ms bleibt, zeigt diese Messung nicht.
 
 ## Ladelast (belastbar)
 
@@ -60,7 +84,7 @@ nicht der Engpass ist. Es ersetzt keine Messung mit GPU.
 
 ## Offen
 
-- 60 fps beim Schwenken: Messung auf der Referenzmaschine (Browser und Tauri-Hülle) mit echten Archiven.
+- 60 fps mit den Archiven und dem Datenbestand für ganz RLP sowie in der Tauri-Hülle.
 - Größe des Suchindex mit echten RLP-Namen (Rechenzeit gemessen, siehe unten).
 
 ## Suche über die ganze Fläche (Rechenzeit)

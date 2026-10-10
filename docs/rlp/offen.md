@@ -41,11 +41,11 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 
 ## Aus R5 (Frontend)
 
-- **60 fps beim Schwenken** ist nicht belegt: gemessen wurde mit Software-Rendering und synthetischen Daten (`docs/perf.md`). Messung auf dem Mac (Browser und Tauri-Hülle) mit den echten Archiven steht aus; Werkzeug `tools/perf_messung.py`.
+- **60 fps:** auf dem Mac (M4, Chrome) mit dem Bestand der alten 120-km-Region gemessen und erreicht (`docs/perf.md`). Offen: Messung mit den Archiven und Daten für ganz RLP und in der Tauri-Hülle.
 - **Verdichtung** ist eine Zähl-Ebene je Rasterzelle unter Zoom 8 plus Mengenbegrenzung der Einzelmeldungen (`ebenenBudget`), kein MapLibre-Clustering. Pegel und Umweltstationen werden nicht verdichtet, sondern erst ab Zoom 8 geladen; darunter sind die Reiter Gewässer und Umwelt leer.
 - **Dichte-Ebene per Tastatur:** Die Zahlen lassen sich nur mit der Maus anklicken. Ersatz für Tastaturnutzer sind Zoomtasten, der Landkreisfilter und die Tabelle (Warnungen sind auch unter Zoom 8 in der Tabelle).
 - **Länderkennung** außerhalb Deutschlands bleibt `region_tag` des Sammlers; `EU` und ein deutsches Kürzel ohne Kreis ergeben „unbekannt“ und fallen bei gesetztem Filter heraus. Landesgrenzen (Natural Earth) wären die saubere Lösung.
 - **Kraftstoff:** Statistik und Luxemburg-Block liegen landesweit im Startpaket, die Stationen kommen aus den Zellen; die Flachdatei kappt bei 200 Stationen, die Zellen nicht.
-- **Flachdateien** werden weiter exportiert (Rückfall ohne Manifest). Abschaffen in R6, wenn alle Stellen auf Zellen laufen.
+- **Flachdateien** werden weiter exportiert (Rückfall ohne Manifest). Entscheidung des Betreibers: in R6 abschaffen, sobald alle Stellen auf Zellen laufen.
 - **Suchindex** für ganz RLP: Rechenzeit gemessen (bis 300 000 Einträge unter 100 ms), Dateigröße mit echten Namen ungemessen.
 - **Abruf je Ereignis:** Im Zellenbetrieb ist `fetched_at` die letzte erfolgreiche Abrufzeit der Quelle, nicht die der einzelnen Meldung.
