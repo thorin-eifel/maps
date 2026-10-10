@@ -34,7 +34,7 @@ BBOX = {"lat_min": _S - 0.3, "lat_max": _N + 0.3, "lon_min": _W - 0.4, "lon_max"
 BBOX_WIDE = {"lat_min": _S - 1.0, "lat_max": _N + 1.0, "lon_min": _W - 1.5, "lon_max": _E + 1.5}
 WIDE_MAX_ZOOM = 9
 URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
-UA = "WasIstLosBeiUns/1.0 (DEM tiles, one-off fetch)"
+UA = "Landblick/1.0 (DEM tiles, one-off fetch)"
 DEST = Path(__file__).resolve().parent.parent / "web" / "tiles" / "dem"
 
 

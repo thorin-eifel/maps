@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Was ist los bei uns? — ein Durchlauf der Sammelstelle: abrufen → exportieren → hochladen
+# Landblick - RLP — ein Durchlauf der Sammelstelle: abrufen → exportieren → hochladen
 #
 # Zweck:     Von Cron im Fünf-Minuten-Takt gestartet. Holt fällige Quellen (Intervall je Quelle
 #            aus sources.yaml), schreibt die JSON-Dateien und lädt sie auf den Webspace.

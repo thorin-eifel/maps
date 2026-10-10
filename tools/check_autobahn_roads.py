@@ -49,7 +49,7 @@ def main() -> int:
     a = ap.parse_args()
     hits: Counter[str] = Counter()
     seen = 0
-    with httpx.Client(headers={"User-Agent": f"WasIstLosBeiUns/1.0 (+{config.CONTACT}) road list"}, timeout=30) as c:
+    with httpx.Client(headers={"User-Agent": f"Landblick/1.0 (+{config.CONTACT}) road list"}, timeout=30) as c:
         roads = a.only or c.get(BASE).json()["roads"]
         for road in roads:
             for svc in SERVICES:

@@ -63,7 +63,7 @@ def main() -> int:
     logging.basicConfig(level="INFO", format="%(levelname)s %(message)s")
 
     lat_min, lon_min, lat_max, lon_max = config.BBOX
-    resp = httpx.get(URL, timeout=60, headers={"User-Agent": f"WasIstLosBeiUns/1.0 (+{config.CONTACT}) orientation build"}, params={
+    resp = httpx.get(URL, timeout=60, headers={"User-Agent": f"Landblick/1.0 (+{config.CONTACT}) orientation build"}, params={
         "service": "WFS", "version": "2.0.0", "request": "GetFeature", "typeName": "dwd:Warngebiete_Kreise",
         "outputFormat": "application/json", "srsName": "EPSG:4326",
         "bbox": f"{lon_min},{lat_min},{lon_max},{lat_max},EPSG:4326",

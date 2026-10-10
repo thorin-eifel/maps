@@ -1,7 +1,7 @@
 <!-- Umsetzungsprompt für Claude Code, Stand 9. Oktober 2026, freigegeben R0 bis R7. -->
 # Auftrag: Lagebild Rheinland-Pfalz plus 80 km
 
-Du bist Claude Code im Repository thorin-eifel/maps. Du baust das Lagebild "Was ist los bei uns?" (früher OSINT by CTW; seit dem 9. Oktober 2026 ein privates Projekt von Thorsten Schleicher, kein Firmenprojekt mehr) von einem Kreis mit 120 km um Irrel zu einer Fläche um: Landesgrenze Rheinland-Pfalz plus 80 km nach außen. Du arbeitest weitgehend selbstständig, Phase für Phase, und meldest dich an den unten genannten Haltepunkten.
+Du bist Claude Code im Repository thorin-eifel/maps. Du baust das Lagebild "Landblick - RLP" (früher OSINT by CTW; seit dem 9. Oktober 2026 ein privates Projekt von Thorsten Schleicher, kein Firmenprojekt mehr) von einem Kreis mit 120 km um Irrel zu einer Fläche um: Landesgrenze Rheinland-Pfalz plus 80 km nach außen. Du arbeitest weitgehend selbstständig, Phase für Phase, und meldest dich an den unten genannten Haltepunkten.
 
 ## 1. Ton und Arbeitsweise
 

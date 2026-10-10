@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =============================================================================
-# Was ist los bei uns? — Icons von uxwing.com holen
+# Landblick - RLP — Icons von uxwing.com holen
 #
 # Zweck:     Lädt die SVG-Icons der Oberfläche von uxwing.com nach web/icons/. Ausnahme (Entscheidung des Betreibers, 2026-09-30):
 #            die Kartenzeichen der natürlichen Landmarken kommen aus OpenStreetMap Carto und Maki (beide CC0), siehe unten.
@@ -53,10 +53,10 @@ for pair in "${ICONS[@]}"; do
   role="${pair%%=*}"; slug="${pair#*=}"
   if [[ -s "${DEST}/${role}.svg" && "${force}" -eq 0 ]]; then continue; fi
   page="https://uxwing.com/${slug}-icon/"
-  url="$(curl -fsS -m 20 -A 'WasIstLosBeiUns/1.0 (Icon-Abruf)' "${page}" \
+  url="$(curl -fsS -m 20 -A 'Landblick/1.0 (Icon-Abruf)' "${page}" \
         | grep -o "https://uxwing.com/wp-content/themes/uxwing/download/[a-z0-9-]*/${slug}-icon.svg" | head -1 || true)"
   if [[ -z "${url}" ]]; then log "FEHLT ${role} (${slug}): keine SVG-Adresse auf ${page}"; missing=1; continue; fi
-  if curl -fsS -m 20 -A 'WasIstLosBeiUns/1.0 (Icon-Abruf)' -o "${DEST}/${role}.svg.tmp" "${url}" && grep -q '<svg' "${DEST}/${role}.svg.tmp"; then
+  if curl -fsS -m 20 -A 'Landblick/1.0 (Icon-Abruf)' -o "${DEST}/${role}.svg.tmp" "${url}" && grep -q '<svg' "${DEST}/${role}.svg.tmp"; then
     mv "${DEST}/${role}.svg.tmp" "${DEST}/${role}.svg"; log "ok ${role}"
   else
     rm -f "${DEST}/${role}.svg.tmp"; log "FEHLT ${role} (${slug}): Download fehlgeschlagen"; missing=1
@@ -85,7 +85,7 @@ MAP_ICONS=(
 for pair in "${MAP_ICONS[@]}"; do
   role="${pair%%=*}"; url="${pair#*=}"
   if [[ -s "${DEST}/${role}.svg" && "${force}" -eq 0 ]]; then continue; fi
-  if curl -fsS -m 20 -A 'WasIstLosBeiUns/1.0 (Icon-Abruf)' -o "${DEST}/${role}.svg.tmp" "${url}" && grep -q '<svg' "${DEST}/${role}.svg.tmp"; then
+  if curl -fsS -m 20 -A 'Landblick/1.0 (Icon-Abruf)' -o "${DEST}/${role}.svg.tmp" "${url}" && grep -q '<svg' "${DEST}/${role}.svg.tmp"; then
     mv "${DEST}/${role}.svg.tmp" "${DEST}/${role}.svg"; log "ok ${role} (CC0)"
   else
     rm -f "${DEST}/${role}.svg.tmp"; log "FEHLT ${role}: Download von ${url} fehlgeschlagen"; missing=1

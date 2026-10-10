@@ -160,7 +160,7 @@ def main(argv: list[str] | None = None) -> int:
         bid = a.build
         if not bid:
             import urllib.request
-            req = urllib.request.Request("https://build-metadata.protomaps.dev/builds.json", headers={"User-Agent": "WasIstLosBeiUns/1.0"})
+            req = urllib.request.Request("https://build-metadata.protomaps.dev/builds.json", headers={"User-Agent": "Landblick/1.0"})
             bid = latest_build(lambda u: urllib.request.urlopen(req, timeout=30).read()) if not a.dry_run else "20260101"
         build(a.lat, a.lon, a.out, a.pmtiles, bid, dry_run=a.dry_run)
     except (ValueError, subprocess.SubprocessError, OSError) as err:

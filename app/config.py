@@ -72,7 +72,7 @@ class Settings:
             db_path=Path(os.environ.get("OSINT_DB_PATH", BASE_DIR / "data" / "osint.sqlite")),
             sources_path=Path(os.environ.get("OSINT_SOURCES", BASE_DIR / "sources.yaml")),
             web_dir=Path(os.environ.get("OSINT_WEB_DIR", BASE_DIR / "web")),
-            user_agent=f"WasIstLosBeiUns/1.0 (+{contact})",
+            user_agent=f"Landblick/1.0 (+{contact})",
             http_timeout_s=float(os.environ.get("OSINT_HTTP_TIMEOUT", "20")),
             http_max_attempts=int(os.environ.get("OSINT_HTTP_ATTEMPTS", "3")),
             breaker_threshold=int(os.environ.get("OSINT_BREAKER_THRESHOLD", "5")),

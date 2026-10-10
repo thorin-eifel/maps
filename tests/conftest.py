@@ -27,7 +27,7 @@ def fixture(name: str):
 def settings(tmp_path) -> Settings:
     return Settings(
         db_path=tmp_path / "t.sqlite", sources_path=ROOT / "sources.yaml", web_dir=ROOT / "web",
-        user_agent="WasIstLosBeiUns/test", http_timeout_s=2, http_max_attempts=3,
+        user_agent="Landblick/test", http_timeout_s=2, http_max_attempts=3,
         breaker_threshold=5, breaker_cooldown_s=900, retention_days=30,
     )
 

@@ -1,4 +1,4 @@
-# Was ist los bei uns?
+# Landblick - RLP
 
 > **Hinweis:** Diese Betriebsanleitung beschreibt den Stand vor dem Umbau auf Rheinland-Pfalz plus 80 km. Die Fläche kommt jetzt aus `region.yaml` (`app/region.py`); Angaben zu "120 km", Kartengrößen und Kacheln werden in R2 bis R5 angepasst. Der aktuelle Stand steht in der `README.md`. Launchd-Labels und Bundle-Kennung heißen noch `de.ctw.osint`: Umbenennen würde das Datenverzeichnis der Desktop-App verschieben und ist deshalb nicht erfolgt.
 

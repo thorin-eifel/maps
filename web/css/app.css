@@ -1,4 +1,4 @@
-/* Was ist los bei uns? — Oberfläche. Nüchtern, ruhig, Admin-Tool-Charakter. Tokens: css/tokens.css */
+/* Landblick - RLP — Oberfläche. Nüchtern, ruhig, Admin-Tool-Charakter. Tokens: css/tokens.css */
 *, *::before, *::after { box-sizing: border-box; }
 html { color-scheme: light; }
 /* Große Bildschirme: Schrift, Rahmenbreite und Kartenhöhe wachsen mit (alles in rem), sonst bleibt eine schmale Spalte in der Mitte */

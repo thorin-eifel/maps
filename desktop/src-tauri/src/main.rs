@@ -1,4 +1,4 @@
-// Was ist los bei uns? – Desktop-Hülle.
+// Landblick - RLP – Desktop-Hülle.
 // Zweck:  Startet den lokalen Dienst (Sidecar "osint-core", Python), wartet auf "OSINT_READY port=N" und öffnet dann ein Fenster
 //         auf http://127.0.0.1:N/. Die Oberfläche ist dieselbe wie im Web; gezeichnet wird mit der GPU des System-WebViews
 //         (WebView2, WKWebView, WebKitGTK). Beim Beenden wird der Dienst mit beendet.
@@ -38,7 +38,7 @@ fn main() {
                                 if let Ok(port) = p.trim().parse::<u16>() {
                                     let url = format!("http://127.0.0.1:{port}/");
                                     let _ = WebviewWindowBuilder::new(&handle, "main", WebviewUrl::External(url.parse().unwrap()))
-                                        .title("Was ist los bei uns?")
+                                        .title("Landblick - RLP")
                                         .inner_size(1360.0, 860.0)
                                         .min_inner_size(900.0, 600.0)
                                         .build();
