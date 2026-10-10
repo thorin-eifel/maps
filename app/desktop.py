@@ -26,6 +26,26 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 log = logging.getLogger("osint.desktop")
+
+
+def use_certifi() -> str | None:
+    """Zertifikatsbündel für urllib setzen. Im gebündelten Programm (PyInstaller, macOS) findet Python sonst keine Stammzertifikate
+    (CERTIFICATE_VERIFY_FAILED). Eine vom Nutzer gesetzte SSL_CERT_FILE bleibt unberührt; Kindprozesse erben die Variable."""
+    if os.environ.get("SSL_CERT_FILE"):
+        return os.environ["SSL_CERT_FILE"]
+    try:
+        import certifi
+        path = certifi.where()
+    except ImportError:
+        return None
+    if not Path(path).is_file():
+        log.warning("certifi-Bündel fehlt: %s", path)
+        return None
+    os.environ["SSL_CERT_FILE"] = path
+    return path
+
+
+use_certifi()
 _RANGE = re.compile(r"^bytes=(\d*)-(\d*)$")
 CYCLE_S = 300
 
