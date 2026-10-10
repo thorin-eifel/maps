@@ -4,6 +4,7 @@
 #
 # Zweck:     Lädt entweder nur die Datendateien (alle paar Minuten) oder die ganze Seite (bei Änderungen).
 # Aufruf:    deploy/publish.sh --data          nur web/data/*.json und radar.png
+#            deploy/publish.sh --delta         nur geänderte Dateien laut manifest.json (tools/publish_delta.py), Manifest zuletzt
 #            deploy/publish.sh --live          nur web/data/aircraft.json und status.json (Live-Schleife)
 #            deploy/publish.sh --site          Seite ohne web/data/ (HTML, CSS, JS, MapLibre, .htaccess)
 #            deploy/publish.sh --site --dry-run   zeigt nur, was passieren würde
@@ -36,6 +37,7 @@ mode=""; dry=0
 for arg in "$@"; do
   case "${arg}" in
     --data) mode="data" ;;
+    --delta) mode="delta" ;;
     --live) mode="live" ;;
     --site) mode="site" ;;
     --dry-run) dry=1 ;;
@@ -43,9 +45,9 @@ for arg in "$@"; do
     *) die "Unbekannte Option: ${arg}" ;;
   esac
 done
-[[ -n "${mode}" ]] || die "Bitte --data, --live oder --site angeben."
+[[ -n "${mode}" ]] || die "Bitte --data, --delta, --live oder --site angeben."
 
-command -v lftp >/dev/null || die "lftp fehlt."
+[[ "${dry}" -eq 1 ]] || command -v lftp >/dev/null || die "lftp fehlt."
 : "${IONOS_SFTP_HOST:?IONOS_SFTP_HOST fehlt}"
 : "${IONOS_SFTP_USER:?IONOS_SFTP_USER fehlt}"
 remote="${IONOS_REMOTE_DIR:-/}"
@@ -62,7 +64,20 @@ else
   die "Weder IONOS_SFTP_KEY noch IONOS_SFTP_PASSWORD gesetzt."
 fi
 
-if [[ "${mode}" == "live" ]]; then
+PLAN=""
+if [[ "${mode}" == "delta" ]]; then
+  PY="${ROOT}/.venv/bin/python"; [[ -x "${PY}" ]] || PY="python3"
+  PLAN="$(mktemp "${TMPDIR:-/tmp}/osint-plan.XXXXXX")"
+  trap 'rm -f "${PLAN}"' EXIT
+  "${PY}" "${ROOT}/tools/publish_delta.py" plan --data "${ROOT}/web/data" --out "${PLAN}" || die "Plan fehlgeschlagen (manifest.json fehlt? erst python -m app.export)"
+  cmd=""
+  while IFS= read -r f; do
+    [[ "${f}" =~ ^[A-Za-z0-9_./-]+$ && "${f}" != *..* ]] || die "Unzulässiger Pfad im Plan: ${f}"
+    d="$(dirname "${f}")"; target="${remote%/}/data"
+    if [[ "${d}" != "." ]]; then target="${target}/${d}"; cmd+="mkdir -p -f ${target}"$'\n'; fi
+    cmd+="put -O ${target} web/data/${f}"$'\n'
+  done < "${PLAN}"
+elif [[ "${mode}" == "live" ]]; then
   [[ -f "${ROOT}/web/data/aircraft.json" ]] || die "web/data/aircraft.json fehlt (erst python -m app.live --once)."
   cmd="put -O ${remote%/}/data web/data/aircraft.json web/data/status.json"
 elif [[ "${mode}" == "data" ]]; then
@@ -93,4 +108,7 @@ open -u "${login}" -p "${IONOS_SFTP_PORT:-22}" sftp://${IONOS_SFTP_HOST}
 ${cmd}
 bye
 LFTP
+if [[ "${mode}" == "delta" ]]; then
+  "${PY}" "${ROOT}/tools/publish_delta.py" commit --data "${ROOT}/web/data" --plan "${PLAN}"
+fi
 log "Upload (${mode}) fertig"

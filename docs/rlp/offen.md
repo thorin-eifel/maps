@@ -1,6 +1,6 @@
 # Offene Punkte und Dinge, die nicht funktioniert haben
 
-Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R3.
+Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R4.
 
 ## Technik
 
@@ -29,3 +29,13 @@ Wird in jeder Phase fortgeschrieben (Plan: `plan.md`). Stand R3.
 - **EUMETSAT-Blitze**: bei der größeren Fläche 116 s Laufzeit, einzelne Zeitschritte laufen in Fehler (1 von 9, wird als "teilweise" gemeldet). Beobachten.
 - **Datenmenge Messwerte**: Hochrechnung 400 bis 500 MB bei 30 Tagen, nicht gemessen. 7-Tage-Lauf in R6 klärt SQLite vs. PostGIS.
 - **Nur GTFS-Statik/GTFS-RT Deutschland** bewertet nach Menge (748 Verspätungen); Zuschnitt auf die Fläche der Fahrpläne nicht gesondert geprüft.
+
+## R4: offen geblieben
+
+- **Upload nicht gegen den echten Webspace getestet** (kein `lftp` im Sandkasten). Trockenlauf und Plan sind getestet. Erster echter Lauf auf dem Mac.
+- **Zelle `z/16_98/events.json` 509 KB** (Budget 500 KB): gemeldet, nicht gekürzt. Geometrien liegen über Zellgrenzen mehrfach (Ereignisse 5,6 MB statt 3,5 MB); Vereinfachung nach Zoomstufe gehört in R5.
+- **Flachdateien** (`events.json` usw.) bleiben bis R5; `events.json` dort weiter bei 2.000 Einträgen, im alten Frontend fehlen damit Ereignisse im Osten der Region. Abhilfe ist das Zellenfrontend, nicht eine größere Flachdatei.
+- **Radar, Wind, Suchindex** sind global (1,2 MB / 110 KB / 136 KB), nicht in Zellen; Nachladestrategie in R5.
+- **Herzschlag** (162 KB je Zyklus) trägt den Quellenzustand. Wird das zu viel, kann `start.json` auf Zustand und Warnband verkleinert werden.
+- **Kraftstoff:** `stats` und der Luxemburger Teil liegen nur in der Flachdatei `kraftstoff.json`, nicht in den Zellen.
+- Neue Kachelarchive (913 MB) und Höhenmodell (676 MB) liegen weiter auf dem Mac; Einspielen und Hochladen ist nicht Teil dieses PR (siehe PR-Text, Frage 1).
